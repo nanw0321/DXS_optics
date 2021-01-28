@@ -18,24 +18,9 @@ import srwl_uti_smp
 def set_optics(v=None):
     el = []
     pp = []
-    names = ['zero_drift', 'im0', 'im0_CRL', 'CRL', 'CRL_C1', 'C1', 'C1_After_C1', 'After_C1', 'After_C1_C2', 'C2', 'C2_After_C2', 'After_C2', 'After_C2_CRL1', 'CRL1', 'CRL1_After_CRL1', 'After_CRL1', 'After_CRL1_Before_WDS', 'Before_WDS', 'Before_WDS_Slit', 'Slit', 'Slit_After_Slit', 'After_Slit', 'After_Slit_CRL2', 'CRL2', 'CRL2_After_CRL2', 'After_CRL2', 'After_CRL2_Before_C3', 'Before_C3', 'Before_C3_C3', 'C3', 'C3_After_C3', 'After_C3', 'After_C3_C4', 'C4', 'C4_After_HRM4', 'After_HRM4', 'After_HRM4_After_HRM', 'After_HRM']
+    names = ['CRL', 'CRL_C1', 'C1', 'C1_C2', 'C2', 'C2_CRL1', 'CRL1', 'CRL1_Slit', 'Slit', 'Slit_CRL2', 'CRL2', 'CRL2_C3', 'C3', 'C3_C4', 'C4', 'C4_After_HRM', 'After_HRM']
     for el_name in names:
-        if el_name == 'zero_drift':
-            # zero_drift: drift 240.0m
-            el.append(srwlib.SRWLOptD(
-                _L=v.op_zero_drift_L,
-            ))
-            pp.append(v.op_zero_drift_pp)
-        elif el_name == 'im0':
-            # im0: watch 240.0m
-            pass
-        elif el_name == 'im0_CRL':
-            # im0_CRL: drift 240.0m
-            el.append(srwlib.SRWLOptD(
-                _L=v.op_im0_CRL_L,
-            ))
-            pp.append(v.op_im0_CRL_pp)
-        elif el_name == 'CRL':
+        if el_name == 'CRL':
             # CRL: crl 290.0m
             el.append(srwlib.srwl_opt_setup_CRL(
                 _foc_plane=v.op_CRL_foc_plane,
@@ -81,21 +66,12 @@ def set_optics(v=None):
             el.append(crystal)
             pp.append(v.op_C1_pp)
 
-        elif el_name == 'C1_After_C1':
-            # C1_After_C1: drift 300.0m
+        elif el_name == 'C1_C2':
+            # C1_C2: drift 300.0m
             el.append(srwlib.SRWLOptD(
-                _L=v.op_C1_After_C1_L,
+                _L=v.op_C1_C2_L,
             ))
-            pp.append(v.op_C1_After_C1_pp)
-        elif el_name == 'After_C1':
-            # After_C1: watch 300.01m
-            pass
-        elif el_name == 'After_C1_C2':
-            # After_C1_C2: drift 300.01m
-            el.append(srwlib.SRWLOptD(
-                _L=v.op_After_C1_C2_L,
-            ))
-            pp.append(v.op_After_C1_C2_pp)
+            pp.append(v.op_C1_C2_pp)
         elif el_name == 'C2':
             # C2: crystal 300.2m
             crystal = srwlib.SRWLOptCryst(
@@ -120,21 +96,12 @@ def set_optics(v=None):
             el.append(crystal)
             pp.append(v.op_C2_pp)
 
-        elif el_name == 'C2_After_C2':
-            # C2_After_C2: drift 300.2m
+        elif el_name == 'C2_CRL1':
+            # C2_CRL1: drift 300.2m
             el.append(srwlib.SRWLOptD(
-                _L=v.op_C2_After_C2_L,
+                _L=v.op_C2_CRL1_L,
             ))
-            pp.append(v.op_C2_After_C2_pp)
-        elif el_name == 'After_C2':
-            # After_C2: watch 300.21m
-            pass
-        elif el_name == 'After_C2_CRL1':
-            # After_C2_CRL1: drift 300.21m
-            el.append(srwlib.SRWLOptD(
-                _L=v.op_After_C2_CRL1_L,
-            ))
-            pp.append(v.op_After_C2_CRL1_pp)
+            pp.append(v.op_C2_CRL1_pp)
         elif el_name == 'CRL1':
             # CRL1: crl 310.2m
             el.append(srwlib.srwl_opt_setup_CRL(
@@ -151,30 +118,12 @@ def set_optics(v=None):
                 _yc=v.op_CRL1_y,
             ))
             pp.append(v.op_CRL1_pp)
-        elif el_name == 'CRL1_After_CRL1':
-            # CRL1_After_CRL1: drift 310.2m
+        elif el_name == 'CRL1_Slit':
+            # CRL1_Slit: drift 310.2m
             el.append(srwlib.SRWLOptD(
-                _L=v.op_CRL1_After_CRL1_L,
+                _L=v.op_CRL1_Slit_L,
             ))
-            pp.append(v.op_CRL1_After_CRL1_pp)
-        elif el_name == 'After_CRL1':
-            # After_CRL1: watch 310.21m
-            pass
-        elif el_name == 'After_CRL1_Before_WDS':
-            # After_CRL1_Before_WDS: drift 310.21m
-            el.append(srwlib.SRWLOptD(
-                _L=v.op_After_CRL1_Before_WDS_L,
-            ))
-            pp.append(v.op_After_CRL1_Before_WDS_pp)
-        elif el_name == 'Before_WDS':
-            # Before_WDS: watch 320.19m
-            pass
-        elif el_name == 'Before_WDS_Slit':
-            # Before_WDS_Slit: drift 320.19m
-            el.append(srwlib.SRWLOptD(
-                _L=v.op_Before_WDS_Slit_L,
-            ))
-            pp.append(v.op_Before_WDS_Slit_pp)
+            pp.append(v.op_CRL1_Slit_pp)
         elif el_name == 'Slit':
             # Slit: aperture 320.2m
             el.append(srwlib.SRWLOptA(
@@ -186,21 +135,12 @@ def set_optics(v=None):
                 _y=v.op_Slit_y,
             ))
             pp.append(v.op_Slit_pp)
-        elif el_name == 'Slit_After_Slit':
-            # Slit_After_Slit: drift 320.2m
+        elif el_name == 'Slit_CRL2':
+            # Slit_CRL2: drift 320.2m
             el.append(srwlib.SRWLOptD(
-                _L=v.op_Slit_After_Slit_L,
+                _L=v.op_Slit_CRL2_L,
             ))
-            pp.append(v.op_Slit_After_Slit_pp)
-        elif el_name == 'After_Slit':
-            # After_Slit: watch 320.21m
-            pass
-        elif el_name == 'After_Slit_CRL2':
-            # After_Slit_CRL2: drift 320.21m
-            el.append(srwlib.SRWLOptD(
-                _L=v.op_After_Slit_CRL2_L,
-            ))
-            pp.append(v.op_After_Slit_CRL2_pp)
+            pp.append(v.op_Slit_CRL2_pp)
         elif el_name == 'CRL2':
             # CRL2: crl 330.2m
             el.append(srwlib.srwl_opt_setup_CRL(
@@ -217,30 +157,12 @@ def set_optics(v=None):
                 _yc=v.op_CRL2_y,
             ))
             pp.append(v.op_CRL2_pp)
-        elif el_name == 'CRL2_After_CRL2':
-            # CRL2_After_CRL2: drift 330.2m
+        elif el_name == 'CRL2_C3':
+            # CRL2_C3: drift 330.2m
             el.append(srwlib.SRWLOptD(
-                _L=v.op_CRL2_After_CRL2_L,
+                _L=v.op_CRL2_C3_L,
             ))
-            pp.append(v.op_CRL2_After_CRL2_pp)
-        elif el_name == 'After_CRL2':
-            # After_CRL2: watch 330.21m
-            pass
-        elif el_name == 'After_CRL2_Before_C3':
-            # After_CRL2_Before_C3: drift 330.21m
-            el.append(srwlib.SRWLOptD(
-                _L=v.op_After_CRL2_Before_C3_L,
-            ))
-            pp.append(v.op_After_CRL2_Before_C3_pp)
-        elif el_name == 'Before_C3':
-            # Before_C3: watch 340.19m
-            pass
-        elif el_name == 'Before_C3_C3':
-            # Before_C3_C3: drift 340.19m
-            el.append(srwlib.SRWLOptD(
-                _L=v.op_Before_C3_C3_L,
-            ))
-            pp.append(v.op_Before_C3_C3_pp)
+            pp.append(v.op_CRL2_C3_pp)
         elif el_name == 'C3':
             # C3: crystal 340.2m
             crystal = srwlib.SRWLOptCryst(
@@ -265,21 +187,12 @@ def set_optics(v=None):
             el.append(crystal)
             pp.append(v.op_C3_pp)
 
-        elif el_name == 'C3_After_C3':
-            # C3_After_C3: drift 340.2m
+        elif el_name == 'C3_C4':
+            # C3_C4: drift 340.2m
             el.append(srwlib.SRWLOptD(
-                _L=v.op_C3_After_C3_L,
+                _L=v.op_C3_C4_L,
             ))
-            pp.append(v.op_C3_After_C3_pp)
-        elif el_name == 'After_C3':
-            # After_C3: watch 340.21m
-            pass
-        elif el_name == 'After_C3_C4':
-            # After_C3_C4: drift 340.21m
-            el.append(srwlib.SRWLOptD(
-                _L=v.op_After_C3_C4_L,
-            ))
-            pp.append(v.op_After_C3_C4_pp)
+            pp.append(v.op_C3_C4_pp)
         elif el_name == 'C4':
             # C4: crystal 340.4m
             crystal = srwlib.SRWLOptCryst(
@@ -304,21 +217,12 @@ def set_optics(v=None):
             el.append(crystal)
             pp.append(v.op_C4_pp)
 
-        elif el_name == 'C4_After_HRM4':
-            # C4_After_HRM4: drift 340.4m
+        elif el_name == 'C4_After_HRM':
+            # C4_After_HRM: drift 340.4m
             el.append(srwlib.SRWLOptD(
-                _L=v.op_C4_After_HRM4_L,
+                _L=v.op_C4_After_HRM_L,
             ))
-            pp.append(v.op_C4_After_HRM4_pp)
-        elif el_name == 'After_HRM4':
-            # After_HRM4: watch 340.41m
-            pass
-        elif el_name == 'After_HRM4_After_HRM':
-            # After_HRM4_After_HRM: drift 340.41m
-            el.append(srwlib.SRWLOptD(
-                _L=v.op_After_HRM4_After_HRM_L,
-            ))
-            pp.append(v.op_After_HRM4_After_HRM_pp)
+            pp.append(v.op_C4_After_HRM_pp)
         elif el_name == 'After_HRM':
             # After_HRM: watch 350.4m
             pass
@@ -342,9 +246,9 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['gbm_pen', 'f', 0.001, 'energy per pulse [J]'],
     ['gbm_rep', 'f', 1, 'rep. rate [Hz]'],
     ['gbm_pol', 'f', 2, 'polarization 1- lin. hor., 2- lin. vert., 3- lin. 45 deg., 4- lin.135 deg., 5- circ. right, 6- circ. left'],
-    ['gbm_sx', 'f', 2.3e-05, 'rms beam size vs horizontal position [m] at waist (for intensity)'],
-    ['gbm_sy', 'f', 2.3e-05, 'rms beam size vs vertical position [m] at waist (for intensity)'],
-    ['gbm_st', 'f', 1e-13, 'rms pulse duration [s] (for intensity)'],
+    ['gbm_sx', 'f', 9.787234042553194e-06, 'rms beam size vs horizontal position [m] at waist (for intensity)'],
+    ['gbm_sy', 'f', 9.787234042553194e-06, 'rms beam size vs vertical position [m] at waist (for intensity)'],
+    ['gbm_st', 'f', 4e-13, 'rms pulse duration [s] (for intensity)'],
     ['gbm_mx', 'f', 0, 'transverse Gauss-Hermite mode order in horizontal direction'],
     ['gbm_my', 'f', 0, 'transverse Gauss-Hermite mode order in vertical direction'],
     ['gbm_ca', 's', 'c', 'treat _sigX, _sigY as sizes in [m] in coordinate representation (_presCA="c") or as angular divergences in [rad] in angular representation (_presCA="a")'],
@@ -463,17 +367,11 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['wm_fbk', '', '', 'create backup file(s) with propagated multi-e intensity distribution vs horizontal and vertical position and other radiation characteristics', 'store_true'],
 
     #to add options
-    ['op_r', 'f', 240.0, 'longitudinal position of the first optical element [m]'],
+    ['op_r', 'f', 290.0, 'longitudinal position of the first optical element [m]'],
     # Former appParam:
     ['rs_type', 's', 'g', 'source type, (u) idealized undulator, (t), tabulated undulator, (m) multipole, (g) gaussian beam'],
 
 #---Beamline optics:
-    # zero_drift: drift
-    ['op_zero_drift_L', 'f', 0, 'length'],
-
-    # im0_CRL: drift
-    ['op_im0_CRL_L', 'f', 50.0, 'length'],
-
     # CRL: crl
     ['op_CRL_foc_plane', 'f', 2, 'focalPlane'],
     ['op_CRL_delta', 'f', 3.791135e-06, 'refractiveIndex'],
@@ -481,11 +379,11 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_CRL_shape', 'f', 1, 'shape'],
     ['op_CRL_apert_h', 'f', 0.001, 'horizontalApertureSize'],
     ['op_CRL_apert_v', 'f', 0.001, 'verticalApertureSize'],
-    ['op_CRL_r_min', 'f', 0.0065965749999999995, 'tipRadius'],
-    ['op_CRL_wall_thick', 'f', 8e-05, 'tipWallThickness'],
+    ['op_CRL_r_min', 'f', 0.0021989112772, 'tipRadius'],
+    ['op_CRL_wall_thick', 'f', 5e-05, 'tipWallThickness'],
     ['op_CRL_x', 'f', 0.0, 'horizontalOffset'],
     ['op_CRL_y', 'f', 0.0, 'verticalOffset'],
-    ['op_CRL_n', 'i', 3, 'numberOfLenses'],
+    ['op_CRL_n', 'i', 1, 'numberOfLenses'],
 
     # CRL_C1: drift
     ['op_CRL_C1_L', 'f', 10.0, 'length'],
@@ -513,11 +411,8 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C1_energy', 'f', 9481.0, 'energy'],
     ['op_C1_diffractionAngle', 'f', 1.57079632, 'diffractionAngle'],
 
-    # C1_After_C1: drift
-    ['op_C1_After_C1_L', 'f', 0.009999999999990905, 'length'],
-
-    # After_C1_C2: drift
-    ['op_After_C1_C2_L', 'f', 0.18999999999999773, 'length'],
+    # C1_C2: drift
+    ['op_C1_C2_L', 'f', 0.19999999999998863, 'length'],
 
     # C2: crystal
     ['op_C2_hfn', 's', '', 'heightProfileFile'],
@@ -532,21 +427,18 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C2_tc', 'f', 0.01, 'crystalThickness'],
     ['op_C2_uc', 'f', 1, 'useCase'],
     ['op_C2_ang_as', 'f', -0.6619756915046209, 'asymmetryAngle'],
-    ['op_C2_nvx', 'f', 0.158940316609, 'nvx'],
-    ['op_C2_nvy', 'f', 1.08e-09, 'nvy'],
-    ['op_C2_nvz', 'f', -0.987288192858, 'nvz'],
-    ['op_C2_tvx', 'f', 0.987288192858, 'tvx'],
-    ['op_C2_tvy', 'f', 6.709e-09, 'tvy'],
-    ['op_C2_ang', 'f', 1.2640763693590809, 'grazingAngle'],
+    ['op_C2_nvx', 'f', 0.1589403166091094, 'nvx'],
+    ['op_C2_nvy', 'f', 1.079983033869711e-09, 'nvy'],
+    ['op_C2_nvz', 'f', -0.9872881928576863, 'nvz'],
+    ['op_C2_tvx', 'f', 0.9872881928576863, 'tvx'],
+    ['op_C2_tvy', 'f', 6.708521290092094e-09, 'tvy'],
+    ['op_C2_ang', 'f', 1.4111790941168765, 'grazingAngle'],
     ['op_C2_amp_coef', 'f', 1.0, 'heightAmplification'],
     ['op_C2_energy', 'f', 9481.0, 'energy'],
     ['op_C2_diffractionAngle', 'f', -1.57079632, 'diffractionAngle'],
 
-    # C2_After_C2: drift
-    ['op_C2_After_C2_L', 'f', 0.009999999999990905, 'length'],
-
-    # After_C2_CRL1: drift
-    ['op_After_C2_CRL1_L', 'f', 9.990000000000009, 'length'],
+    # C2_CRL1: drift
+    ['op_C2_CRL1_L', 'f', 10.0, 'length'],
 
     # CRL1: crl
     ['op_CRL1_foc_plane', 'f', 1, 'focalPlane'],
@@ -555,20 +447,14 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_CRL1_shape', 'f', 1, 'shape'],
     ['op_CRL1_apert_h', 'f', 0.0015, 'horizontalApertureSize'],
     ['op_CRL1_apert_v', 'f', 0.0015, 'verticalApertureSize'],
-    ['op_CRL1_r_min', 'f', 0.00022746700000000002, 'tipRadius'],
+    ['op_CRL1_r_min', 'f', 7.582452679721133e-05, 'tipRadius'],
     ['op_CRL1_wall_thick', 'f', 5e-05, 'tipWallThickness'],
     ['op_CRL1_x', 'f', 0.0, 'horizontalOffset'],
     ['op_CRL1_y', 'f', 0.0, 'verticalOffset'],
-    ['op_CRL1_n', 'i', 3, 'numberOfLenses'],
+    ['op_CRL1_n', 'i', 1, 'numberOfLenses'],
 
-    # CRL1_After_CRL1: drift
-    ['op_CRL1_After_CRL1_L', 'f', 0.009999999999990905, 'length'],
-
-    # After_CRL1_Before_WDS: drift
-    ['op_After_CRL1_Before_WDS_L', 'f', 9.980000000000018, 'length'],
-
-    # Before_WDS_Slit: drift
-    ['op_Before_WDS_Slit_L', 'f', 0.009999999999990905, 'length'],
+    # CRL1_Slit: drift
+    ['op_CRL1_Slit_L', 'f', 10.0, 'length'],
 
     # Slit: aperture
     ['op_Slit_shape', 's', 'r', 'shape'],
@@ -577,11 +463,8 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_Slit_x', 'f', 0.0, 'horizontalOffset'],
     ['op_Slit_y', 'f', 0.0, 'verticalOffset'],
 
-    # Slit_After_Slit: drift
-    ['op_Slit_After_Slit_L', 'f', 0.009999999999990905, 'length'],
-
-    # After_Slit_CRL2: drift
-    ['op_After_Slit_CRL2_L', 'f', 9.990000000000009, 'length'],
+    # Slit_CRL2: drift
+    ['op_Slit_CRL2_L', 'f', 10.0, 'length'],
 
     # CRL2: crl
     ['op_CRL2_foc_plane', 'f', 1, 'focalPlane'],
@@ -590,20 +473,14 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_CRL2_shape', 'f', 1, 'shape'],
     ['op_CRL2_apert_h', 'f', 0.0015, 'horizontalApertureSize'],
     ['op_CRL2_apert_v', 'f', 0.0015, 'verticalApertureSize'],
-    ['op_CRL2_r_min', 'f', 0.00022746700000000002, 'tipRadius'],
+    ['op_CRL2_r_min', 'f', 7.582452679721133e-05, 'tipRadius'],
     ['op_CRL2_wall_thick', 'f', 5e-05, 'tipWallThickness'],
     ['op_CRL2_x', 'f', 0.0, 'horizontalOffset'],
     ['op_CRL2_y', 'f', 0.0, 'verticalOffset'],
-    ['op_CRL2_n', 'i', 3, 'numberOfLenses'],
+    ['op_CRL2_n', 'i', 1, 'numberOfLenses'],
 
-    # CRL2_After_CRL2: drift
-    ['op_CRL2_After_CRL2_L', 'f', 0.009999999999990905, 'length'],
-
-    # After_CRL2_Before_C3: drift
-    ['op_After_CRL2_Before_C3_L', 'f', 9.980000000000018, 'length'],
-
-    # Before_C3_C3: drift
-    ['op_Before_C3_C3_L', 'f', 0.009999999999990905, 'length'],
+    # CRL2_C3: drift
+    ['op_CRL2_C3_L', 'f', 10.0, 'length'],
 
     # C3: crystal
     ['op_C3_hfn', 's', '', 'heightProfileFile'],
@@ -618,21 +495,18 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C3_tc', 'f', 0.01, 'crystalThickness'],
     ['op_C3_uc', 'f', 1, 'useCase'],
     ['op_C3_ang_as', 'f', 0.0, 'asymmetryAngle'],
-    ['op_C3_nvx', 'f', 0.732228243073, 'nvx'],
-    ['op_C3_nvy', 'f', 4.975e-09, 'nvy'],
-    ['op_C3_nvz', 'f', -0.681059321973, 'nvz'],
-    ['op_C3_tvx', 'f', 0.681059321973, 'tvx'],
-    ['op_C3_tvy', 'f', 4.628e-09, 'tvy'],
-    ['op_C3_ang', 'f', 0.23435318504297908, 'grazingAngle'],
+    ['op_C3_nvx', 'f', 0.7322282430733594, 'nvx'],
+    ['op_C3_nvy', 'f', 4.975415277322606e-09, 'nvy'],
+    ['op_C3_nvz', 'f', -0.6810593219725439, 'nvz'],
+    ['op_C3_tvx', 'f', 0.6810593219725439, 'tvx'],
+    ['op_C3_tvy', 'f', 4.627727743855522e-09, 'tvy'],
+    ['op_C3_ang', 'f', 0.7492083731847909, 'grazingAngle'],
     ['op_C3_amp_coef', 'f', 1.0, 'heightAmplification'],
     ['op_C3_energy', 'f', 9481.0, 'energy'],
     ['op_C3_diffractionAngle', 'f', -1.57079632, 'diffractionAngle'],
 
-    # C3_After_C3: drift
-    ['op_C3_After_C3_L', 'f', 0.009999999999990905, 'length'],
-
-    # After_C3_C4: drift
-    ['op_After_C3_C4_L', 'f', 0.18999999999999773, 'length'],
+    # C3_C4: drift
+    ['op_C3_C4_L', 'f', 0.19999999999998863, 'length'],
 
     # C4: crystal
     ['op_C4_hfn', 's', '', 'heightProfileFile'],
@@ -647,51 +521,37 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C4_tc', 'f', 0.01, 'crystalThickness'],
     ['op_C4_uc', 'f', 1, 'useCase'],
     ['op_C4_ang_as', 'f', 0.6619756915046209, 'asymmetryAngle'],
-    ['op_C4_nvx', 'f', -0.996192732149, 'nvx'],
-    ['op_C4_nvy', 'f', 6.769e-09, 'nvy'],
-    ['op_C4_nvz', 'f', -0.087178210659, 'nvz'],
-    ['op_C4_tvx', 'f', -0.087178210659, 'tvx'],
-    ['op_C4_tvy', 'f', 5.92e-10, 'tvy'],
-    ['op_C4_ang', 'f', 0.7492083731847909, 'grazingAngle'],
+    ['op_C4_nvx', 'f', -0.9961927321489331, 'nvx'],
+    ['op_C4_nvy', 'f', 6.769026714795782e-09, 'nvy'],
+    ['op_C4_nvz', 'f', -0.08717821065864992, 'nvz'],
+    ['op_C4_tvx', 'f', -0.08717821065864992, 'tvx'],
+    ['op_C4_tvy', 'f', 5.923669364898284e-10, 'tvy'],
+    ['op_C4_ang', 'f', 0.08728901635673195, 'grazingAngle'],
     ['op_C4_amp_coef', 'f', 1.0, 'heightAmplification'],
     ['op_C4_energy', 'f', 9481.0, 'energy'],
     ['op_C4_diffractionAngle', 'f', 1.57079632, 'diffractionAngle'],
 
-    # C4_After_HRM4: drift
-    ['op_C4_After_HRM4_L', 'f', 0.010000000000047748, 'length'],
-
-    # After_HRM4_After_HRM: drift
-    ['op_After_HRM4_After_HRM_L', 'f', 9.989999999999952, 'length'],
+    # C4_After_HRM: drift
+    ['op_C4_After_HRM_L', 'f', 10.0, 'length'],
 
 #---Propagation parameters
-    ['op_zero_drift_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'zero_drift'],
-    ['op_im0_CRL_pp', 'f',               [0, 0, 1.0, 1, 0, 1.0, 4.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'im0_CRL'],
-    ['op_CRL_pp', 'f',                   [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL'],
-    ['op_CRL_C1_pp', 'f',                [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL_C1'],
-    ['op_C1_pp', 'f',                    [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, -0.997381741513, 6.777e-09, 0.072316399909, 0.072316399909, 6.304e-09], 'C1'],
-    ['op_C1_After_C1_pp', 'f',           [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C1_After_C1'],
-    ['op_After_C1_C2_pp', 'f',           [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'After_C1_C2'],
-    ['op_C2_pp', 'f',                    [0, 0, 1.0, 0, 0, 10.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.997382667547, 6.777e-09, 0.072303626994, 0.072303626994, -6.304e-09], 'C2'],
-    ['op_C2_After_C2_pp', 'f',           [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C2_After_C2'],
-    ['op_After_C2_CRL1_pp', 'f',         [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'After_C2_CRL1'],
-    ['op_CRL1_pp', 'f',                  [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1'],
-    ['op_CRL1_After_CRL1_pp', 'f',       [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1_After_CRL1'],
-    ['op_After_CRL1_Before_WDS_pp', 'f', [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'After_CRL1_Before_WDS'],
-    ['op_Before_WDS_Slit_pp', 'f',       [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Before_WDS_Slit'],
-    ['op_Slit_pp', 'f',                  [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Slit'],
-    ['op_Slit_After_Slit_pp', 'f',       [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Slit_After_Slit'],
-    ['op_After_Slit_CRL2_pp', 'f',       [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'After_Slit_CRL2'],
-    ['op_CRL2_pp', 'f',                  [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL2'],
-    ['op_CRL2_After_CRL2_pp', 'f',       [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL2_After_CRL2'],
-    ['op_After_CRL2_Before_C3_pp', 'f',  [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'After_CRL2_Before_C3'],
-    ['op_Before_C3_C3_pp', 'f',          [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Before_C3_C3'],
-    ['op_C3_pp', 'f',                    [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.99738266769, 6.777e-09, 0.072303625018, 0.072303625018, -6.304e-09], 'C3'],
-    ['op_C3_After_C3_pp', 'f',           [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C3_After_C3'],
-    ['op_After_C3_C4_pp', 'f',           [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'After_C3_C4'],
-    ['op_C4_pp', 'f',                    [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, -0.997381741513, 6.777e-09, 0.072316399909, 0.072316399909, 6.304e-09], 'C4'],
-    ['op_C4_After_HRM4_pp', 'f',         [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C4_After_HRM4'],
-    ['op_After_HRM4_After_HRM_pp', 'f',  [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'After_HRM4_After_HRM'],
-    ['op_fin_pp', 'f',                   [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'final post-propagation (resize) parameters'],
+    ['op_CRL_pp', 'f',          [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL'],
+    ['op_CRL_C1_pp', 'f',       [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL_C1'],
+    ['op_C1_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, -0.997381741513, 6.777e-09, 0.072316399909, 0.072316399909, 6.304e-09], 'C1'],
+    ['op_C1_C2_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C1_C2'],
+    ['op_C2_pp', 'f',           [0, 0, 1.0, 0, 0, 10.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.997382667547, 6.777e-09, 0.072303626994, 0.072303626994, -6.304e-09], 'C2'],
+    ['op_C2_CRL1_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C2_CRL1'],
+    ['op_CRL1_pp', 'f',         [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1'],
+    ['op_CRL1_Slit_pp', 'f',    [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1_Slit'],
+    ['op_Slit_pp', 'f',         [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Slit'],
+    ['op_Slit_CRL2_pp', 'f',    [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Slit_CRL2'],
+    ['op_CRL2_pp', 'f',         [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL2'],
+    ['op_CRL2_C3_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL2_C3'],
+    ['op_C3_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.99738266769, 6.777e-09, 0.072303625018, 0.072303625018, -6.304e-09], 'C3'],
+    ['op_C3_C4_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C3_C4'],
+    ['op_C4_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, -0.997381741513, 6.777e-09, 0.072316399909, 0.072316399909, 6.304e-09], 'C4'],
+    ['op_C4_After_HRM_pp', 'f', [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C4_After_HRM'],
+    ['op_fin_pp', 'f',          [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'final post-propagation (resize) parameters'],
 
     #[ 0]: Auto-Resize (1) or not (0) Before propagation
     #[ 1]: Auto-Resize (1) or not (0) After propagation
