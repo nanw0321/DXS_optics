@@ -1,0 +1,19 @@
+To install SRW on PSANA:
+	git clone --branch reorg https://github.com/Synchrotron-Radiation-Workshop/SRW.git
+	cd SRW/python
+
+	# For non-OpenMP:
+	python setup.py install
+
+	# For OpenMP
+	MODE=omp python setup.py install
+
+To get PSANA working (temporary solution):
+	conda activate ana-4.0.11-py3
+	source /reg/g/psdm/etc/psconda.sh -py3
+	export PYTHONPATH=`pwd`/install/lib/python3.7/site-packages/srwpy-1.0-py3.7-linux-x86_64.egg/
+
+To fix srwpy import issues:
+	go to SRW/python/srwpy, and go through the .py files; change all "." in the import section to "srwpy" or "srwpy.".
+
+******ATM: since there is no srwlpy file in srwpy folder, line 6 in srwlib.py fails.
