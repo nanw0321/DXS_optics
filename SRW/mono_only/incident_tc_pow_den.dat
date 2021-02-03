@@ -1,0 +1,21 @@
+#Power Density [W/mm^2] (C-aligned, inner loop is vs Time, outer loop vs Vertical Position)
+#-2e-12 #Initial Time [s]
+#2e-12 #Final Time [s]
+#10 #Number of points vs Time
+#0.0 #Initial Horizontal Position [m]
+#0.0 #Final Horizontal Position [m]
+#1 #Number of points vs Horizontal Position
+#0.0 #Initial Vertical Position [m]
+#0.0 #Final Vertical Position [m]
+#1 #Number of points vs Vertical Position
+#1 #Number of components
+ 6188.833984375
+ 863521.0
+ 35056696.0
+ 414097920.0
+ 1423210240.0
+ 1423210240.0
+ 414097920.0
+ 35056696.0
+ 863521.0
+ 6188.833984375

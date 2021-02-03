@@ -14,3 +14,4 @@ To get PSANA working (temporary solution):
 	export PYTHONPATH=/cds/sw/package/srw/SRW/python/install/lib/python3.7/site-packages/srwpy-1.0-py3.7-linux-x86_64.egg/
 
 When importing any SRW modules, use from srwpy import ***.
+

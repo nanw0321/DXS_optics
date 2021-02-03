@@ -1,0 +1,29 @@
+#Spectral Fluence [J/eV/mm^2] (C-aligned, inner loop is vs Photon Energy, outer loop vs Vertical Position)
+#9480.999665010959 #Initial Photon Energy [eV]
+#9481.000297768036 #Final Photon Energy [eV]
+#18 #Number of points vs Photon Energy
+#0.0 #Initial Horizontal Position [m]
+#0.0 #Final Horizontal Position [m]
+#1 #Number of points vs Horizontal Position
+#0.0 #Initial Vertical Position [m]
+#0.0 #Final Vertical Position [m]
+#1 #Number of points vs Vertical Position
+#1 #Number of components
+ 0.7431238293647766
+ 0.7561529278755188
+ 0.7678384184837341
+ 0.7781115174293518
+ 0.7869112491607666
+ 0.794184684753418
+ 0.7998883128166199
+ 0.8039873242378235
+ 0.8064567446708679
+ 0.8072813749313354
+ 0.8064565658569336
+ 0.8039870262145996
+ 0.7998882532119751
+ 0.794184684753418
+ 0.7869113683700562
+ 0.778111457824707
+ 0.767838716506958
+ 0.7561529278755188
