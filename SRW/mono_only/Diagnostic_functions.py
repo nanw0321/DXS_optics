@@ -107,7 +107,6 @@ def plot_tprofile_from_wf(_wfr, if_short=1):
         axis_t = axis_t[aw]
         int0 = int0[aw]
     plt.plot(axis_t*1e15, int0)
-    plt.title()
     plt.xlabel('time (fs)')
     plt.ylabel('intensity (a.u.)')
 
