@@ -1,0 +1,51 @@
+#Power [W] (C-aligned, inner loop is vs Time, outer loop vs Vertical Position)
+#-4.105263158035214e-12 #Initial Time [s]
+#4.105263158035214e-12 #Final Time [s]
+#40 #Number of points vs Time
+#0.0 #Initial Horizontal Position [m]
+#0.0 #Final Horizontal Position [m]
+#1 #Number of points vs Horizontal Position
+#0.0 #Initial Vertical Position [m]
+#0.0 #Final Vertical Position [m]
+#1 #Number of points vs Vertical Position
+#1 #Number of components
+ 6594.51953125
+ 11777.5361328125
+ 25802.8046875
+ 59357.02734375
+ 136318.140625
+ 301843.8125
+ 625127.0
+ 1219430.875
+ 2399527.0
+ 4731052.5
+ 9614124.0
+ 20266362.0
+ 40188448.0
+ 72280384.0
+ 116839920.0
+ 169313712.0
+ 221320208.0
+ 265053664.0
+ 294676416.0
+ 307081472.0
+ 301679008.0
+ 279718624.0
+ 243548384.0
+ 197526880.0
+ 147744960.0
+ 100792512.0
+ 62319088.0
+ 34996220.0
+ 18041150.0
+ 8793099.0
+ 4306978.0
+ 2170627.75
+ 1092596.25
+ 547772.6875
+ 263438.3125
+ 119002.1875
+ 51673.640625
+ 22411.994140625
+ 10376.0673828125
+ 6217.068359375

@@ -1,0 +1,65 @@
+kinit: KDC can't fulfill requested option while renewing credentials
+/cds/sw/package/srw/SRW/python/install/lib/python3.7/site-packages/srwpy-1.0-py3.7-linux-x86_64.egg/srwpy/uti_plot_matplotlib.py:406: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+  if isDataAr: ax.pcolormesh(x, y, ar2d, cmap=self._pl.cm.Greys_r) #OC30052020
+/cds/sw/package/srw/SRW/python/install/lib/python3.7/site-packages/srwpy-1.0-py3.7-linux-x86_64.egg/srwpy/uti_plot_matplotlib.py:406: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+  if isDataAr: ax.pcolormesh(x, y, ar2d, cmap=self._pl.cm.Greys_r) #OC30052020
+/cds/sw/package/srw/SRW/python/install/lib/python3.7/site-packages/srwpy-1.0-py3.7-linux-x86_64.egg/srwpy/uti_plot_matplotlib.py:406: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+  if isDataAr: ax.pcolormesh(x, y, ar2d, cmap=self._pl.cm.Greys_r) #OC30052020
+Gaussian beam electric field calculation ... completed (lasted 0.084 s)
+Extracting intensity and saving it to a file ... completed (lasted 1.54 s)
+Saving time-coordinate-domain radiation characteristics to files (for viewing/debugging): TkAgg: backend unavailable; plots will be saved to files
+Saving figures to uti_plot-{}.png
+done in 1 s
+Resizing in Time domain: done in 1.238 s
+Switching from Time to Frequency domain: done in 0.569 s
+Resizing in Frequency domain: done in 0.708 s
+Saving frequency-coordinate-domain radiation characteristics to files (for viewing/debugging): done in 1 s
+Propagating through monochromator: Optical Element Setup: CRL Focal Length: 290.0 m
+Optical Element Setup: CRL Focal Length: 10.0 m
+Optical Element Setup: CRL Focal Length: 10.0 m
+done in 533.711 s
+Resizing in Frequency domain: done in 6.732 s
+Switching from Frequency to Time domain: done in 25.132 s
+Saving time-coordinate-domain radiation characteristics to files (for viewing/debugging): done in 11 s
+
+
+
+
+ everything lasted: 583.3578743934631s
+
+------------------------------------------------------------
+Sender: LSF System <lsf@psana1418.pcdsn>
+Subject: Job 805383: <OMP_NUM_THREADS=16 python mono_only_time.py> in cluster <slac> Done
+
+Job <OMP_NUM_THREADS=16 python mono_only_time.py> was submitted from host <psanagpu110.pcdsn> by user <nanw0321> in cluster <slac> at Tue Feb  9 00:17:17 2021
+Job was executed on host(s) <psana1418.pcdsn>, in queue <psanaq>, as user <nanw0321> in cluster <slac> at Tue Feb  9 00:17:19 2021
+</cds/home/n/nanw0321> was used as the home directory.
+</cds/home/n/nanw0321/DXS_Optics/code> was used as the working directory.
+Started at Tue Feb  9 00:17:19 2021
+Terminated at Tue Feb  9 00:27:04 2021
+Results reported at Tue Feb  9 00:27:04 2021
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+OMP_NUM_THREADS=16 python mono_only_time.py
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   582.99 sec.
+    Max Memory :                                 5358 MB
+    Average Memory :                             1982.95 MB
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              3
+    Max Threads :                                4
+    Run time :                                   584 sec.
+    Turnaround time :                            587 sec.
+
+The output (if any) is above this job summary.
+

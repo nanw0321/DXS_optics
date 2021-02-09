@@ -21,10 +21,11 @@ from time import *
 from copy import *
 from array import *
 
+tstart = time()
 
 sigT = 400e-15
 pulseRange = 10
-nx = 100; ny = 100; nz = 10
+nx = 100; ny = 100; nz = 100
 range_x = 4e-3; range_y = 4e-3
 factor = -1 # factor = 0.5
 
@@ -400,7 +401,6 @@ varParam = srwl_bl.srwl_uti_ext_options([
     # ['wm_fni', 's', 'res_int_pr_me.dat', 'file name for saving propagated multi-e intensity distribution vs horizontal and vertical position'],
     # ['wm_fbk', '', '', 'create backup file(s) with propagated multi-e intensity distribution vs horizontal and vertical position and other radiation characteristics', 'store_true'],
 
-    
 #---Beamline optics:
     # CRL: crl
     ['op_CRL_foc_plane', 'f', 2, 'focalPlane'],
@@ -781,7 +781,7 @@ def main(_do_integ=True, _do_cuts=True):
     wfr0 = deepcopy(wfr)
     print('Resizing in Time domain: ', end='')
     t0 = time();
-    srwlpy.ResizeElecField(wfr, 't', [0, 25., 1])
+    srwlpy.ResizeElecField(wfr, 't', [0, 10., 1])
     #srwlpy.ResizeElecField(wfr, 't', [0, 50., 1])
     print('done in', round(time() - t0, 3), 's')
     
@@ -792,7 +792,7 @@ def main(_do_integ=True, _do_cuts=True):
     
     print('Resizing in Frequency domain: ', end='')
     t0 = time();
-    srwlpy.ResizeElecField(wfr, 'f', [0, 0.07, 1])
+    srwlpy.ResizeElecField(wfr, 'f', [0, 0.1, 1])
     print('done in', round(time() - t0, 3), 's')
     
     ec = 0.5*(wfr.mesh.eStart + wfr.mesh.eFin) # central photon energy
@@ -819,6 +819,11 @@ def main(_do_integ=True, _do_cuts=True):
     srwlpy.SetRepresElecField(wfr, 't')
     print('done in', round(time() - t0, 3), 's')
     
-    save_pulse_data(wfr, tc, xc, yc, _fnPrefix='mono_output', _do_integ=_do_integ, _do_cuts=_do_cuts, _do_plot=True, _do_multi_en=False, _nmDir=v.fdir)
-    return wfr0, wfr
-wfr0, wfr = main(_do_integ=True, _do_cuts=True)
+    save_pulse_data(wfr, tc, xc, yc, _fnPrefix='output', _do_integ=_do_integ, _do_cuts=_do_cuts, _do_plot=True, _do_multi_en=False, _nmDir=v.fdir)
+    
+    print('\n\n\n\n everything lasted: {}s'.format(time()-tstart))
+#    uti_plot_show()
+
+if __name__ == '__main__':
+    main(_do_integ=True, _do_cuts=False)
+

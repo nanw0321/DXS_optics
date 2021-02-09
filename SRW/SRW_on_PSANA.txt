@@ -15,3 +15,14 @@ To get PSANA working (temporary solution):
 
 When importing any SRW modules, use from srwpy import ***.
 
+Testing OpenMP on a single psana machine (100 x 100 x 20): <OMP_NUM_THREADS=8 python something.py>
+	export OMP_PROC_BIND=true		# not sure if this does anything
+	OMP_NUM_THREADS not specified	# t = 105.75667023658752s
+	OMP_NUM_THREADS = 4		# t = 101.40362071990967s
+	OMP_NUM_THREADS = 8		# t = 107.6915853023529s
+	
+
+Testing OpenMP on PSANA batch farm (100 x 100 x 100): <bsub -q psanaq -o *.log OMP_NUM_THREADS=8 python something.py>
+	OMP_NUM_THREADS not specified	# t = 595.9785695075989s
+	OMP_NUM_THREADS = 8		# t = 596.2037081718445s
+	OMP_NUM_THREADS = 16		# t = 583.3578743934631s
