@@ -12,7 +12,7 @@ To get PSANA working (temporary solution):
 	conda activate ana-4.0.11-py3
 	source /reg/g/psdm/etc/psconda.sh -py3
 	export PYTHONPATH=/cds/sw/package/srw/SRW/python/install/lib/python3.7/site-packages/srwpy-1.0-py3.7-linux-x86_64.egg/
-
+https://confluence.slac.stanford.edu/display/PCDS/Submitting+SLURM+Batch+Jobs
 When importing any SRW modules, use from srwpy import ***.
 
 Testing OpenMP on a single psana machine (100 x 100 x 20): <OMP_NUM_THREADS=8 python something.py>
@@ -26,3 +26,41 @@ Testing OpenMP on PSANA batch farm (100 x 100 x 100): <bsub -q psanaq -o *.log O
 	OMP_NUM_THREADS not specified	# t = 595.9785695075989s
 	OMP_NUM_THREADS = 8		# t = 596.2037081718445s
 	OMP_NUM_THREADS = 16		# t = 583.3578743934631s
+
+
+********** Oleg's update:
+write the following code into something.slrm
+	#!/bin/bash -l
+	#SBATCH -N 1
+	#SBATCH -t 00:30:00
+	#SBATCH -q debug
+	#SBATCH -L SCRATCH
+	#SBATCH -C haswell
+	#export OMP_NUM_THREADS=32
+	#SBATCH --account=m2173
+	module load python
+	srun -n 1 python ./mono_only_time_segmented_oc.py
+
+then execute sbatch something.slrm
+
+	***The directory with compiled SRW library file at NERSC is:
+		/global/project/projectdirs/m2173/SRW_Dev/env/work/srw_python
+
+
+*** Apparently Oleg uses SLRUM to submit jobs with OpenMP parallelization. The instructions on submitting SLURM batch jobs at PSANA:
+	https://confluence.slac.stanford.edu/display/PCDS/Submitting+SLURM+Batch+Jobs
+	FTM I don't have license to run SLURM at psana. May need to ask Chris for help.
+
+
+**** the real simulation size:
+	100 x 100 x 100 incident
+	100 x 100 x 1000 incident resize_t
+	100 x 100 x 100 incident resize_f
+	300 x 300 x 100 CRL0
+
+*** segmented simulation size:
+	100 x 100 x 100 incident
+	100 x 100 x 400 resize_t
+	300 x 300 x 400 CRL0
+	
+	

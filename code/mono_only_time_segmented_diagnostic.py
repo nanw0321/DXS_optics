@@ -1,3 +1,6 @@
+##### diagnostic
+#from Diagnostic_functions import *
+
 #!/usr/bin/env python
 from __future__ import absolute_import, division, print_function #Py 2.*/3.* compatibility
 
@@ -21,13 +24,20 @@ from time import *
 from copy import *
 from array import *
 
+#from util_Matt import Util
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')   # allows plot without X11 forwarding
+import matplotlib.pyplot as plt
+
 tstart = time()
 
 sigT = 400e-15
-pulseRange = 10
-nx = 100; ny = 100; nz = 20
+pulseRange = 20
+nx = 100; ny = 100; nz = 400
 range_x = 4e-3; range_y = 4e-3
 factor = -1 # factor = 0.5
+d_slit = 1e-1
 
 def rCRL(fCRL, nCRL):
     # calculates the min radius of curvature of each lens
@@ -37,6 +47,13 @@ fCRL0 = 290.; nCRL0 = 1
 fCRL1 = 10.; nCRL1 = 1
 fCRL2 = 10.; nCRL2 = 1
 
+xRange = 5
+xRes = 4
+yRange = 1
+yRes = 1
+
+xRange_slit = 1
+xRes_slit = 1
 
 def set_optics_CC1(v=None):
     el = []
@@ -513,7 +530,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
 
     # Slit: aperture
     ['op_Slit_shape', 's', 'r', 'shape'],
-    ['op_Slit_Dx', 'f', 0.0002, 'horizontalSize'],
+    ['op_Slit_Dx', 'f', d_slit, 'horizontalSize'],
     ['op_Slit_Dy', 'f', 0.01, 'verticalSize'],
     ['op_Slit_x', 'f', 0.0, 'horizontalOffset'],
     ['op_Slit_y', 'f', 0.0, 'verticalOffset'],
@@ -591,15 +608,16 @@ varParam = srwl_bl.srwl_uti_ext_options([
 
 #---Propagation parameters
 #                               [0][1] [2] [3][4] [5]  [6]  [7]  [8]  [9] [10] [11]
-    ['op_CRL_pp', 'f',          [0, 0, 1.0, 0, 0, 1.0, 3.0, 1.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL'],
+    ['op_CRL_pp', 'f',          [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL'],
     ['op_CRL_C1_pp', 'f',       [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL_C1'],
     ['op_C1_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, -0.997381741513, 6.777e-09, 0.072316399909, 0.072316399909, 6.304e-09], 'C1'],
     ['op_C1_C2_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C1_C2'],
-    ['op_C2_pp', 'f',           [0, 0, 1.0, 0, 0, 10.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.997382667547, 6.777e-09, 0.072303626994, 0.072303626994, -6.304e-09], 'C2'],
+    ['op_C2_pp', 'f',           [0, 0, 1.0, 0, 0, xRange, xRes, yRange, yRes, 0.0, 0.0, 0.0, 0.997382667547, 6.777e-09, 0.072303626994, 0.072303626994, -6.304e-09], 'C2'],
+    # higher resolution after C2, less range (<10), or not resizing range at all since axis shrinks automatically
     ['op_C2_CRL1_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C2_CRL1'],
     ['op_CRL1_pp', 'f',         [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1'],
     ['op_CRL1_Slit_pp', 'f',    [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1_Slit'],
-    ['op_Slit_pp', 'f',         [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Slit'],
+    ['op_Slit_pp', 'f',         [0, 0, 1.0, 0, 0, xRange_slit, xRes_slit, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Slit'],
     ['op_Slit_CRL2_pp', 'f',    [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Slit_CRL2'],
     ['op_CRL2_pp', 'f',         [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL2'],
     ['op_CRL2_C3_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL2_C3'],
@@ -802,12 +820,11 @@ def main(_do_integ=True, _do_cuts=True):
     
     #Initial radiaiton in Time-Coordinate domain
     save_pulse_data(wfr, tc, xc, yc, _fnPrefix='incident', _do_integ=_do_integ, _do_cuts=_do_cuts, _do_plot=True, _do_multi_en=False, _nmDir=v.fdir)
-    wfr0 = deepcopy(wfr)    # preserve copy of input before resizing
     
-    print('Resizing in Time domain: ', end='')
-    t0 = time();
-    srwlpy.ResizeElecField(wfr, 't', [0, 2., 2])
-    print('done in', round(time() - t0, 3), 's')
+    # print('Resizing in Time domain: ', end='')
+    # t0 = time();
+    # srwlpy.ResizeElecField(wfr, 't', [0, 2., 2])
+    # print('done in', round(time() - t0, 3), 's')
     
     print('Switching from Time to Frequency domain: ', end='')
     t0 = time();
@@ -822,7 +839,7 @@ def main(_do_integ=True, _do_cuts=True):
     ec = 0.5*(wfr.mesh.eStart + wfr.mesh.eFin) # central photon energy
     
     save_pulse_data(wfr, ec, xc, yc, _fnPrefix='incident_resize', _do_integ=_do_integ, _do_cuts=_do_cuts, _do_plot=True, _do_multi_en=False, _nmDir=v.fdir)
-    wfr0_r = deepcopy(wfr)    # preserve copy of input after resizing
+    wfr0 = deepcopy(wfr)    # preserve copy of input after resizing
     
     print('Propagating through CC1: ', end='')
     t0 = time()
@@ -842,18 +859,18 @@ def main(_do_integ=True, _do_cuts=True):
     print('done in', round(time() - t0, 3), 's')
     wfr2 = deepcopy(wfr)      # preserve copy of beam at focus
     
-    print('Propagating to CC2: ', end='')
-    t0 = time()
-    bl3 = set_optics_focus_CC2(v)
-    srwlpy.PropagElecField(wfr, bl3)
-    print('done in', round(time() - t0, 3), 's')
-    wfr3 = deepcopy(wfr)      # preserve copy of beam before CC2
+    # print('Propagating to CC2: ', end='')
+    # t0 = time()
+    # bl3 = set_optics_focus_CC2(v)
+    # srwlpy.PropagElecField(wfr, bl3)
+    # print('done in', round(time() - t0, 3), 's')
+    # wfr3 = deepcopy(wfr)      # preserve copy of beam before CC2
     
-    print('Propagating through CC2: ', end='')
-    t0 = time()
-    bl4 = set_optics_CC2(v)
-    srwlpy.PropagElecField(wfr, bl4)
-    print('done in', round(time() - t0, 3), 's')
+    # print('Propagating through CC2: ', end='')
+    # t0 = time()
+    # bl4 = set_optics_CC2(v)
+    # srwlpy.PropagElecField(wfr, bl4)
+    # print('done in', round(time() - t0, 3), 's')
 
 #     print('Resizing in Frequency domain: ', end='')
 #     t0 = time();
@@ -865,18 +882,42 @@ def main(_do_integ=True, _do_cuts=True):
     srwlpy.SetRepresElecField(wfr0, 't')
     srwlpy.SetRepresElecField(wfr1, 't')
     srwlpy.SetRepresElecField(wfr2, 't')
-    srwlpy.SetRepresElecField(wfr3, 't')
-    srwlpy.SetRepresElecField(wfr, 't')
+    # srwlpy.SetRepresElecField(wfr3, 't')
+    # srwlpy.SetRepresElecField(wfr, 't')
     print('done in', round(time() - t0, 3), 's')
     
     save_pulse_data(wfr1, tc, xc, yc, _fnPrefix='after_C2', _do_integ=_do_integ, _do_cuts=_do_cuts, _do_plot=True, _do_multi_en=False, _nmDir=v.fdir)
     save_pulse_data(wfr2, tc, xc, yc, _fnPrefix='focus', _do_integ=_do_integ, _do_cuts=_do_cuts, _do_plot=True, _do_multi_en=False, _nmDir=v.fdir)
-    save_pulse_data(wfr3, tc, xc, yc, _fnPrefix='before_C3', _do_integ=_do_integ, _do_cuts=_do_cuts, _do_plot=True, _do_multi_en=False, _nmDir=v.fdir)
-    save_pulse_data(wfr, tc, xc, yc, _fnPrefix='ouptut', _do_integ=_do_integ, _do_cuts=_do_cuts, _do_plot=True, _do_multi_en=False, _nmDir=v.fdir)
+    # save_pulse_data(wfr3, tc, xc, yc, _fnPrefix='before_C3', _do_integ=_do_integ, _do_cuts=_do_cuts, _do_plot=True, _do_multi_en=False, _nmDir=v.fdir)
+    # save_pulse_data(wfr, tc, xc, yc, _fnPrefix='ouptut', _do_integ=_do_integ, _do_cuts=_do_cuts, _do_plot=True, _do_multi_en=False, _nmDir=v.fdir)
     
     print('\n\n\n\n everything lasted: {}s'.format(time()-tstart))
     #uti_plot_show()
-
+    # return wfr0, wfr1, wfr2, wfr3, wfr
+    #return wfr0, wfr1, wfr2
 
 if __name__ == '__main__':
+    # wfr0, wfr0_r, wfr1, wfr2, wfr3, wfr = main(_do_integ=True, _do_cuts=False)
+    #wfr0, wfr1, wfr2 = main(_do_integ=True, _do_cuts=False)
     main(_do_integ=True, _do_cuts=False)
+    ### Plots
+    # if_short = 0
+    # # wfs = [wfr0, wfr0_r, wfr1, wfr2, wfr3, wfr]
+    # # labels = ['input', 'input resize', 'after C2', 'focus', 'before C3', 'output']
+    # wfs = [wfr0, wfr1, wfr2]
+    # labels = ['input', 'after C2', 'focus']
+
+    # for i in range(len(wfs)):
+    #     plt.figure(figsize=(20,4))
+    #     plt.subplot(1,4,1); plot_spatial_from_wf(wfs[i]); plt.title(labels[i])
+    #     #plt.subplot(1,4,2); plot_tilt_from_wf(wfs[i],ori='Vertical',type='slice')
+    #     plt.subplot(1,4,2); plot_tilt_from_wf(wfs[i],ori='Horizontal',type='slice')
+    #     plt.subplot(1,4,3); plot_tprofile_from_wf(wfs[i], if_short=if_short)
+    #     plt.subplot(1,4,4); plot_spectrum_from_wf(wfs[i], if_short=if_short); plt.title('{} pts'.format(len(get_axis_ev(wfs[i]))))
+
+    #     plt.savefig('C2_{}x{}H_slit_{}x{}H_{}x{}V_nz{}_{}.png'.format(xRange,xRes,xRange_slit,xRes_slit,yRange,yRes,nz, labels[i]))
+
+
+
+
+

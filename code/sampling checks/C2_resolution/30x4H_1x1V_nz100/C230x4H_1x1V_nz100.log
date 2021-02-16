@@ -5,61 +5,61 @@ kinit: KDC can't fulfill requested option while renewing credentials
   if isDataAr: ax.pcolormesh(x, y, ar2d, cmap=self._pl.cm.Greys_r) #OC30052020
 /cds/sw/package/srw/SRW/python/install/lib/python3.7/site-packages/srwpy-1.0-py3.7-linux-x86_64.egg/srwpy/uti_plot_matplotlib.py:406: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
   if isDataAr: ax.pcolormesh(x, y, ar2d, cmap=self._pl.cm.Greys_r) #OC30052020
+/cds/sw/package/srw/SRW/python/install/lib/python3.7/site-packages/srwpy-1.0-py3.7-linux-x86_64.egg/srwpy/uti_plot_matplotlib.py:406: MatplotlibDeprecationWarning: shading='flat' when X and Y have the same dimensions as C is deprecated since 3.3.  Either specify the corners of the quadrilaterals with X and Y, or pass shading='auto', 'nearest' or 'gouraud', or set rcParams['pcolor.shading'].  This will become an error two minor releases later.
+  if isDataAr: ax.pcolormesh(x, y, ar2d, cmap=self._pl.cm.Greys_r) #OC30052020
 Gaussian beam electric field calculation ... completed (lasted 0.083 s)
-Extracting intensity and saving it to a file ... completed (lasted 1.552 s)
+Extracting intensity and saving it to a file ... completed (lasted 1.853 s)
 Saving time-coordinate-domain radiation characteristics to files (for viewing/debugging): TkAgg: backend unavailable; plots will be saved to files
 Saving figures to uti_plot-{}.png
-done in 1 s
-Resizing in Time domain: done in 1.259 s
-Switching from Time to Frequency domain: done in 0.539 s
-Resizing in Frequency domain: done in 0.653 s
+done in 2 s
+Switching from Time to Frequency domain: done in 0.039 s
 Saving frequency-coordinate-domain radiation characteristics to files (for viewing/debugging): done in 1 s
-Propagating through monochromator: Optical Element Setup: CRL Focal Length: 290.0 m
-Optical Element Setup: CRL Focal Length: 10.0 m
-Optical Element Setup: CRL Focal Length: 10.0 m
-done in 539.796 s
-Resizing in Frequency domain: done in 6.733 s
-Switching from Frequency to Time domain: done in 29.404 s
-Saving time-coordinate-domain radiation characteristics to files (for viewing/debugging): done in 14 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 147.883 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 10.0 m
+done in 106.502 s
+Switching from Frequency to Time domain: done in 15.528 s
+Saving time-coordinate-domain radiation characteristics to files (for viewing/debugging): done in 7 s
+Saving time-coordinate-domain radiation characteristics to files (for viewing/debugging): done in 7 s
 
 
 
 
- everything lasted: 596.2037081718445s
+ everything lasted: 290.46838188171387s
 
 ------------------------------------------------------------
-Sender: LSF System <lsf@psana1418.pcdsn>
-Subject: Job 805293: <OMP_NUM_THREADS=8 python mono_only_time.py> in cluster <slac> Done
+Sender: LSF System <lsf@psana1205.pcdsn>
+Subject: Job 467189: <python mono_only_time_segmented_diagnostic.py> in cluster <slac> Done
 
-Job <OMP_NUM_THREADS=8 python mono_only_time.py> was submitted from host <psanagpu110.pcdsn> by user <nanw0321> in cluster <slac> at Tue Feb  9 00:16:48 2021
-Job was executed on host(s) <psana1418.pcdsn>, in queue <psanaq>, as user <nanw0321> in cluster <slac> at Tue Feb  9 00:16:50 2021
+Job <python mono_only_time_segmented_diagnostic.py> was submitted from host <psanagpu103.pcdsn> by user <nanw0321> in cluster <slac> at Mon Feb 15 22:13:21 2021
+Job was executed on host(s) <psana1205.pcdsn>, in queue <psanaq>, as user <nanw0321> in cluster <slac> at Mon Feb 15 22:13:22 2021
 </cds/home/n/nanw0321> was used as the home directory.
 </cds/home/n/nanw0321/DXS_Optics/code> was used as the working directory.
-Started at Tue Feb  9 00:16:50 2021
-Terminated at Tue Feb  9 00:26:48 2021
-Results reported at Tue Feb  9 00:26:48 2021
+Started at Mon Feb 15 22:13:22 2021
+Terminated at Mon Feb 15 22:21:40 2021
+Results reported at Mon Feb 15 22:21:40 2021
 
 Your job looked like:
 
 ------------------------------------------------------------
 # LSBATCH: User input
-OMP_NUM_THREADS=8 python mono_only_time.py
+python mono_only_time_segmented_diagnostic.py
 ------------------------------------------------------------
 
 Successfully completed.
 
 Resource usage summary:
 
-    CPU time :                                   595.65 sec.
-    Max Memory :                                 4310 MB
-    Average Memory :                             1602.48 MB
+    CPU time :                                   492.81 sec.
+    Max Memory :                                 5676 MB
+    Average Memory :                             3484.06 MB
     Total Requested Memory :                     -
     Delta Memory :                               -
     Max Swap :                                   -
     Max Processes :                              3
     Max Threads :                                4
-    Run time :                                   597 sec.
-    Turnaround time :                            600 sec.
+    Run time :                                   498 sec.
+    Turnaround time :                            499 sec.
 
 The output (if any) is above this job summary.
 

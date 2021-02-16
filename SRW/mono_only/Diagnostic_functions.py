@@ -1,8 +1,32 @@
-from __future__ import print_function #Python 2.7 compatibility
+#!/usr/bin/env python
+from __future__ import absolute_import, division, print_function #Py 2.*/3.* compatibility
 
-from srwpy import srwlpy
+import os
+try:
+    __IPYTHON__
+    import sys
+    del sys.argv[1:]
+except:
+    pass
+
+
+import srwl_bl
+import srwlib
+import srwlpy
+import srwl_uti_smp
+import uti_io
+import math
+
+from time import *
+from copy import *
+from array import *
+from uti_plot import *
+
 from util_Matt import Util
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')   # allows plot without X11 forwarding
+import matplotlib.pyplot as plt
 
 
 ####### get info from SRW wavefront
@@ -41,12 +65,13 @@ def get_intensity(_wfr, polarization='total'):
             'unknown polarization value, shoule be "total" or "horizontal" or "vertical"')
 
     mesh_temp = deepcopy(_wfr.mesh)
-    intensity = array('f', [0]*mesh_temp.ne*mesh_temp.nx*mesh_temp.ny)
+    #intensity = array('f', [0]*mesh_temp.ne*mesh_temp.nx*mesh_temp.ny)
+    intensity = np.zeros(mesh_temp.ne*mesh_temp.nx*mesh_temp.ny, dtype='float32')
 
     ec = np.mean(get_axis_ev(_wfr))               # get energy center; pulse is now in frequency domain
     axis_x, axis_y = get_axis_sp(_wfr)            # get spatial axis; pulse is now in time domain
     xc = np.mean(axis_x); yc = np.mean(axis_y)    # get spatial centers
-    srwlpy.CalcIntFromElecField(intensity, _wfr, pol, 0, 6, ec, xc, yc)
+    intensity = srwlpy.CalcIntFromElecField(intensity, _wfr, pol, 0, 6, ec, xc, yc)
     intensity = np.array(intensity, dtype='float32', copy=False)
     intensity.shape = (
         mesh_temp.ny, mesh_temp.nx, mesh_temp.ne)

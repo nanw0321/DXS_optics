@@ -1,0 +1,11 @@
+#!/bin/bash -l
+#SBATCH -N 1
+#SBATCH -t 00:30:00
+#SBATCH -o OMP_test.log
+#SBATCH -q debug
+#SBATCH -p psanaq
+#SBATCH -L SCRATCH
+#SBATCH -C haswell
+#export OMP_NUM_THREADS=10
+module load python
+srun -n 1 python ./mono_only_time_segmented_diagnostic.py
