@@ -51,8 +51,16 @@ def get_axis_t(_wfr):
     axis_t = np.linspace(mesh_temp.eStart, mesh_temp.eFin, mesh_temp.ne)
     return axis_t
 
-def get_intensity(_wfr, polarization='total'):
-    # get 3d intensity [y:x:z] profile; this leaves the pulse in time domain
+def get_intensity(_wfr, domain='t', polarization='total'):
+    if domain == 'f':
+        axis_x, axis_y = get_axis_sp(_wfr)            # get spatial axis; pulse is now in time domain
+        ec = np.mean(get_axis_ev(_wfr))               # get energy center; pulse is now in frequency domain
+    elif domain == 't':
+        ec = np.mean(get_axis_ev(_wfr))               # get energy center; pulse is now in frequency domain
+        axis_x, axis_y = get_axis_sp(_wfr)            # get spatial axis; pulse is now in time domain
+    xc = np.mean(axis_x); yc = np.mean(axis_y)    # get spatial centers
+
+    # get 3d intensity [y:x:z] profile
     if polarization == 'total' or (polarization is None):
         pol = 6
     elif polarization == 'horizontal':
@@ -65,10 +73,7 @@ def get_intensity(_wfr, polarization='total'):
 
     mesh_temp = deepcopy(_wfr.mesh)
     intensity = array('f', [0]*mesh_temp.ne*mesh_temp.nx*mesh_temp.ny)
-
-    ec = np.mean(get_axis_ev(_wfr))               # get energy center; pulse is now in frequency domain
-    axis_x, axis_y = get_axis_sp(_wfr)            # get spatial axis; pulse is now in time domain
-    xc = np.mean(axis_x); yc = np.mean(axis_y)    # get spatial centers
+    srwlpy.SetRepresElecField(_wfr, domain)           # just to be sure the pulse is in the right domain
     srwlpy.CalcIntFromElecField(intensity, _wfr, pol, 0, 6, ec, xc, yc)
     intensity = np.array(intensity, dtype='float32', copy=False)
     intensity.shape = (
@@ -78,7 +83,7 @@ def get_intensity(_wfr, polarization='total'):
 def get_tprofile(_wfr):
     # get temporal profile (intensity vs time); this leaves the pulse in time domain
     axis_t = get_axis_t(_wfr)                     # get time axis; pulse is now in time domain
-    int0 = get_intensity(_wfr).sum(axis=(0,1))    # intensity per time slice
+    int0 = get_intensity(_wfr, domain='t').sum(axis=(0,1))    # intensity per time slice
 
     aw = [a[0] for a in np.argwhere(int0>int0.max()*0.01)] # indicies for meaningful slices with intensity > 1% of the maximum
     aw = np.asarray(aw)
@@ -87,7 +92,7 @@ def get_tprofile(_wfr):
 def get_tilt(_wfr, ori='Vertical', type='sum'):
     # get the pulse front tilt in horizontal or vertical plane (y or x vs time)
     axis_x, axis_y = get_axis_sp(_wfr)            # get spatial axis; pulse is now in time domain
-    intensity = get_intensity(_wfr)
+    intensity = get_intensity(_wfr, domain='t')
     if ori == 'Vertical':
         axis_sp = axis_y
         if type == 'sum':
@@ -105,7 +110,7 @@ def get_tilt(_wfr, ori='Vertical', type='sum'):
 def get_spectrum(_wfr):
     # get spectral info (intensity vs eV); this leaves the pulse in frequency domain
     axis_ev = get_axis_ev(_wfr)                   # get energy axis; pulse is now in frequency domain
-    int0 = get_intensity(_wfr).sum(axis=(0,1))    # intensity per energy slice
+    int0 = get_intensity(_wfr, domain='f').sum(axis=(0,1))    # intensity per energy slice
 
     aw = [a[0] for a in np.argwhere(int0>int0.max()*0.01)] # indicies for meaningful slices with intensity > 1% of the maximum
     aw = np.asarray(aw)
@@ -115,7 +120,7 @@ def get_spectrum(_wfr):
 ####### plot
 def plot_spatial_from_wf(_wfr):
     # plot wavefront projection (y vs x)
-    img = get_intensity(_wfr).sum(axis=-1)
+    img = get_intensity(_wfr, domain='t').sum(axis=-1)
     axis_x, axis_y = get_axis_sp(_wfr)
     plt.imshow(img,cmap='jet',
         extent = [axis_x.min()*1e6, axis_x.max()*1e6, axis_y.max()*1e6, axis_y.min()*1e6])
@@ -228,8 +233,8 @@ def fit_pulse_bandwidth(_wfr):
 
 def fit_throughput(_wfr0, _wfr1):
     # Method to calculate the throughput at wfr1 relative to wfr0
-    I0 = get_intensity(_wfr0)
-    I1 = get_intensity(_wfr1)
+    I0 = get_intensity(_wfr0, domain='t')
+    I1 = get_intensity(_wfr1, domain='t')
     # this is a very rough treatment, for cross-comparison to be meaningful, need same ROI
     throughput = np.sum(I0)/ np.sum(I1)
 

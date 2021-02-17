@@ -445,7 +445,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
     
 #---Beamline optics:
     # CRL: crl
-    ['op_CRL_foc_plane', 'f', 2, 'focalPlane'],
+    ['op_CRL_foc_plane', 'f', 1, 'focalPlane'],
     ['op_CRL_delta', 'f', 3.791135e-06, 'refractiveIndex'],
     ['op_CRL_atten_len', 'f', 0.008387, 'attenuationLength'],
     ['op_CRL_shape', 'f', 1, 'shape'],
