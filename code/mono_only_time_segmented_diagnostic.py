@@ -1,40 +1,40 @@
 ##### diagnostic
-#from Diagnostic_functions import *
+from Diagnostic_functions import *
 
-#!/usr/bin/env python
-from __future__ import absolute_import, division, print_function #Py 2.*/3.* compatibility
+# #!/usr/bin/env python
+# from __future__ import absolute_import, division, print_function #Py 2.*/3.* compatibility
 
-import os
-try:
-    __IPYTHON__
-    import sys
-    del sys.argv[1:]
-except:
-    pass
+# import os
+# try:
+#     __IPYTHON__
+#     import sys
+#     del sys.argv[1:]
+# except:
+#     pass
 
-from srwpy import srwl_bl
-from srwpy import srwlib
-from srwpy import srwlpy
-from srwpy import srwl_uti_smp
-from srwpy import uti_io
-from srwpy.uti_plot import *
-import math
+# from srwpy import srwl_bl
+# from srwpy import srwlib
+# from srwpy import srwlpy
+# from srwpy import srwl_uti_smp
+# from srwpy import uti_io
+# from srwpy.uti_plot import *
+# import math
 
-from time import *
-from copy import *
-from array import *
+# from time import *
+# from copy import *
+# from array import *
 
-#from util_Matt import Util
-import numpy as np
-import matplotlib
-matplotlib.use('Agg')   # allows plot without X11 forwarding
-import matplotlib.pyplot as plt
+# #from util_Matt import Util
+# import numpy as np
+# import matplotlib
+# matplotlib.use('Agg')   # allows plot without X11 forwarding
+# import matplotlib.pyplot as plt
 
 tstart = time()
 
 sigT = 400e-15
 pulseRange = 20
-nx = 100; ny = 100; nz = 400
+nx = 100; ny = 100; nz = 100
 range_x = 4e-3; range_y = 4e-3
 factor = -1 # factor = 0.5
 d_slit = 1e-1
@@ -47,7 +47,7 @@ fCRL0 = 290.; nCRL0 = 1
 fCRL1 = 10.; nCRL1 = 1
 fCRL2 = 10.; nCRL2 = 1
 
-xRange = 5
+xRange = 20
 xRes = 4
 yRange = 1
 yRes = 1
@@ -141,7 +141,7 @@ def set_optics_CC1(v=None):
 def set_optics_CC1_focus(v=None):
     el = []
     pp = []
-    names = ['C2_CRL1', 'CRL1', 'CRL1_Slit', 'Slit']
+    names = ['C2_CRL1', 'CRL1', 'CRL1_Slit']
     for el_name in names:
         if el_name == 'C2_CRL1':
             # C2_CRL1: drift 300.2m
@@ -171,7 +171,15 @@ def set_optics_CC1_focus(v=None):
                 _L=v.op_CRL1_Slit_L,
             ))
             pp.append(v.op_CRL1_Slit_pp)
-        elif el_name == 'Slit':
+    return srwlib.SRWLOptC(el, pp)
+
+
+def set_optics_focus_CC2(v=None):
+    el = []
+    pp = []
+    names = ['Slit', 'Slit_CRL2', 'CRL2', 'CRL2_C3']
+    for el_name in names:
+        if el_name == 'Slit':
             # Slit: aperture 320.2m
             el.append(srwlib.SRWLOptA(
                 _shape=v.op_Slit_shape,
@@ -182,14 +190,6 @@ def set_optics_CC1_focus(v=None):
                 _y=v.op_Slit_y,
             ))
             pp.append(v.op_Slit_pp)
-    return srwlib.SRWLOptC(el, pp)
-
-
-def set_optics_focus_CC2(v=None):
-    el = []
-    pp = []
-    names = ['Slit_CRL2', 'CRL2', 'CRL2_C3']
-    for el_name in names:
         if el_name == 'Slit_CRL2':
             # Slit_CRL2: drift 320.2m
             el.append(srwlib.SRWLOptD(
@@ -857,6 +857,13 @@ def main(_do_integ=True, _do_cuts=True):
     bl2 = set_optics_CC1_focus(v)
     srwlpy.PropagElecField(wfr, bl2)
     print('done in', round(time() - t0, 3), 's')
+
+    xc, yc = fit_pulse_position(wfr)
+    opShift = srwlib.SRWLOptShift(_shift_x=-xc, _shift_y=0)
+    ppShift = [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0]
+    bl_shift = srwlib.SRWLOptC([opShift],[ppShift])
+    srwlpy.PropagElecField(wfr, bl_shift)
+
     wfr2 = deepcopy(wfr)      # preserve copy of beam at focus
     
     # print('Propagating to CC2: ', end='')

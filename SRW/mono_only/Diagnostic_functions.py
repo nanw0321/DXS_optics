@@ -173,6 +173,17 @@ def plot_spectrum_from_wf(_wfr, if_short=1):
     plt.ylabel('intensity (a.u.)')
 
 ####### Fit
+def fit_pulse_position(_wfr):
+    # Method to calculate the beam position
+    axis_x, axis_y = get_axis_sp(_wfr)
+    image = get_intensity(_wfr, domain='t').sum(axis=-1)
+    projection_x = image.sum(axis=0)
+    projection_y = image.sum(axis=1)
+    centroid_x, sigX = Util.gaussian_stats(axis_x, projection_x)
+    centroid_y, sigY = Util.gaussian_stats(axis_y, projection_y)
+
+    return centroid_x, centroid_y
+
 def fit_pulse_duration(_wfr):
     # Method to calculate the temporal pulse structure
     aw, axis_t, int0 = get_tprofile(_wfr)    # the pulse is now in time domain
