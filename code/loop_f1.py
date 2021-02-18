@@ -1,12 +1,13 @@
 ##### diagnostic
 from Diagnostic_functions import *
 from tqdm import tqdm
+import h5py
 
 t_window = 8000e-15  # total time window [s]
-ev_window = 50e-3   # total energy window [eV]
+ev_window = 100e-3   # total energy window [eV]
 t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
 
-sigT = 400e-15        # pulse duration [s]
+sigT = 200e-15        # pulse duration [s]
 pulseRange = int(t_window/sigT)
 nx = 256; ny = 256; nz = 2*int(t_window/t_res/2)
 range_x = 4e-3; range_y = 4e-3
@@ -36,7 +37,8 @@ fCRL2 = 10.; nCRL2 = 1
 def mkdir(path):
     if not os.path.exists(path):
         os.mkdir(path)
-dir_plot = 'plots/'; mkdir(dir_plot)
+dir_output = 'output/'; mkdir(dir_output)
+dir_plot = dir_output+'{}fs'.format(round(sigT*1e15)); mkdir(dir_plot)
 
 ## define bl
 def set_optics_CC1(v=None):
@@ -122,7 +124,7 @@ def set_optics_CC1(v=None):
     return srwlib.SRWLOptC(el, pp)
 
 
-def set_optics_CC1_focus(v=None, fCRL=10., nCRL):
+def set_optics_CC1_focus(v=None, fCRL=10., nCRL=1):
     el = []
     pp = []
     names = ['C2_CRL1', 'CRL1', 'CRL1_Slit']
@@ -177,7 +179,7 @@ def set_optics_slit(v=None, xc=0, yc=0):
     return srwlib.SRWLOptC(el, pp)
 
 
-def set_optics_focus_CC2(v=None, fCRL=10., nCRL):
+def set_optics_focus_CC2(v=None, fCRL=10., nCRL=1):
     el = []
     pp = []
     names = ['Slit_CRL2', 'CRL2', 'CRL2_C3']
@@ -589,14 +591,14 @@ def main(fCRL=10., nCRL=1):
     
     print('Propagating through CC1: ', end='')
     t0 = time()
-    bl1 = set_optics_CC1(v, fCRL, nCRL)
+    bl1 = set_optics_CC1(v)
     srwlpy.PropagElecField(wfr, bl1)
     print('done in', round(time() - t0, 3), 's')
     wfr1 = deepcopy(wfr)      # preserve copy of beam after CC1
 
     print('Propagating to focus: ', end='')
     t0 = time()
-    bl2 = set_optics_CC1_focus(v)
+    bl2 = set_optics_CC1_focus(v, fCRL, nCRL)
     srwlpy.PropagElecField(wfr, bl2)
     print('done in', round(time() - t0, 3), 's')
     wfr_open = deepcopy(wfr)   # duplicate beam at focus for open slit propagation
@@ -632,23 +634,69 @@ def main(fCRL=10., nCRL=1):
 
 if __name__ == '__main__':
     print(xRange, xRes, yRange, yRes, d_slit, fCRL1, sigT)
-    for i, f1 in enumerate(f1_list):
-        dir_case = dir_plot+'{}'
+    f1_list = np.linspace(10,5,20)
+    for irep, f1 in tqdm(enumerate(f1_list)):
+        if irep == 1: break
+        dir_case = dir_plot+'rep_{}_f{}/'.format(irep,round(f1,2)); mkdir(dir_case)
         wfs = main(fCRL=f1, nCRL=1)
-        labels = ['input', 'after C2', 'focus', 'focus open', 'before C3', 'before C3 open', 'output', 'output open']
+        labels = np.array(['input', 'after C2', 'focus', 'focus open', 'before C3', 'before C3 open', 'output', 'output open'])
 
         ## Plots
         if_short = 0
         for i in range(len(wfs)):
             plt.figure(figsize=(20,4))
             plt.subplot(1,4,1); plot_spatial_from_wf(wfs[i]); plt.title(labels[i])
-            #plt.subplot(1,4,2); plot_tilt_from_wf(wfs[i],ori='Vertical',type='slice')
             plt.subplot(1,4,2); plot_tilt_from_wf(wfs[i],ori='Horizontal',type='slice')
             plt.subplot(1,4,3); plot_tprofile_from_wf(wfs[i], if_short=if_short)
             plt.subplot(1,4,4); plot_spectrum_from_wf(wfs[i], if_short=if_short); plt.title('{} pts'.format(len(get_axis_ev(wfs[i]))))
 
-            plt.savefig(dir_plot+'{}x{}H_{}x{}V_{}_{}.png'.format(xRange,xRes,yRange,yRes, i+1, labels[i]))
+            plt.savefig(dir_case+'{}x{}H_{}x{}V_{}_{}.png'.format(xRange,xRes,yRange,yRes, i+1, labels[i]))
+            plt.close('all')
 
         ## Diagnostics
-        
+        # open slit
+        try:
+            _, dur_out = fit_pulse_duration(wfs[np.argwhere(labels=='output open')[0,0]])
+        except:
+            dur_out = 1e30
+        try:
+            ptilt_x_out = fit_pulsefront_tilt(wfs[np.argwhere(labels=='output open')[0,0]], dim='x')
+        except:
+            ptilt_x_out = 1e30
+        try:
+            ptilt_y_out = fit_pulsefront_tilt(wfs[np.argwhere(labels=='output open')[0,0]], dim='y')    # fs/um
+        except:
+            ptilt_y_out = 1e30
+        # closed slit
+        try:
+            bw_out = fit_pulse_bandwidth(wfs[np.argwhere(labels=='output')[0,0]])
+        except:
+            bw_out = 1e30
+        try:
+            _, axis_ev_in, int_ev_in = get_spectrum(wfs[np.argwhere(labels=='input')[0,0]])
+        except:
+            axis_ev_in = np.zeros((5))
+            int_ev_in = np.zeros((5))
+        try:
+            _, axis_ev_out, int_ev_out = get_spectrum(wfs[np.argwhere(labels=='output')[0,0]])
+        except:
+            axis_ev_out = np.zeros((5))
+            int_ev_out = np.zeros((5))
+        try:
+            centE_out = fit_central_energy(wfs[np.argwhere(labels=='output')[0,0]])
+        except:
+            centE_out = 1e30
+
+        with h5py.File(dir_plot+'loop_f1_{}-{}m.h5'.format(f1_list.min(), f1_list.max()), 'a') as f:
+            grp = f.create_group('rep_{}'.format(irep))
+            grp.create_dataset('f1', data=[f1])
+            grp.create_dataset('duration', data = [dur_out])
+            grp.create_dataset('tilt_x', data = [ptilt_x_out])
+            grp.create_dataset('tilt_y', data = [ptilt_y_out])
+            grp.create_dataset('bandwidth', data = [bw_out])
+            grp.create_dataset('axis_ev_in', data = axis_ev_in)
+            grp.create_dataset('axis_ev_out', data = axis_ev_out)
+            grp.create_dataset('int_ev_in', data = int_ev_in)
+            grp.create_dataset('int_ev_out', data = int_ev_out)
+            grp.create_dataset('central_energy', data = [centE_out])
 

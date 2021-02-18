@@ -1,0 +1,360 @@
+kinit: KDC can't fulfill requested option while renewing credentials
+0it [00:00, ?it/s]1it [02:30, 150.85s/it]2it [05:02, 151.33s/it]3it [07:32, 150.69s/it]4it [10:07, 152.22s/it]5it [12:39, 152.21s/it]6it [15:13, 152.88s/it]7it [17:47, 153.19s/it]8it [20:19, 152.81s/it]9it [22:54, 153.71s/it]10it [25:28, 153.76s/it]11it [28:03, 154.03s/it]12it [30:37, 154.16s/it]13it [33:09, 153.35s/it]14it [35:42, 153.24s/it]15it [38:13, 152.70s/it]16it [40:48, 153.33s/it]17it [43:23, 153.90s/it]18it [45:56, 153.54s/it]19it [48:32, 154.20s/it]20it [50:56, 151.25s/it]20it [50:56, 152.83s/it]
+5 0.2 1 1 2e-05 10.0 4e-13
+Gaussian beam electric field calculation ... completed (lasted 0.872 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.093 s)
+Switching from Time to Frequency domain: done in 0.436 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 24.683 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 10.0 m
+done in 7.559 s
+Shift slit to pulse center: done in 10.188 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 10.0 m
+done in 12.693 s
+Propagating through CC2: done in 30.035 s
+
+
+
+
+ everything lasted: 91.77266025543213s
+Gaussian beam electric field calculation ... completed (lasted 1.057 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.046 s)
+Switching from Time to Frequency domain: done in 0.336 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 25.602 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 9.736842105263158 m
+done in 7.886 s
+Shift slit to pulse center: done in 10.262 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 9.736842105263158 m
+done in 12.788 s
+Propagating through CC2: done in 29.945 s
+
+
+
+
+ everything lasted: 92.82343029975891s
+Gaussian beam electric field calculation ... completed (lasted 0.906 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.137 s)
+Switching from Time to Frequency domain: done in 0.498 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 24.94 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 9.473684210526315 m
+done in 7.695 s
+Shift slit to pulse center: done in 9.902 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 9.473684210526315 m
+done in 12.495 s
+Propagating through CC2: done in 29.801 s
+
+
+
+
+ everything lasted: 91.46585893630981s
+Gaussian beam electric field calculation ... completed (lasted 0.994 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.059 s)
+Switching from Time to Frequency domain: done in 0.496 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 25.583 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 9.210526315789474 m
+done in 7.938 s
+Shift slit to pulse center: done in 11.175 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 9.210526315789474 m
+done in 13.54 s
+Propagating through CC2: done in 31.835 s
+
+
+
+
+ everything lasted: 96.3960530757904s
+Gaussian beam electric field calculation ... completed (lasted 1.008 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.238 s)
+Switching from Time to Frequency domain: done in 0.312 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 25.294 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 8.947368421052632 m
+done in 7.69 s
+Shift slit to pulse center: done in 10.587 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 8.947368421052632 m
+done in 12.656 s
+Propagating through CC2: done in 31.206 s
+
+
+
+
+ everything lasted: 94.09452319145203s
+Gaussian beam electric field calculation ... completed (lasted 1.047 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.051 s)
+Switching from Time to Frequency domain: done in 0.494 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 25.805 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 8.68421052631579 m
+done in 7.947 s
+Shift slit to pulse center: done in 10.802 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 8.68421052631579 m
+done in 12.771 s
+Propagating through CC2: done in 31.005 s
+
+
+
+
+ everything lasted: 94.72292304039001s
+Gaussian beam electric field calculation ... completed (lasted 0.989 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.083 s)
+Switching from Time to Frequency domain: done in 0.487 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 25.091 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 8.421052631578947 m
+done in 7.765 s
+Shift slit to pulse center: done in 10.869 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 8.421052631578947 m
+done in 12.665 s
+Propagating through CC2: done in 31.144 s
+
+
+
+
+ everything lasted: 94.07702279090881s
+Gaussian beam electric field calculation ... completed (lasted 1.035 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.1 s)
+Switching from Time to Frequency domain: done in 0.344 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 23.603 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 8.157894736842106 m
+done in 7.768 s
+Shift slit to pulse center: done in 10.881 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 8.157894736842106 m
+done in 12.716 s
+Propagating through CC2: done in 30.732 s
+
+
+
+
+ everything lasted: 92.13140177726746s
+Gaussian beam electric field calculation ... completed (lasted 0.937 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.089 s)
+Switching from Time to Frequency domain: done in 0.376 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 25.389 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 7.894736842105264 m
+done in 7.79 s
+Shift slit to pulse center: done in 10.728 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 7.894736842105264 m
+done in 12.855 s
+Propagating through CC2: done in 30.757 s
+
+
+
+
+ everything lasted: 93.87247943878174s
+Gaussian beam electric field calculation ... completed (lasted 1.009 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.108 s)
+Switching from Time to Frequency domain: done in 0.376 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 25.414 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 7.631578947368421 m
+done in 7.893 s
+Shift slit to pulse center: done in 11.074 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 7.631578947368421 m
+done in 12.947 s
+Propagating through CC2: done in 30.835 s
+
+
+
+
+ everything lasted: 94.49759483337402s
+Gaussian beam electric field calculation ... completed (lasted 0.986 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.124 s)
+Switching from Time to Frequency domain: done in 0.387 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 25.313 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 7.368421052631579 m
+done in 7.6 s
+Shift slit to pulse center: done in 10.692 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 7.368421052631579 m
+done in 13.007 s
+Propagating through CC2: done in 30.985 s
+
+
+
+
+ everything lasted: 94.23680973052979s
+Gaussian beam electric field calculation ... completed (lasted 1.026 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.126 s)
+Switching from Time to Frequency domain: done in 0.344 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 25.306 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 7.105263157894737 m
+done in 7.921 s
+Shift slit to pulse center: done in 11.17 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 7.105263157894737 m
+done in 12.809 s
+Propagating through CC2: done in 30.561 s
+
+
+
+
+ everything lasted: 94.0930106639862s
+Gaussian beam electric field calculation ... completed (lasted 0.867 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.059 s)
+Switching from Time to Frequency domain: done in 0.418 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 25.103 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 6.842105263157895 m
+done in 7.628 s
+Shift slit to pulse center: done in 10.453 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 6.842105263157895 m
+done in 12.615 s
+Propagating through CC2: done in 30.165 s
+
+
+
+
+ everything lasted: 92.40245318412781s
+Gaussian beam electric field calculation ... completed (lasted 1.066 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.154 s)
+Switching from Time to Frequency domain: done in 0.415 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 25.694 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 6.578947368421053 m
+done in 7.951 s
+Shift slit to pulse center: done in 10.951 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 6.578947368421053 m
+done in 13.0 s
+Propagating through CC2: done in 30.577 s
+
+
+
+
+ everything lasted: 94.68867874145508s
+Gaussian beam electric field calculation ... completed (lasted 0.943 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.104 s)
+Switching from Time to Frequency domain: done in 0.395 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 25.125 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 6.315789473684211 m
+done in 7.768 s
+Shift slit to pulse center: done in 10.655 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 6.315789473684211 m
+done in 12.562 s
+Propagating through CC2: done in 30.497 s
+
+
+
+
+ everything lasted: 93.02627372741699s
+Gaussian beam electric field calculation ... completed (lasted 1.048 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.058 s)
+Switching from Time to Frequency domain: done in 0.504 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 25.035 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 6.052631578947368 m
+done in 7.756 s
+Shift slit to pulse center: done in 10.791 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 6.052631578947368 m
+done in 12.555 s
+Propagating through CC2: done in 32.108 s
+
+
+
+
+ everything lasted: 94.86777114868164s
+Gaussian beam electric field calculation ... completed (lasted 0.87 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.058 s)
+Switching from Time to Frequency domain: done in 0.399 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 25.071 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 5.7894736842105265 m
+done in 7.711 s
+Shift slit to pulse center: done in 10.737 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 5.7894736842105265 m
+done in 12.737 s
+Propagating through CC2: done in 32.47 s
+
+
+
+
+ everything lasted: 95.12483668327332s
+Gaussian beam electric field calculation ... completed (lasted 1.003 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.046 s)
+Switching from Time to Frequency domain: done in 0.319 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 25.192 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 5.526315789473684 m
+done in 7.793 s
+Shift slit to pulse center: done in 10.842 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 5.526315789473684 m
+done in 12.91 s
+Propagating through CC2: done in 30.496 s
+
+
+
+
+ everything lasted: 93.57313346862793s
+Gaussian beam electric field calculation ... completed (lasted 1.041 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.131 s)
+Switching from Time to Frequency domain: done in 0.513 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 25.652 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 5.2631578947368425 m
+done in 7.921 s
+Shift slit to pulse center: done in 11.07 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 5.2631578947368425 m
+done in 12.918 s
+Propagating through CC2: done in 30.186 s
+
+
+
+
+ everything lasted: 94.25479173660278s
+Gaussian beam electric field calculation ... completed (lasted 0.989 s)
+Extracting intensity and saving it to a file ... completed (lasted 11.155 s)
+Switching from Time to Frequency domain: done in 0.406 s
+Propagating through CC1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 25.236 s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 5.0 m
+done in 7.902 s
+Shift slit to pulse center: done in 10.867 s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 5.0 m
+done in 12.465 s
+Propagating through CC2: done in 27.782 s
+
+
+
+
+ everything lasted: 90.60739970207214s
+
+------------------------------------------------------------
+Sender: LSF System <lsf@psana1107.pcdsn>
+Subject: Job 217187: <python loop_f1.py> in cluster <slac> Done
+
+Job <python loop_f1.py> was submitted from host <psanagpu105.pcdsn> by user <nanw0321> in cluster <slac> at Wed Feb 17 20:37:28 2021
+Job was executed on host(s) <psana1107.pcdsn>, in queue <psanaq>, as user <nanw0321> in cluster <slac> at Wed Feb 17 20:37:29 2021
+</cds/home/n/nanw0321> was used as the home directory.
+</cds/home/n/nanw0321/DXS_Optics/code> was used as the working directory.
+Started at Wed Feb 17 20:37:29 2021
+Terminated at Wed Feb 17 21:28:54 2021
+Results reported at Wed Feb 17 21:28:54 2021
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+python loop_f1.py
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   3035.07 sec.
+    Max Memory :                                 1793 MB
+    Average Memory :                             1232.53 MB
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              3
+    Max Threads :                                5
+    Run time :                                   3084 sec.
+    Turnaround time :                            3086 sec.
+
+The output (if any) is above this job summary.
+
