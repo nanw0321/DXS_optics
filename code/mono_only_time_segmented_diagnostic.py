@@ -50,7 +50,7 @@ fCRL2 = 10.; nCRL2 = 1
 xRange = 20
 xRes = 4
 yRange = 1
-yRes = 1
+yRes = 2
 
 xRange_slit = 1
 xRes_slit = 1
@@ -864,7 +864,7 @@ def main(_do_integ=True, _do_cuts=True):
     bl_shift = srwlib.SRWLOptC([opShift],[ppShift])
     srwlpy.PropagElecField(wfr, bl_shift)
 
-    wfr2 = deepcopy(wfr)      # preserve copy of beam at focus
+    wfr2 = deepcopy(wfr)      # preserve copy of beam at focus after shift
     
     # print('Propagating to CC2: ', end='')
     # t0 = time()
@@ -901,28 +901,28 @@ def main(_do_integ=True, _do_cuts=True):
     print('\n\n\n\n everything lasted: {}s'.format(time()-tstart))
     #uti_plot_show()
     # return wfr0, wfr1, wfr2, wfr3, wfr
-    #return wfr0, wfr1, wfr2
+    return wfr0, wfr1, wfr2
 
 if __name__ == '__main__':
     # wfr0, wfr0_r, wfr1, wfr2, wfr3, wfr = main(_do_integ=True, _do_cuts=False)
     #wfr0, wfr1, wfr2 = main(_do_integ=True, _do_cuts=False)
-    main(_do_integ=True, _do_cuts=False)
-    ### Plots
-    # if_short = 0
-    # # wfs = [wfr0, wfr0_r, wfr1, wfr2, wfr3, wfr]
-    # # labels = ['input', 'input resize', 'after C2', 'focus', 'before C3', 'output']
-    # wfs = [wfr0, wfr1, wfr2]
-    # labels = ['input', 'after C2', 'focus']
+    wfr0, wfr1, wfr2 = main(_do_integ=True, _do_cuts=False)
+    ## Plots
+    if_short = 0
+    # wfs = [wfr0, wfr0_r, wfr1, wfr2, wfr3, wfr]
+    # labels = ['input', 'input resize', 'after C2', 'focus', 'before C3', 'output']
+    wfs = [wfr0, wfr1, wfr2]
+    labels = ['input', 'after C2', 'focus_shift']
 
-    # for i in range(len(wfs)):
-    #     plt.figure(figsize=(20,4))
-    #     plt.subplot(1,4,1); plot_spatial_from_wf(wfs[i]); plt.title(labels[i])
-    #     #plt.subplot(1,4,2); plot_tilt_from_wf(wfs[i],ori='Vertical',type='slice')
-    #     plt.subplot(1,4,2); plot_tilt_from_wf(wfs[i],ori='Horizontal',type='slice')
-    #     plt.subplot(1,4,3); plot_tprofile_from_wf(wfs[i], if_short=if_short)
-    #     plt.subplot(1,4,4); plot_spectrum_from_wf(wfs[i], if_short=if_short); plt.title('{} pts'.format(len(get_axis_ev(wfs[i]))))
+    for i in range(len(wfs)):
+        plt.figure(figsize=(20,4))
+        plt.subplot(1,4,1); plot_spatial_from_wf(wfs[i]); plt.title(labels[i])
+        #plt.subplot(1,4,2); plot_tilt_from_wf(wfs[i],ori='Vertical',type='slice')
+        plt.subplot(1,4,2); plot_tilt_from_wf(wfs[i],ori='Horizontal',type='slice')
+        plt.subplot(1,4,3); plot_tprofile_from_wf(wfs[i], if_short=if_short)
+        plt.subplot(1,4,4); plot_spectrum_from_wf(wfs[i], if_short=if_short); plt.title('{} pts'.format(len(get_axis_ev(wfs[i]))))
 
-    #     plt.savefig('C2_{}x{}H_slit_{}x{}H_{}x{}V_nz{}_{}.png'.format(xRange,xRes,xRange_slit,xRes_slit,yRange,yRes,nz, labels[i]))
+        plt.savefig('C2_{}x{}H_slit_{}x{}H_{}x{}V_nz{}_{}.png'.format(xRange,xRes,xRange_slit,xRes_slit,yRange,yRes,nz, labels[i]))
 
 
 

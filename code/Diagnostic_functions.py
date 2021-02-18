@@ -174,7 +174,7 @@ def plot_spectrum_from_wf(_wfr, if_short=1):
 ####### Fit
 def fit_pulse_position(_wfr):
     # Method to calculate the beam position
-    axis_x, axis_y = get_axis_sp(_wfr)
+    axis_x, axis_y = get_axis_sp(_wfr)       # get spatial axis; pulse is now in time domain
     image = get_intensity(_wfr, domain='t').sum(axis=-1)
     projection_x = image.sum(axis=0)
     projection_y = image.sum(axis=1)

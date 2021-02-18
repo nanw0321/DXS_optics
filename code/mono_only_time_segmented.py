@@ -1,33 +1,27 @@
-#!/usr/bin/env python
-from __future__ import absolute_import, division, print_function #Py 2.*/3.* compatibility
+##### diagnostic
+from Diagnostic_functions import *
 
-import os
-try:
-    __IPYTHON__
-    import sys
-    del sys.argv[1:]
-except:
-    pass
+t_window = 8000e-15  # total time window [s]
+ev_window = 400e-3   # total energy window [eV]
+t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
 
-from srwpy import srwl_bl
-from srwpy import srwlib
-from srwpy import srwlpy
-from srwpy import srwl_uti_smp
-from srwpy import uti_io
-from srwpy.uti_plot import *
-import math
-
-from time import *
-from copy import *
-from array import *
-
-tstart = time()
-
-sigT = 400e-15
-pulseRange = 10
-nx = 100; ny = 100; nz = 100
+sigT = 40e-15        # pulse duration [s]
+pulseRange = int(t_window/sigT)
+nx = 256; ny = 256; nz = 2*int(t_window/t_res/2)
 range_x = 4e-3; range_y = 4e-3
 factor = -1 # factor = 0.5
+d_slit = 20e-6
+
+xRange = 5
+xRes = 0.2
+yRange = 1
+yRes = 1
+
+tRange = 1
+tRes = 1
+
+fRange = 1
+fRes = 1
 
 def rCRL(fCRL, nCRL):
     # calculates the min radius of curvature of each lens
@@ -37,7 +31,13 @@ fCRL0 = 290.; nCRL0 = 1
 fCRL1 = 10.; nCRL1 = 1
 fCRL2 = 10.; nCRL2 = 1
 
+# I/O
+def mkdir(path):
+    if not os.path.exists(path):
+        os.mkdir(path)
+dir_plot = 'plots/'; mkdir(dir_plot)
 
+## define bl
 def set_optics_CC1(v=None):
     el = []
     pp = []
@@ -124,7 +124,7 @@ def set_optics_CC1(v=None):
 def set_optics_CC1_focus(v=None):
     el = []
     pp = []
-    names = ['C2_CRL1', 'CRL1', 'CRL1_Slit', 'Slit']
+    names = ['C2_CRL1', 'CRL1', 'CRL1_Slit']
     for el_name in names:
         if el_name == 'C2_CRL1':
             # C2_CRL1: drift 300.2m
@@ -154,15 +154,23 @@ def set_optics_CC1_focus(v=None):
                 _L=v.op_CRL1_Slit_L,
             ))
             pp.append(v.op_CRL1_Slit_pp)
-        elif el_name == 'Slit':
+    return srwlib.SRWLOptC(el, pp)
+
+
+def set_optics_slit(v=None, xc=0, yc=0):
+    el = []
+    pp = []
+    names = ['Slit']
+    for el_name in names:
+        if el_name == 'Slit':
             # Slit: aperture 320.2m
             el.append(srwlib.SRWLOptA(
                 _shape=v.op_Slit_shape,
                 _ap_or_ob='a',
                 _Dx=v.op_Slit_Dx,
                 _Dy=v.op_Slit_Dy,
-                _x=v.op_Slit_x,
-                _y=v.op_Slit_y,
+                _x=xc,
+                _y=yc,
             ))
             pp.append(v.op_Slit_pp)
     return srwlib.SRWLOptC(el, pp)
@@ -276,7 +284,7 @@ def set_optics_CC2(v=None):
     return srwlib.SRWLOptC(el, pp)
 
 
-
+## Params
 varParam = srwl_bl.srwl_uti_ext_options([
     ['name', 's', 'mono_only', 'simulation name'],
 
@@ -337,98 +345,10 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_r', 'f', 290.0, 'longitudinal position of the first optical element [m]'],
     # Former appParam:
     ['rs_type', 's', 'g', 'source type, (u) idealized undulator, (t), tabulated undulator, (m) multipole, (g) gaussian beam'],
-
-    # # Electron Trajectory
-    # ['tr', '', '', 'calculate electron trajectory', 'store_true'],
-    # ['tr_cti', 'f', 0.0, 'initial time moment (c*t) for electron trajectory calculation [m]'],
-    # ['tr_ctf', 'f', 0.0, 'final time moment (c*t) for electron trajectory calculation [m]'],
-    # ['tr_np', 'f', 10000, 'number of points for trajectory calculation'],
-    # ['tr_mag', 'i', 1, 'magnetic field to be used for trajectory calculation: 1- approximate, 2- accurate'],
-    # ['tr_fn', 's', 'res_trj.dat', 'file name for saving calculated trajectory data'],
-    # ['tr_pl', 's', '', 'plot the resulting trajectiry in graph(s): ""- dont plot, otherwise the string should list the trajectory components to plot'],
-
-    # #Single-Electron Spectrum vs Photon Energy
-    # ['ss', '', '', 'calculate single-e spectrum vs photon energy', 'store_true'],
-    # ['ss_ei', 'f', 100.0, 'initial photon energy [eV] for single-e spectrum vs photon energy calculation'],
-    # ['ss_ef', 'f', 20000.0, 'final photon energy [eV] for single-e spectrum vs photon energy calculation'],
-    # ['ss_ne', 'i', 10000, 'number of points vs photon energy for single-e spectrum vs photon energy calculation'],
-    # ['ss_x', 'f', 0.0, 'horizontal position [m] for single-e spectrum vs photon energy calculation'],
-    # ['ss_y', 'f', 0.0, 'vertical position [m] for single-e spectrum vs photon energy calculation'],
-    # ['ss_meth', 'i', 1, 'method to use for single-e spectrum vs photon energy calculation: 0- "manual", 1- "auto-undulator", 2- "auto-wiggler"'],
-    # ['ss_prec', 'f', 0.01, 'relative precision for single-e spectrum vs photon energy calculation (nominal value is 0.01)'],
-    # ['ss_pol', 'i', 6, 'polarization component to extract after spectrum vs photon energy calculation: 0- Linear Horizontal, 1- Linear Vertical, 2- Linear 45 degrees, 3- Linear 135 degrees, 4- Circular Right, 5- Circular Left, 6- Total'],
-    # ['ss_mag', 'i', 1, 'magnetic field to be used for single-e spectrum vs photon energy calculation: 1- approximate, 2- accurate'],
-    # ['ss_ft', 's', 'f', 'presentation/domain: "f"- frequency (photon energy), "t"- time'],
-    # ['ss_u', 'i', 1, 'electric field units: 0- arbitrary, 1- sqrt(Phot/s/0.1%bw/mm^2), 2- sqrt(J/eV/mm^2) or sqrt(W/mm^2), depending on representation (freq. or time)'],
-    # ['ss_fn', 's', 'res_spec_se.dat', 'file name for saving calculated single-e spectrum vs photon energy'],
-    # ['ss_pl', 's', '', 'plot the resulting single-e spectrum in a graph: ""- dont plot, "e"- show plot vs photon energy'],
-
-    # #Multi-Electron Spectrum vs Photon Energy (taking into account e-beam emittance, energy spread and collection aperture size)
-    # ['sm', '', '', 'calculate multi-e spectrum vs photon energy', 'store_true'],
-    # ['sm_ei', 'f', 100.0, 'initial photon energy [eV] for multi-e spectrum vs photon energy calculation'],
-    # ['sm_ef', 'f', 20000.0, 'final photon energy [eV] for multi-e spectrum vs photon energy calculation'],
-    # ['sm_ne', 'i', 10000, 'number of points vs photon energy for multi-e spectrum vs photon energy calculation'],
-    # ['sm_x', 'f', 0.0, 'horizontal center position [m] for multi-e spectrum vs photon energy calculation'],
-    # ['sm_rx', 'f', 0.001, 'range of horizontal position / horizontal aperture size [m] for multi-e spectrum vs photon energy calculation'],
-    # ['sm_nx', 'i', 1, 'number of points vs horizontal position for multi-e spectrum vs photon energy calculation'],
-    # ['sm_y', 'f', 0.0, 'vertical center position [m] for multi-e spectrum vs photon energy calculation'],
-    # ['sm_ry', 'f', 0.001, 'range of vertical position / vertical aperture size [m] for multi-e spectrum vs photon energy calculation'],
-    # ['sm_ny', 'i', 1, 'number of points vs vertical position for multi-e spectrum vs photon energy calculation'],
-    # ['sm_mag', 'i', 1, 'magnetic field to be used for calculation of multi-e spectrum spectrum or intensity distribution: 1- approximate, 2- accurate'],
-    # ['sm_hi', 'i', 1, 'initial UR spectral harmonic to be taken into account for multi-e spectrum vs photon energy calculation'],
-    # ['sm_hf', 'i', 15, 'final UR spectral harmonic to be taken into account for multi-e spectrum vs photon energy calculation'],
-    # ['sm_prl', 'f', 1.0, 'longitudinal integration precision parameter for multi-e spectrum vs photon energy calculation'],
-    # ['sm_pra', 'f', 1.0, 'azimuthal integration precision parameter for multi-e spectrum vs photon energy calculation'],
-    # ['sm_meth', 'i', -1, 'method to use for spectrum vs photon energy calculation in case of arbitrary input magnetic field: 0- "manual", 1- "auto-undulator", 2- "auto-wiggler", -1- dont use this accurate integration method (rather use approximate if possible)'],
-    # ['sm_prec', 'f', 0.01, 'relative precision for spectrum vs photon energy calculation in case of arbitrary input magnetic field (nominal value is 0.01)'],
-    # ['sm_nm', 'i', 1, 'number of macro-electrons for calculation of spectrum in case of arbitrary input magnetic field'],
-    # ['sm_na', 'i', 5, 'number of macro-electrons to average on each node at parallel (MPI-based) calculation of spectrum in case of arbitrary input magnetic field'],
-    # ['sm_ns', 'i', 5, 'saving periodicity (in terms of macro-electrons) for intermediate intensity at calculation of multi-electron spectrum in case of arbitrary input magnetic field'],
-    # ['sm_type', 'i', 1, 'calculate flux (=1) or flux per unit surface (=2)'],
-    # ['sm_pol', 'i', 6, 'polarization component to extract after calculation of multi-e flux or intensity: 0- Linear Horizontal, 1- Linear Vertical, 2- Linear 45 degrees, 3- Linear 135 degrees, 4- Circular Right, 5- Circular Left, 6- Total'],
-    # ['sm_rm', 'i', 1, 'method for generation of pseudo-random numbers for e-beam phase-space integration: 1- standard pseudo-random number generator, 2- Halton sequences, 3- LPtau sequences (to be implemented)'],
-    # ['sm_fn', 's', 'res_spec_me.dat', 'file name for saving calculated milti-e spectrum vs photon energy'],
-    # ['sm_pl', 's', '', 'plot the resulting spectrum-e spectrum in a graph: ""- dont plot, "e"- show plot vs photon energy'],
-    # #to add options for the multi-e calculation from "accurate" magnetic field
-
-    # #Power Density Distribution vs horizontal and vertical position
-    # ['pw', '', '', 'calculate SR power density distribution', 'store_true'],
-    # ['pw_x', 'f', 0.0, 'central horizontal position [m] for calculation of power density distribution vs horizontal and vertical position'],
-    # ['pw_rx', 'f', 0.015, 'range of horizontal position [m] for calculation of power density distribution vs horizontal and vertical position'],
-    # ['pw_nx', 'i', 100, 'number of points vs horizontal position for calculation of power density distribution'],
-    # ['pw_y', 'f', 0.0, 'central vertical position [m] for calculation of power density distribution vs horizontal and vertical position'],
-    # ['pw_ry', 'f', 0.015, 'range of vertical position [m] for calculation of power density distribution vs horizontal and vertical position'],
-    # ['pw_ny', 'i', 100, 'number of points vs vertical position for calculation of power density distribution'],
-    # ['pw_pr', 'f', 1.0, 'precision factor for calculation of power density distribution'],
-    # ['pw_meth', 'i', 1, 'power density computation method (1- "near field", 2- "far field")'],
-    # ['pw_zst', 'f', 0., 'initial longitudinal position along electron trajectory of power density distribution (effective if pow_sst < pow_sfi)'],
-    # ['pw_zfi', 'f', 0., 'final longitudinal position along electron trajectory of power density distribution (effective if pow_sst < pow_sfi)'],
-    # ['pw_mag', 'i', 1, 'magnetic field to be used for power density calculation: 1- approximate, 2- accurate'],
-    # ['pw_fn', 's', 'res_pow.dat', 'file name for saving calculated power density distribution'],
-    # ['pw_pl', 's', '', 'plot the resulting power density distribution in a graph: ""- dont plot, "x"- vs horizontal position, "y"- vs vertical position, "xy"- vs horizontal and vertical position'],
-
-
-    
-    # ['w_mag', 'i', 1, 'magnetic field to be used for calculation of intensity distribution vs horizontal and vertical position: 1- approximate, 2- accurate'],
-
-
-    # ['wm_nm', 'i', 1000, 'number of macro-electrons (coherent wavefronts) for calculation of multi-electron wavefront propagation'],
-    # ['wm_na', 'i', 5, 'number of macro-electrons (coherent wavefronts) to average on each node for parallel (MPI-based) calculation of multi-electron wavefront propagation'],
-    # ['wm_ns', 'i', 5, 'saving periodicity (in terms of macro-electrons / coherent wavefronts) for intermediate intensity at multi-electron wavefront propagation calculation'],
-    # ['wm_ch', 'i', 0, 'type of a characteristic to be extracted after calculation of multi-electron wavefront propagation: #0- intensity (s0); 1- four Stokes components; 2- mutual intensity cut vs x; 3- mutual intensity cut vs y; 40- intensity(s0), mutual intensity cuts and degree of coherence vs X & Y'],
-    # ['wm_ap', 'i', 0, 'switch specifying representation of the resulting Stokes parameters: coordinate (0) or angular (1)'],
-    # ['wm_x0', 'f', 0.0, 'horizontal center position for mutual intensity cut calculation'],
-    # ['wm_y0', 'f', 0.0, 'vertical center position for mutual intensity cut calculation'],
-    # ['wm_ei', 'i', 0, 'integration over photon energy is required (1) or not (0); if the integration is required, the limits are taken from w_e, w_ef'],
-    # ['wm_rm', 'i', 1, 'method for generation of pseudo-random numbers for e-beam phase-space integration: 1- standard pseudo-random number generator, 2- Halton sequences, 3- LPtau sequences (to be implemented)'],
-    # ['wm_am', 'i', 0, 'multi-electron integration approximation method: 0- no approximation (use the standard 5D integration method), 1- integrate numerically only over e-beam energy spread and use convolution to treat transverse emittance'],
-    # ['wm_fni', 's', 'res_int_pr_me.dat', 'file name for saving propagated multi-e intensity distribution vs horizontal and vertical position'],
-    # ['wm_fbk', '', '', 'create backup file(s) with propagated multi-e intensity distribution vs horizontal and vertical position and other radiation characteristics', 'store_true'],
-
     
 #---Beamline optics:
     # CRL: crl
-    ['op_CRL_foc_plane', 'f', 2, 'focalPlane'],
+    ['op_CRL_foc_plane', 'f', 1, 'focalPlane'],
     ['op_CRL_delta', 'f', 3.791135e-06, 'refractiveIndex'],
     ['op_CRL_atten_len', 'f', 0.008387, 'attenuationLength'],
     ['op_CRL_shape', 'f', 1, 'shape'],
@@ -481,7 +401,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C2_psiHBi', 'f', 1.6100412693351052e-07, 'psiHBi'],
     ['op_C2_tc', 'f', 0.01, 'crystalThickness'],
     ['op_C2_uc', 'f', 1, 'useCase'],
-    ['op_C2_ang_as', 'f', -0.6619756915046209, 'asymmetryAngle'],
+    ['op_C2_ang_as', 'f', np.deg2rad(-29.5), 'asymmetryAngle'],
     ['op_C2_nvx', 'f', 0.1589403166091094, 'nvx'],
     ['op_C2_nvy', 'f', 1.079983033869711e-09, 'nvy'],
     ['op_C2_nvz', 'f', -0.9872881928576863, 'nvz'],
@@ -513,7 +433,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
 
     # Slit: aperture
     ['op_Slit_shape', 's', 'r', 'shape'],
-    ['op_Slit_Dx', 'f', 0.0002, 'horizontalSize'],
+    ['op_Slit_Dx', 'f', d_slit, 'horizontalSize'],
     ['op_Slit_Dy', 'f', 0.01, 'verticalSize'],
     ['op_Slit_x', 'f', 0.0, 'horizontalOffset'],
     ['op_Slit_y', 'f', 0.0, 'verticalOffset'],
@@ -549,7 +469,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C3_psiHBi', 'f', 1.6100412693351052e-07, 'psiHBi'],
     ['op_C3_tc', 'f', 0.01, 'crystalThickness'],
     ['op_C3_uc', 'f', 1, 'useCase'],
-    ['op_C3_ang_as', 'f', 0.0, 'asymmetryAngle'],
+    ['op_C3_ang_as', 'f', np.deg2rad(29.5), 'asymmetryAngle'],
     ['op_C3_nvx', 'f', 0.7322282430733594, 'nvx'],
     ['op_C3_nvy', 'f', 4.975415277322606e-09, 'nvy'],
     ['op_C3_nvz', 'f', -0.6810593219725439, 'nvz'],
@@ -575,7 +495,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C4_psiHBi', 'f', 1.6100412693351052e-07, 'psiHBi'],
     ['op_C4_tc', 'f', 0.01, 'crystalThickness'],
     ['op_C4_uc', 'f', 1, 'useCase'],
-    ['op_C4_ang_as', 'f', 0.6619756915046209, 'asymmetryAngle'],
+    ['op_C4_ang_as', 'f', 0., 'asymmetryAngle'],
     ['op_C4_nvx', 'f', -0.9961927321489331, 'nvx'],
     ['op_C4_nvy', 'f', 6.769026714795782e-09, 'nvy'],
     ['op_C4_nvz', 'f', -0.08717821065864992, 'nvz'],
@@ -591,11 +511,12 @@ varParam = srwl_bl.srwl_uti_ext_options([
 
 #---Propagation parameters
 #                               [0][1] [2] [3][4] [5]  [6]  [7]  [8]  [9] [10] [11]
-    ['op_CRL_pp', 'f',          [0, 0, 1.0, 0, 0, 1.0, 3.0, 1.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL'],
+    ['op_CRL_pp', 'f',          [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL'],
     ['op_CRL_C1_pp', 'f',       [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL_C1'],
     ['op_C1_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, -0.997381741513, 6.777e-09, 0.072316399909, 0.072316399909, 6.304e-09], 'C1'],
     ['op_C1_C2_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C1_C2'],
-    ['op_C2_pp', 'f',           [0, 0, 1.0, 0, 0, 10.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.997382667547, 6.777e-09, 0.072303626994, 0.072303626994, -6.304e-09], 'C2'],
+    ['op_C2_pp', 'f',           [0, 0, 1.0, 0, 0, xRange, xRes, yRange, yRes, 0.0, 0.0, 0.0, 0.997382667547, 6.777e-09, 0.072303626994, 0.072303626994, -6.304e-09], 'C2'],
+    # higher resolution after C2, less range (<10), or not resizing range at all since axis shrinks automatically
     ['op_C2_CRL1_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C2_CRL1'],
     ['op_CRL1_pp', 'f',         [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1'],
     ['op_CRL1_Slit_pp', 'f',    [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1_Slit'],
@@ -629,162 +550,8 @@ varParam = srwl_bl.srwl_uti_ext_options([
 ])
 
 
-def save_pulse_data(_wfr, _ec, _xc, _yc, _fnPrefix, _do_integ=True, _do_cuts=True, _do_plot=False, _do_multi_en=False, _nmDir=''):
-
-    sufCA = ''
-    labelPosAng = ''
-    unitPosAng = ''
-    unitPer = ''
-    mesCA = ''
-    if(_wfr.presCA == 0):
-        sufCA = 'c'
-        labelPosAng = 'Position'
-        unitPosAng = 'm'
-        unitPer = 'mm'
-        mesCA = 'coordinate'
-    else:
-        sufCA = 'a'
-        labelPosAng = 'Angle'
-        unitPosAng = 'rad'
-        unitPer = 'mrad'
-        mesCA = 'angular'
-
-    sufTE = ''
-    labelArg1 = ''
-    unitArg1 = ''
-    #prefSpec = ''
-    onAxSpec = ''
-    integSpec = ''
-    onAxFN = ''
-    integFN = ''
-    unitPow = ''
-    mesFT = ''
-    if(_wfr.presFT == 0):
-        sufTE = 'e' #'_e_'
-        labelArg1 = 'Photon Energy'
-        unitArg1 = 'eV'
-        unitPow = 'J/eV'
-        #prefSpec = 'Spectral '
-        onAxSpec = 'Spectral Fluence'
-        integSpec = 'Spectral Energy'
-        onAxFN = 'spec_fluence'
-        integFN = 'spec_en'       
-        mesFT = 'frequency'
-    else:
-        sufTE = 't' #'_t_'
-        labelArg1 = 'Time'
-        unitArg1 = 's'
-        unitPow = 'W'
-        onAxSpec = 'Power Density'
-        integSpec = 'Power'
-        onAxFN = 'pow_den'
-        integFN = 'pow'       
-        mesFT = 'time'
-
-    print('Saving ' + mesFT + '-' + mesCA + '-domain radiation characteristics to files (for viewing/debugging): ', end='')
-
-    t0 = time()
-
-    fnPrefixTot = _fnPrefix + '_' + sufTE + sufCA + '_'
-
-    intType = 0 #5 #0
-    #0- "Single-Electron" Intensity; 
-    #5- Re(E): Real part of Single-Electron Electric Field;
-    #6- Im(E): Imaginary part of Single-Electron Electric Field;
-    #7- "Single-Electron" Intensity, integrated over Time or Photon Energy (i.e. Fluence);
-
-    meshP = deepcopy(_wfr.mesh)
-    meshPDvsXY = deepcopy(meshP); meshPDvsXY.ne = 1
-    meshPDvsXY.eStart = _ec; meshPDvsXY.eFin = _ec
-
-    arPDvsT = None; arPvsT = None
-    if(meshP.ne > 1):
-
-        arPDvsT = array('f', [0]*meshP.ne)
-        meshPvsT = deepcopy(meshP); meshPvsT.nx = 1; meshPvsT.ny = 1
-        meshPvsT.xStart = _xc; meshPvsT.xFin = _xc
-        meshPvsT.yStart = _yc; meshPvsT.yFin = _yc
-
-        if(_do_cuts):
-            #Saving On-Axis (Spectral) Power Density vs Time (or Photon Energy)
-            srwlpy.CalcIntFromElecField(arPDvsT, _wfr, 6, intType, 0, _ec, _xc, _yc)
-            srwlib.srwl_uti_save_intens_ascii(arPDvsT, meshPvsT, os.path.join(os.getcwd(), _nmDir, fnPrefixTot + onAxFN + '.dat'),
-                                              _arLabels=[labelArg1, 'Horizontal ' + labelPosAng, 'Vertical ' + labelPosAng, onAxSpec],
-                                              _arUnits=[unitArg1, unitPosAng, unitPosAng, unitPow + '/' + unitPer + '^2'])
-            if(_do_plot):
-                uti_plot1d(arPDvsT, [meshPvsT.eStart, meshPvsT.eFin, meshPvsT.ne],
-                           labels=[labelArg1, onAxSpec, onAxSpec + ' (' + _fnPrefix + ')'],
-                           units=[unitArg1, unitPow + '/' + unitPer + '^2'])
-
-        if(_do_integ):
-            #Saving (Spectral) Power vs Time (or Photon Energy)
-            arPvsT = array('f', [0]*meshP.ne)
-            srwlpy.CalcIntFromElecField(arPvsT, _wfr, 6, 2, 0, _ec, _xc, _yc)
-            srwlib.srwl_uti_save_intens_ascii(arPvsT, meshPvsT, os.path.join(os.getcwd(), _nmDir, fnPrefixTot + integFN + '.dat'),
-                                              _arLabels=[labelArg1, 'Horizontal ' + labelPosAng, 'Vertical ' + labelPosAng, integSpec],
-                                              _arUnits=[unitArg1, unitPosAng, unitPosAng, unitPow])
-##        #Saving Input Power Density vs T (or E) & X & Y
-##        arPvsEXY = array('f', [0]*meshP.ne*meshP.nx*meshP.ny)
-##        srwlpy.CalcIntFromElecField(arPvsEXY, _wfr, 6, intType, 6, _ec, _xc, _yc)
-##        srwlib.srwl_uti_save_intens_ascii(arPvsEXY, meshP, os.path.join(os.getcwd(), _nmDir, fnPrefixTot + onAxFN + '_3d.dat'),
-##                                          _arLabels=[labelArg1, 'Horizontal ' + labelPosAng, 'Vertical ' + labelPosAng, onAxSpec],
-##                                          _arUnits=[unitArg1, unitPosAng, unitPosAng, unitPow + '/' + unitPer + '^2'])
-            #Saving Fluence (i.e. Power Density Integrated over Time or Spectral Fluence Integrated over Photon Energy) vs X&Y
-            arFvsXY = array('f', [0]*meshP.nx*meshP.ny)
-            srwlpy.CalcIntFromElecField(arFvsXY, _wfr, 6, 7, 3, _ec, _xc, _yc)
-            srwlib.srwl_uti_save_intens_ascii(arFvsXY, meshPDvsXY, os.path.join(os.getcwd(), _nmDir, fnPrefixTot + 'fluence_xy.dat'),
-                                              _arLabels=[labelArg1, 'Horizontal ' + labelPosAng, 'Vertical ' + labelPosAng, 'Fluence'],
-                                              _arUnits=[unitArg1, unitPosAng, unitPosAng, 'J/' + unitPer + '^2'])
-            if(_do_plot):
-                uti_plot1d(arPvsT, [meshPvsT.eStart, meshPvsT.eFin, meshPvsT.ne],
-                           labels=[labelArg1, integSpec, integSpec + ' (' + _fnPrefix + ')'],
-                           units=[unitArg1, unitPow])
-                uti_plot2d1d(arFvsXY,
-                             [meshPDvsXY.xStart, meshPDvsXY.xFin, meshPDvsXY.nx],
-                             [meshPDvsXY.yStart, meshPDvsXY.yFin, meshPDvsXY.ny], x=0, y=0,
-                             labels=['Horizontal ' + labelPosAng, 'Vertical ' + labelPosAng, 'Fluence (' + _fnPrefix + ')'],
-                             units=[unitPosAng, unitPosAng, 'J/' + unitPer + '^2'])
-
-        #Saving (Spectral) Power Density In Pulse (Spectrum) vs X and Y at different Energies or Time moments
-        eSaveStepFact = 1 #5 #10 #to steer
-        eStep = (meshP.eFin - meshP.eStart)/(meshP.ne - 1)
-        eStepSave = eStep*eSaveStepFact
-        arPDvsXY = array('f', [0]*meshP.nx*meshP.ny)
-        ePh = meshP.eStart
-        if(_do_multi_en and _do_cuts):
-        #if(_do_multi_en == True):
-            for ie in range(meshP.ne):
-                srwlpy.CalcIntFromElecField(arPDvsXY, _wfr, 6, intType, 3, ePh, 0, 0)
-                meshPDvsXY.eStart = ePh
-                meshPDvsXY.eFin = ePh
-                #srwl_uti_save_intens_ascii(arPDvsXY, meshPDvsXY, os.path.join(os.getcwd(), _nmDir, fnPrefixTot + 'pow_den_xy_' + repr(round(ePh, 5)) + unitArg1 + '.dat'),
-                srwlib.srwl_uti_save_intens_ascii(arPDvsXY, meshPDvsXY, os.path.join(os.getcwd(), _nmDir, fnPrefixTot + 'pow_den_xy_' + repr(ePh) + unitArg1 + '.dat'),
-                                                  _arLabels=[labelArg1, 'Horizontal ' + labelPosAng, 'Vertical ' + labelPosAng, onAxSpec],
-                                                  _arUnits=[unitArg1, unitPosAng, unitPosAng, unitPow + '/' + unitPer + '^2'])
-                ePh += eStepSave
-                if(ePh > meshP.eFin): break
-
-    if(_do_cuts):
-        #Saving Power Density (/ Spectral Fluence) In Pulse (/ Spectrum) Center vs X and Y
-        arPDvsXY = array('f', [0]*meshP.nx*meshP.ny)
-        srwlpy.CalcIntFromElecField(arPDvsXY, _wfr, 6, intType, 3, _ec, 0, 0)
-        srwlib.srwl_uti_save_intens_ascii(arPDvsXY, meshPDvsXY, os.path.join(os.getcwd(), _nmDir, fnPrefixTot + onAxFN + '_xy.dat'),
-                                          _arLabels=[labelArg1, 'Horizontal ' + labelPosAng, 'Vertical ' + labelPosAng, onAxSpec],
-                                          _arUnits=[unitArg1, unitPosAng, unitPosAng, unitPow + '/' + unitPer + '^2'])
-        if(_do_plot):
-            uti_plot2d1d(arPDvsXY,
-                         [meshPDvsXY.xStart, meshPDvsXY.xFin, meshPDvsXY.nx],
-                         [meshPDvsXY.yStart, meshPDvsXY.yFin, meshPDvsXY.ny], x=0, y=0,
-                         labels=['Horizontal ' + labelPosAng, 'Vertical ' + labelPosAng, onAxSpec + ' (' + _fnPrefix + ')'],
-                         units=[unitPosAng, unitPosAng, unitPow + '/' + unitPer + '^2'])
-
-    print('done in', round(time() - t0), 's')
-
-
-def main(_do_integ=True, _do_cuts=True):
-    #_do_integ #produce integrated pulse characteristics
-    #_do_cuts #produce cuts of 3D pulse characteristics
-    
+def main():
+    tstart = time()
     v = srwl_bl.srwl_uti_parse_options(varParam, use_sys_argv=True)
     
     #Necessary for initial wavefront calculation without ropagation
@@ -800,29 +567,24 @@ def main(_do_integ=True, _do_cuts=True):
     xc = v.w_x
     yc = v.w_y
     
-    #Initial radiaiton in Time-Coordinate domain
-    save_pulse_data(wfr, tc, xc, yc, _fnPrefix='incident', _do_integ=_do_integ, _do_cuts=_do_cuts, _do_plot=True, _do_multi_en=False, _nmDir=v.fdir)
-    wfr0 = deepcopy(wfr)    # preserve copy of input before resizing
-    
-    print('Resizing in Time domain: ', end='')
-    t0 = time();
-    srwlpy.ResizeElecField(wfr, 't', [0, 2., 2])
-    print('done in', round(time() - t0, 3), 's')
+    # if tRange != 1 or tRes != 1:
+    #     print('Resizing in Time domain: ', end='')
+    #     t0 = time();
+    #     srwlpy.ResizeElecField(wfr, 't', [0, tRange, tRes])
+    #     print('done in', round(time() - t0, 3), 's')
     
     print('Switching from Time to Frequency domain: ', end='')
     t0 = time();
     srwlpy.SetRepresElecField(wfr, 'f');
     print('done in', round(time() - t0, 3), 's')
+
+    # if fRange != 1 or fRes != 1:
+    # print('Resizing in Frequency domain: ', end='')
+    # t0 = time();
+    # srwlpy.ResizeElecField(wfr, 'f', [0, fRange, fRes])
+    # print('done in', round(time() - t0, 3), 's')
     
-#     print('Resizing in Frequency domain: ', end='')
-#     t0 = time();
-#     srwlpy.ResizeElecField(wfr, 'f', [0, 0.07, 1])
-#     print('done in', round(time() - t0, 3), 's')
-    
-    ec = 0.5*(wfr.mesh.eStart + wfr.mesh.eFin) # central photon energy
-    
-    save_pulse_data(wfr, ec, xc, yc, _fnPrefix='incident_resize', _do_integ=_do_integ, _do_cuts=_do_cuts, _do_plot=True, _do_multi_en=False, _nmDir=v.fdir)
-    wfr0_r = deepcopy(wfr)    # preserve copy of input after resizing
+    wfr0 = deepcopy(wfr)    # preserve copy of input after resizing
     
     print('Propagating through CC1: ', end='')
     t0 = time()
@@ -830,17 +592,20 @@ def main(_do_integ=True, _do_cuts=True):
     srwlpy.PropagElecField(wfr, bl1)
     print('done in', round(time() - t0, 3), 's')
     wfr1 = deepcopy(wfr)      # preserve copy of beam after CC1
-    
-#     opOrientData = bl1.get_orient_lab_fr(_e=v.gbm_ave, _r=v.op_r) 
-#     uti_io.write_ascii_data_rows(_file_path=os.path.join(v.fdir, 'orient1.dat'), _rows=opOrientData, _str_sep='\t', 
-#                                  _str_head='#Types of optical elements and Cartesian coordinates of their center positions and base vectors (t, s, n) in the Lab frame')
-    
+
     print('Propagating to focus: ', end='')
     t0 = time()
     bl2 = set_optics_CC1_focus(v)
     srwlpy.PropagElecField(wfr, bl2)
     print('done in', round(time() - t0, 3), 's')
-    wfr2 = deepcopy(wfr)      # preserve copy of beam at focus
+
+    print('Shift slit to pulse center: ', end='')
+    xc, yc = fit_pulse_position(wfr)
+    srwlpy.SetRepresElecField(wfr, 'f')
+    bl_slit = set_optics_slit(v, xc=xc, yc=0)
+    srwlpy.PropagElecField(wfr, bl_slit)
+    print('done in', round(time() - t0, 3), 's')
+    wfr2 = deepcopy(wfr)      # preserve copy of beam at focus after shifted slit
     
     print('Propagating to CC2: ', end='')
     t0 = time()
@@ -855,11 +620,6 @@ def main(_do_integ=True, _do_cuts=True):
     srwlpy.PropagElecField(wfr, bl4)
     print('done in', round(time() - t0, 3), 's')
 
-#     print('Resizing in Frequency domain: ', end='')
-#     t0 = time();
-#     srwlpy.ResizeElecField(wfr, 'f', [0, 3., 1.])
-#     print('done in', round(time() - t0, 3), 's')
-
     print('Switching from Frequency to Time domain: ', end='')
     t0 = time();
     srwlpy.SetRepresElecField(wfr0, 't')
@@ -869,14 +629,23 @@ def main(_do_integ=True, _do_cuts=True):
     srwlpy.SetRepresElecField(wfr, 't')
     print('done in', round(time() - t0, 3), 's')
     
-    save_pulse_data(wfr1, tc, xc, yc, _fnPrefix='after_C2', _do_integ=_do_integ, _do_cuts=_do_cuts, _do_plot=True, _do_multi_en=False, _nmDir=v.fdir)
-    save_pulse_data(wfr2, tc, xc, yc, _fnPrefix='focus', _do_integ=_do_integ, _do_cuts=_do_cuts, _do_plot=True, _do_multi_en=False, _nmDir=v.fdir)
-    save_pulse_data(wfr3, tc, xc, yc, _fnPrefix='before_C3', _do_integ=_do_integ, _do_cuts=_do_cuts, _do_plot=True, _do_multi_en=False, _nmDir=v.fdir)
-    save_pulse_data(wfr, tc, xc, yc, _fnPrefix='ouptut', _do_integ=_do_integ, _do_cuts=_do_cuts, _do_plot=True, _do_multi_en=False, _nmDir=v.fdir)
-    
     print('\n\n\n\n everything lasted: {}s'.format(time()-tstart))
     #uti_plot_show()
-
+    return wfr0, wfr1, wfr2, wfr3, wfr
 
 if __name__ == '__main__':
-    main(_do_integ=True, _do_cuts=False)
+    print(xRange, xRes, yRange, yRes, d_slit, fCRL1, sigT)
+    wfs = main()
+    ## Plots
+    if_short = 0
+    labels = ['input', 'after C2', 'focus_shifted', 'before C3', 'output']
+
+    for i in range(len(wfs)):
+        plt.figure(figsize=(20,4))
+        plt.subplot(1,4,1); plot_spatial_from_wf(wfs[i]); plt.title(labels[i])
+        #plt.subplot(1,4,2); plot_tilt_from_wf(wfs[i],ori='Vertical',type='slice')
+        plt.subplot(1,4,2); plot_tilt_from_wf(wfs[i],ori='Horizontal',type='slice')
+        plt.subplot(1,4,3); plot_tprofile_from_wf(wfs[i], if_short=if_short)
+        plt.subplot(1,4,4); plot_spectrum_from_wf(wfs[i], if_short=if_short); plt.title('{} pts'.format(len(get_axis_ev(wfs[i]))))
+
+        plt.savefig(dir_plot+'{}x{}H_{}x{}V_{}_{}.png'.format(xRange,xRes,yRange,yRes, i+1, labels[i]))

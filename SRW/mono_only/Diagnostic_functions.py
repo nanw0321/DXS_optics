@@ -25,7 +25,7 @@ from uti_plot import *
 from util_Matt import Util
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')   # allows plot without X11 forwarding
+#matplotlib.use('Agg')   # allows plot without X11 forwarding
 import matplotlib.pyplot as plt
 
 
