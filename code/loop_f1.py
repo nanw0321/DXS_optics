@@ -1,21 +1,20 @@
 ##### diagnostic
 from Diagnostic_functions import *
-from tqdm import tqdm
 import h5py
 
 t_window = 8000e-15  # total time window [s]
 ev_window = 100e-3   # total energy window [eV]
 t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
 
-sigT = 200e-15        # pulse duration [s]
+sigT = 100e-15        # pulse duration [s]
 pulseRange = int(t_window/sigT)
 nx = 256; ny = 256; nz = 2*int(t_window/t_res/2)
 range_x = 4e-3; range_y = 4e-3
 factor = -1 # factor = 0.5
-d_slit = 20e-6
+d_slit = 10e-6
 
 xRange = 5
-xRes = 0.2
+xRes = 0.4
 yRange = 1
 yRes = 1
 
@@ -38,7 +37,7 @@ def mkdir(path):
     if not os.path.exists(path):
         os.mkdir(path)
 dir_output = 'output/'; mkdir(dir_output)
-dir_plot = dir_output+'{}fs'.format(round(sigT*1e15)); mkdir(dir_plot)
+dir_plot = dir_output+'{}fs/'.format(round(sigT*1e15)); mkdir(dir_plot)
 
 ## define bl
 def set_optics_CC1(v=None):
@@ -635,8 +634,8 @@ def main(fCRL=10., nCRL=1):
 if __name__ == '__main__':
     print(xRange, xRes, yRange, yRes, d_slit, fCRL1, sigT)
     f1_list = np.linspace(10,5,20)
-    for irep, f1 in tqdm(enumerate(f1_list)):
-        if irep == 1: break
+    for irep, f1 in enumerate(f1_list):
+        # if irep > 0: continue
         dir_case = dir_plot+'rep_{}_f{}/'.format(irep,round(f1,2)); mkdir(dir_case)
         wfs = main(fCRL=f1, nCRL=1)
         labels = np.array(['input', 'after C2', 'focus', 'focus open', 'before C3', 'before C3 open', 'output', 'output open'])

@@ -9,24 +9,41 @@ try:
 except:
     pass
 
-from srwpy import srwl_bl
-from srwpy import srwlib
-from srwpy import srwlpy
-from srwpy import srwl_uti_smp
-from srwpy import uti_io
-from srwpy.uti_plot import *
+# from srwpy import srwl_bl
+# from srwpy import srwlib
+# from srwpy import srwlpy
+# from srwpy import srwl_uti_smp
+# from srwpy import uti_io
+# from srwpy.uti_plot import *
+# import math
+
+# from time import *
+# from copy import *
+# from array import *
+
+# from util_Matt import Util
+# import numpy as np
+# import matplotlib
+# matplotlib.use('Agg')   # allows plot without X11 forwarding
+# import matplotlib.pyplot as plt
+
+import srwl_bl
+import srwlib
+import srwlpy
+import srwl_uti_smp
+import uti_io
 import math
 
 from time import *
 from copy import *
 from array import *
+from uti_plot import *
 
 from util_Matt import Util
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')   # allows plot without X11 forwarding
+#matplotlib.use('Agg')   # allows plot without X11 forwarding
 import matplotlib.pyplot as plt
-
 
 ####### get info from SRW wavefront
 def get_axis_sp(_wfr):
