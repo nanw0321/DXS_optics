@@ -37,7 +37,8 @@ def mkdir(path):
     if not os.path.exists(path):
         os.mkdir(path)
 dir_output = 'output/'; mkdir(dir_output)
-dir_plot = dir_output+'{}fs/'.format(round(sigT*1e15)); mkdir(dir_plot)
+dir_type = dir_output+'f1_scan/'; mkdir(dir_type)
+dir_plot = dir_type+'{}fs/'.format(round(sigT*1e15)); mkdir(dir_plot)
 
 ## define bl
 def set_optics_CC1(v=None):
@@ -123,7 +124,7 @@ def set_optics_CC1(v=None):
     return srwlib.SRWLOptC(el, pp)
 
 
-def set_optics_CC1_focus(v=None, fCRL=10., nCRL=1):
+def set_optics_CC1_focus(v=None, f1=10.):
     el = []
     pp = []
     names = ['C2_CRL1', 'CRL1', 'CRL1_Slit']
@@ -131,7 +132,8 @@ def set_optics_CC1_focus(v=None, fCRL=10., nCRL=1):
         if el_name == 'C2_CRL1':
             # C2_CRL1: drift 300.2m
             el.append(srwlib.SRWLOptD(
-                _L=v.op_C2_CRL1_L,
+                # _L=v.op_C2_CRL1_L,
+                _L=f1,
             ))
             pp.append(v.op_C2_CRL1_pp)
         elif el_name == 'CRL1':
@@ -143,8 +145,8 @@ def set_optics_CC1_focus(v=None, fCRL=10., nCRL=1):
                 _shape=v.op_CRL1_shape,
                 _apert_h=v.op_CRL1_apert_h,
                 _apert_v=v.op_CRL1_apert_v,
-                _r_min=rCRL(fCRL, nCRL),
-                _n=nCRL,
+                _r_min=v.op_CRL1_r_min,
+                _n=v.op_CRL1_n,
                 _wall_thick=v.op_CRL1_wall_thick,
                 _xc=v.op_CRL1_x,
                 _yc=v.op_CRL1_y,
@@ -178,7 +180,7 @@ def set_optics_slit(v=None, xc=0, yc=0):
     return srwlib.SRWLOptC(el, pp)
 
 
-def set_optics_focus_CC2(v=None, fCRL=10., nCRL=1):
+def set_optics_focus_CC2(v=None, f1=10.):
     el = []
     pp = []
     names = ['Slit_CRL2', 'CRL2', 'CRL2_C3']
@@ -198,8 +200,8 @@ def set_optics_focus_CC2(v=None, fCRL=10., nCRL=1):
                 _shape=v.op_CRL2_shape,
                 _apert_h=v.op_CRL2_apert_h,
                 _apert_v=v.op_CRL2_apert_v,
-                _r_min=rCRL(fCRL, nCRL),
-                _n=nCRL,
+                _r_min=v.op_CRL2_r_min,
+                _n=v.op_CRL2_n,
                 _wall_thick=v.op_CRL2_wall_thick,
                 _xc=v.op_CRL2_x,
                 _yc=v.op_CRL2_y,
@@ -208,7 +210,8 @@ def set_optics_focus_CC2(v=None, fCRL=10., nCRL=1):
         elif el_name == 'CRL2_C3':
             # CRL2_C3: drift 330.2m
             el.append(srwlib.SRWLOptD(
-                _L=v.op_CRL2_C3_L,
+                # _L=v.op_CRL2_C3_L,
+                _L=f1,
             ))
             pp.append(v.op_CRL2_C3_pp)
     return srwlib.SRWLOptC(el, pp)
@@ -552,7 +555,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
 ])
 
 
-def main(fCRL=10., nCRL=1):
+def main(f1=10.):
     tstart = time()
     v = srwl_bl.srwl_uti_parse_options(varParam, use_sys_argv=True)
     
@@ -597,7 +600,7 @@ def main(fCRL=10., nCRL=1):
 
     print('Propagating to focus: ', end='')
     t0 = time()
-    bl2 = set_optics_CC1_focus(v, fCRL, nCRL)
+    bl2 = set_optics_CC1_focus(v, f1)
     srwlpy.PropagElecField(wfr, bl2)
     print('done in', round(time() - t0, 3), 's')
     wfr_open = deepcopy(wfr)   # duplicate beam at focus for open slit propagation
@@ -613,7 +616,7 @@ def main(fCRL=10., nCRL=1):
     
     print('Propagating to CC2: ', end='')
     t0 = time()
-    bl3 = set_optics_focus_CC2(v, fCRL, nCRL)
+    bl3 = set_optics_focus_CC2(v, f1)
     srwlpy.PropagElecField(wfr, bl3)
     srwlpy.PropagElecField(wfr_open, bl3)
     print('done in', round(time() - t0, 3), 's')
@@ -632,12 +635,12 @@ def main(fCRL=10., nCRL=1):
     return wfr0, wfr1, wfr2, wfr2_open, wfr3, wfr3_open, wfr, wfr_open
 
 if __name__ == '__main__':
-    print(xRange, xRes, yRange, yRes, d_slit, fCRL1, sigT)
+    print(xRange, xRes, yRange, yRes, d_slit, sigT)
     f1_list = np.linspace(10,5,20)
     for irep, f1 in enumerate(f1_list):
-        # if irep > 0: continue
+        if irep <3: continue
         dir_case = dir_plot+'rep_{}_f{}/'.format(irep,round(f1,2)); mkdir(dir_case)
-        wfs = main(fCRL=f1, nCRL=1)
+        wfs = main(f1=f1)
         labels = np.array(['input', 'after C2', 'focus', 'focus open', 'before C3', 'before C3 open', 'output', 'output open'])
 
         ## Plots

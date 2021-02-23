@@ -181,11 +181,12 @@ def plot_tilt_from_wf(_wfr, ori='Vertical', type='sum', if_log=0):
 
 def plot_spectrum_from_wf(_wfr, if_short=1):
     aw, axis_ev, int0 = get_spectrum(_wfr)
+    ev_cent = axis_ev[int(len(axis_ev)/2)]
     if if_short == 1:
         axis_ev = axis_ev[aw]
         int0 = int0[aw]
-    plt.plot(axis_ev, int0)
-    plt.xlabel('photon energy (eV)')
+    plt.plot( (axis_ev-ev_cent)*1e3, int0)
+    plt.xlabel('photon energy (meV) + {}eV'.format(ev_cent))
     plt.ylabel('intensity (a.u.)')
 
 ####### Fit
