@@ -38,3 +38,7 @@ def main():
 ### so should be more stable than LCLS-I, but will never reach the stability of a synchrotron
 
 ### Won't have LCLS-II data by the design review (end of year), so need a way to simulate beam fluctuations.
+
+
+### Try a single crystal reflection and see if there's tail lol
+### Can have a weekly meeting about XPCS modelling.

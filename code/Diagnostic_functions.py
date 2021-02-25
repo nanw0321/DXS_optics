@@ -65,7 +65,7 @@ def get_axis_t(_wfr):
     # get axis in time (s); this leaves the pulse in time domain
     srwlpy.SetRepresElecField(_wfr, 't')
     mesh_temp = deepcopy(_wfr.mesh)
-    axis_t = np.linspace(mesh_temp.eStart, mesh_temp.eFin, mesh_temp.ne)
+    axis_t = np.linspace(mesh_temp.eFin, mesh_temp.eStart, mesh_temp.ne)
     return axis_t
 
 def get_intensity(_wfr, domain='t', polarization='total'):
@@ -148,12 +148,16 @@ def plot_spatial_from_wf(_wfr):
 def plot_tprofile_from_wf(_wfr, if_short=1):
     # plot temporal profile (intensity vs time), if_short then only plot slices with > 1% intensity
     aw, axis_t, int0 = get_tprofile(_wfr)
+    trange = (axis_t.max() - axis_t.min())*1e15
+    npts = len(axis_t)
+
     if if_short == 1:
         axis_t = axis_t[aw]
         int0 = int0[aw]
     plt.plot(axis_t*1e15, int0)
     plt.xlabel('time (fs)')
     plt.ylabel('intensity (a.u.)')
+    plt.title('{} fs/{} pts'.format(round(trange,2), npts))
 
 def plot_tilt_from_wf(_wfr, ori='Vertical', type='sum', if_log=0):
     # plot wavefront tilt (y or x vs time)
@@ -168,7 +172,7 @@ def plot_tilt_from_wf(_wfr, ori='Vertical', type='sum', if_log=0):
         if if_log == 1:
             tilt = np.log(tilt)
         plt.imshow(tilt, cmap='jet',
-                  extent = [axis_t.min()*1e15, axis_t.max()*1e15, axis_sp.max()*1e6, axis_sp.min()*1e6])
+                  extent = [axis_t.max()*1e15, axis_t.min()*1e15, axis_sp.max()*1e6, axis_sp.min()*1e6])
         plt.colorbar()
         if if_log == 1:
             cmin = np.max(tilt)-10
@@ -181,13 +185,17 @@ def plot_tilt_from_wf(_wfr, ori='Vertical', type='sum', if_log=0):
 
 def plot_spectrum_from_wf(_wfr, if_short=1):
     aw, axis_ev, int0 = get_spectrum(_wfr)
+    ev_range = (axis_ev.max() - axis_ev.min())*1e3
+    npts = len(axis_ev)
     ev_cent = axis_ev[int(len(axis_ev)/2)]
+    
     if if_short == 1:
         axis_ev = axis_ev[aw]
         int0 = int0[aw]
     plt.plot( (axis_ev-ev_cent)*1e3, int0)
     plt.xlabel('photon energy (meV) + {}eV'.format(ev_cent))
     plt.ylabel('intensity (a.u.)')
+    plt.title('{} meV/{} pts'.format(round(ev_range,2), npts))
 
 ####### Fit
 def fit_pulse_position(_wfr):
@@ -258,7 +266,7 @@ def fit_pulse_bandwidth(_wfr):
     centroid, sigE = Util.gaussian_stats(axis_ev, int0)
     fwhm = sigE * 2.355
 
-    return fwhm
+    return centroid, fwhm
 
 def fit_throughput(_wfr0, _wfr1):
     # Method to calculate the throughput at wfr1 relative to wfr0
