@@ -18,7 +18,7 @@ import srwl_uti_smp
 def set_optics(v=None):
     el = []
     pp = []
-    names = ['CRL', 'CRL_C1', 'C1', 'C1_Watchpoint', 'Watchpoint']
+    names = ['CRL', 'CRL_C1', 'C1', 'C1_C2', 'C2', 'C2_C3', 'C3', 'C3_C4', 'C4']
     for el_name in names:
         if el_name == 'CRL':
             # CRL: crl 290.0m
@@ -43,7 +43,7 @@ def set_optics(v=None):
             ))
             pp.append(v.op_CRL_C1_pp)
         elif el_name == 'C1':
-            # C1: crystal 300.0m
+            # C1: crystal 296.3m
             crystal = srwlib.SRWLOptCryst(
                 _d_sp=v.op_C1_d_sp,
                 _psi0r=v.op_C1_psi0r,
@@ -66,21 +66,102 @@ def set_optics(v=None):
             el.append(crystal)
             pp.append(v.op_C1_pp)
 
-        elif el_name == 'C1_Watchpoint':
-            # C1_Watchpoint: drift 300.0m
+        elif el_name == 'C1_C2':
+            # C1_C2: drift 296.3m
             el.append(srwlib.SRWLOptD(
-                _L=v.op_C1_Watchpoint_L,
+                _L=v.op_C1_C2_L,
             ))
-            pp.append(v.op_C1_Watchpoint_pp)
-        elif el_name == 'Watchpoint':
-            # Watchpoint: watch 300.1m
-            pass
+            pp.append(v.op_C1_C2_pp)
+        elif el_name == 'C2':
+            # C2: crystal 302.6m
+            crystal = srwlib.SRWLOptCryst(
+                _d_sp=v.op_C2_d_sp,
+                _psi0r=v.op_C2_psi0r,
+                _psi0i=v.op_C2_psi0i,
+                _psi_hr=v.op_C2_psiHr,
+                _psi_hi=v.op_C2_psiHi,
+                _psi_hbr=v.op_C2_psiHBr,
+                _psi_hbi=v.op_C2_psiHBi,
+                _tc=v.op_C2_tc,
+                _ang_as=v.op_C2_ang_as,
+                _nvx=v.op_C2_nvx,
+                _nvy=v.op_C2_nvy,
+                _nvz=v.op_C2_nvz,
+                _tvx=v.op_C2_tvx,
+                _tvy=v.op_C2_tvy,
+                _uc=v.op_C2_uc,
+                _e_avg=v.op_C2_energy,
+                _ang_roll=v.op_C2_diffractionAngle
+            )
+            el.append(crystal)
+            pp.append(v.op_C2_pp)
+
+        elif el_name == 'C2_C3':
+            # C2_C3: drift 302.6m
+            el.append(srwlib.SRWLOptD(
+                _L=v.op_C2_C3_L,
+            ))
+            pp.append(v.op_C2_C3_pp)
+        elif el_name == 'C3':
+            # C3: crystal 303.0m
+            crystal = srwlib.SRWLOptCryst(
+                _d_sp=v.op_C3_d_sp,
+                _psi0r=v.op_C3_psi0r,
+                _psi0i=v.op_C3_psi0i,
+                _psi_hr=v.op_C3_psiHr,
+                _psi_hi=v.op_C3_psiHi,
+                _psi_hbr=v.op_C3_psiHBr,
+                _psi_hbi=v.op_C3_psiHBi,
+                _tc=v.op_C3_tc,
+                _ang_as=v.op_C3_ang_as,
+                _nvx=v.op_C3_nvx,
+                _nvy=v.op_C3_nvy,
+                _nvz=v.op_C3_nvz,
+                _tvx=v.op_C3_tvx,
+                _tvy=v.op_C3_tvy,
+                _uc=v.op_C3_uc,
+                _e_avg=v.op_C3_energy,
+                _ang_roll=v.op_C3_diffractionAngle
+            )
+            el.append(crystal)
+            pp.append(v.op_C3_pp)
+
+        elif el_name == 'C3_C4':
+            # C3_C4: drift 303.0m
+            el.append(srwlib.SRWLOptD(
+                _L=v.op_C3_C4_L,
+            ))
+            pp.append(v.op_C3_C4_pp)
+        elif el_name == 'C4':
+            # C4: crystal 305.6m
+            crystal = srwlib.SRWLOptCryst(
+                _d_sp=v.op_C4_d_sp,
+                _psi0r=v.op_C4_psi0r,
+                _psi0i=v.op_C4_psi0i,
+                _psi_hr=v.op_C4_psiHr,
+                _psi_hi=v.op_C4_psiHi,
+                _psi_hbr=v.op_C4_psiHBr,
+                _psi_hbi=v.op_C4_psiHBi,
+                _tc=v.op_C4_tc,
+                _ang_as=v.op_C4_ang_as,
+                _nvx=v.op_C4_nvx,
+                _nvy=v.op_C4_nvy,
+                _nvz=v.op_C4_nvz,
+                _tvx=v.op_C4_tvx,
+                _tvy=v.op_C4_tvy,
+                _uc=v.op_C4_uc,
+                _e_avg=v.op_C4_energy,
+                _ang_roll=v.op_C4_diffractionAngle
+            )
+            el.append(crystal)
+            pp.append(v.op_C4_pp)
+
     pp.append(v.op_fin_pp)
     return srwlib.SRWLOptC(el, pp)
 
 
 varParam = srwl_bl.srwl_uti_ext_options([
-    ['name', 's', 'Single_crystal_asymmetric', 'simulation name'],
+    ['name', 's', '4_Crystals_only_mpmp', 'simulation name'],
 
 #---Data Folder
     ['fdir', 's', '', 'folder (directory) name for reading-in input and saving output data files'],
@@ -94,9 +175,9 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['gbm_ave', 'f', 9481.0, 'average photon energy [eV]'],
     ['gbm_pen', 'f', 0.001, 'energy per pulse [J]'],
     ['gbm_rep', 'f', 1, 'rep. rate [Hz]'],
-    ['gbm_pol', 'f', 2, 'polarization 1- lin. hor., 2- lin. vert., 3- lin. 45 deg., 4- lin.135 deg., 5- circ. right, 6- circ. left'],
-    ['gbm_sx', 'f', 9.787234042553194e-06, 'rms beam size vs horizontal position [m] at waist (for intensity)'],
-    ['gbm_sy', 'f', 9.787234042553194e-06, 'rms beam size vs vertical position [m] at waist (for intensity)'],
+    ['gbm_pol', 'f', 1, 'polarization 1- lin. hor., 2- lin. vert., 3- lin. 45 deg., 4- lin.135 deg., 5- circ. right, 6- circ. left'],
+    ['gbm_sx', 'f', 9.787229999999999e-06, 'rms beam size vs horizontal position [m] at waist (for intensity)'],
+    ['gbm_sy', 'f', 9.787229999999999e-06, 'rms beam size vs vertical position [m] at waist (for intensity)'],
     ['gbm_st', 'f', 1e-13, 'rms pulse duration [s] (for intensity)'],
     ['gbm_mx', 'f', 0, 'transverse Gauss-Hermite mode order in horizontal direction'],
     ['gbm_my', 'f', 0, 'transverse Gauss-Hermite mode order in vertical direction'],
@@ -222,20 +303,20 @@ varParam = srwl_bl.srwl_uti_ext_options([
 
 #---Beamline optics:
     # CRL: crl
-    ['op_CRL_foc_plane', 'f', 1, 'focalPlane'],
+    ['op_CRL_foc_plane', 'f', 2, 'focalPlane'],
     ['op_CRL_delta', 'f', 3.791135e-06, 'refractiveIndex'],
     ['op_CRL_atten_len', 'f', 0.008387, 'attenuationLength'],
     ['op_CRL_shape', 'f', 1, 'shape'],
     ['op_CRL_apert_h', 'f', 0.004, 'horizontalApertureSize'],
     ['op_CRL_apert_v', 'f', 0.004, 'verticalApertureSize'],
-    ['op_CRL_r_min', 'f', 0.0021989112772, 'tipRadius'],
+    ['op_CRL_r_min', 'f', 0.0021988583, 'tipRadius'],
     ['op_CRL_wall_thick', 'f', 8e-05, 'tipWallThickness'],
     ['op_CRL_x', 'f', 0.0, 'horizontalOffset'],
     ['op_CRL_y', 'f', 0.0, 'verticalOffset'],
     ['op_CRL_n', 'i', 1, 'numberOfLenses'],
 
     # CRL_C1: drift
-    ['op_CRL_C1_L', 'f', 10.0, 'length'],
+    ['op_CRL_C1_L', 'f', 6.300000000000011, 'length'],
 
     # C1: crystal
     ['op_C1_hfn', 's', '', 'heightProfileFile'],
@@ -249,26 +330,106 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C1_psiHBi', 'f', 1.6100412693351052e-07, 'psiHBi'],
     ['op_C1_tc', 'f', 0.01, 'crystalThickness'],
     ['op_C1_uc', 'f', 1, 'useCase'],
-    ['op_C1_ang_as', 'f', -0.08726646259971647, 'asymmetryAngle'],
-    ['op_C1_nvx', 'f', 0.670084358312, 'nvx'],
-    ['op_C1_nvy', 'f', 4.553e-09, 'nvy'],
-    ['op_C1_nvz', 'f', -0.742284953873, 'nvz'],
-    ['op_C1_tvx', 'f', 0.742284953873, 'tvx'],
-    ['op_C1_tvy', 'f', 5.044e-09, 'tvy'],
+    ['op_C1_ang_as', 'f', -0.5148721293383273, 'asymmetryAngle'],
+    ['op_C1_nvx', 'f', 0.301933297485, 'nvx'],
+    ['op_C1_nvy', 'f', 2.052e-09, 'nvy'],
+    ['op_C1_nvz', 'f', -0.953329053302, 'nvz'],
+    ['op_C1_tvx', 'f', 0.953329053302, 'tvx'],
+    ['op_C1_tvy', 'f', 6.478e-09, 'tvy'],
     ['op_C1_ang', 'f', 0.0, 'grazingAngle'],
     ['op_C1_amp_coef', 'f', 1.0, 'heightAmplification'],
     ['op_C1_energy', 'f', 9481.0, 'energy'],
     ['op_C1_diffractionAngle', 'f', -1.57079632, 'diffractionAngle'],
 
-    # C1_Watchpoint: drift
-    ['op_C1_Watchpoint_L', 'f', 0.10000000000002274, 'length'],
+    # C1_C2: drift
+    ['op_C1_C2_L', 'f', 6.300000000000011, 'length'],
+
+    # C2: crystal
+    ['op_C2_hfn', 's', '', 'heightProfileFile'],
+    ['op_C2_dim', 's', 'x', 'orientation'],
+    ['op_C2_d_sp', 'f', 0.9600687344008111, 'dSpacing'],
+    ['op_C2_psi0r', 'f', -1.0873035035585694e-05, 'psi0r'],
+    ['op_C2_psi0i', 'f', 1.8438837339536554e-07, 'psi0i'],
+    ['op_C2_psiHr', 'f', -4.181686438547451e-06, 'psiHr'],
+    ['op_C2_psiHi', 'f', 1.6100412693351052e-07, 'psiHi'],
+    ['op_C2_psiHBr', 'f', -4.181686438547451e-06, 'psiHBr'],
+    ['op_C2_psiHBi', 'f', 1.6100412693351052e-07, 'psiHBi'],
+    ['op_C2_tc', 'f', 0.01, 'crystalThickness'],
+    ['op_C2_uc', 'f', 1, 'useCase'],
+    ['op_C2_ang_as', 'f', 0.5148721293383273, 'asymmetryAngle'],
+    ['op_C2_nvx', 'f', -0.972664746381, 'nvx'],
+    ['op_C2_nvy', 'f', 6.609e-09, 'nvy'],
+    ['op_C2_nvz', 'f', -0.232213890945, 'nvz'],
+    ['op_C2_tvx', 'f', -0.232213890945, 'tvx'],
+    ['op_C2_tvy', 'f', 1.578e-09, 'tvy'],
+    ['op_C2_ang', 'f', 0.0, 'grazingAngle'],
+    ['op_C2_amp_coef', 'f', 1.0, 'heightAmplification'],
+    ['op_C2_energy', 'f', 9481.0, 'energy'],
+    ['op_C2_diffractionAngle', 'f', 1.57079632, 'diffractionAngle'],
+
+    # C2_C3: drift
+    ['op_C2_C3_L', 'f', 0.39999999999997726, 'length'],
+
+    # C3: crystal
+    ['op_C3_hfn', 's', '', 'heightProfileFile'],
+    ['op_C3_dim', 's', 'x', 'orientation'],
+    ['op_C3_d_sp', 'f', 0.9600687344008111, 'dSpacing'],
+    ['op_C3_psi0r', 'f', -1.0873035035585694e-05, 'psi0r'],
+    ['op_C3_psi0i', 'f', 1.8438837339536554e-07, 'psi0i'],
+    ['op_C3_psiHr', 'f', -4.181686438547451e-06, 'psiHr'],
+    ['op_C3_psiHi', 'f', 1.6100412693351052e-07, 'psiHi'],
+    ['op_C3_psiHBr', 'f', -4.181686438547451e-06, 'psiHBr'],
+    ['op_C3_psiHBi', 'f', 1.6100412693351052e-07, 'psiHBi'],
+    ['op_C3_tc', 'f', 0.01, 'crystalThickness'],
+    ['op_C3_uc', 'f', 1, 'useCase'],
+    ['op_C3_ang_as', 'f', -0.5148721293383273, 'asymmetryAngle'],
+    ['op_C3_nvx', 'f', -0.301933297485, 'nvx'],
+    ['op_C3_nvy', 'f', 2.052e-09, 'nvy'],
+    ['op_C3_nvz', 'f', -0.953329053302, 'nvz'],
+    ['op_C3_tvx', 'f', -0.953329053302, 'tvx'],
+    ['op_C3_tvy', 'f', 6.478e-09, 'tvy'],
+    ['op_C3_ang', 'f', 0.0, 'grazingAngle'],
+    ['op_C3_amp_coef', 'f', 1.0, 'heightAmplification'],
+    ['op_C3_energy', 'f', 9481.0, 'energy'],
+    ['op_C3_diffractionAngle', 'f', 1.57079632, 'diffractionAngle'],
+
+    # C3_C4: drift
+    ['op_C3_C4_L', 'f', 2.6000000000000227, 'length'],
+
+    # C4: crystal
+    ['op_C4_hfn', 's', '', 'heightProfileFile'],
+    ['op_C4_dim', 's', 'x', 'orientation'],
+    ['op_C4_d_sp', 'f', 0.9600687344008111, 'dSpacing'],
+    ['op_C4_psi0r', 'f', -1.0873035035585694e-05, 'psi0r'],
+    ['op_C4_psi0i', 'f', 1.8438837339536554e-07, 'psi0i'],
+    ['op_C4_psiHr', 'f', -4.181686438547451e-06, 'psiHr'],
+    ['op_C4_psiHi', 'f', 1.6100412693351052e-07, 'psiHi'],
+    ['op_C4_psiHBr', 'f', -4.181686438547451e-06, 'psiHBr'],
+    ['op_C4_psiHBi', 'f', 1.6100412693351052e-07, 'psiHBi'],
+    ['op_C4_tc', 'f', 0.01, 'crystalThickness'],
+    ['op_C4_uc', 'f', 1, 'useCase'],
+    ['op_C4_ang_as', 'f', 0.5148721293383273, 'asymmetryAngle'],
+    ['op_C4_nvx', 'f', 0.78879942877, 'nvx'],
+    ['op_C4_nvy', 'f', 5.36e-09, 'nvy'],
+    ['op_C4_nvz', 'f', -0.614650682235, 'nvz'],
+    ['op_C4_tvx', 'f', 0.614650682235, 'tvx'],
+    ['op_C4_tvy', 'f', 4.176e-09, 'tvy'],
+    ['op_C4_ang', 'f', 0.0, 'grazingAngle'],
+    ['op_C4_amp_coef', 'f', 1.0, 'heightAmplification'],
+    ['op_C4_energy', 'f', 9481.0, 'energy'],
+    ['op_C4_diffractionAngle', 'f', -1.57079632, 'diffractionAngle'],
 
 #---Propagation parameters
-    ['op_CRL_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL'],
-    ['op_CRL_C1_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL_C1'],
-    ['op_C1_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C1'],
-    ['op_C1_Watchpoint_pp', 'f', [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C1_Watchpoint'],
-    ['op_fin_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'final post-propagation (resize) parameters'],
+    ['op_CRL_pp', 'f',    [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL'],
+    ['op_CRL_C1_pp', 'f', [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL_C1'],
+    ['op_C1_pp', 'f',     [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C1'],
+    ['op_C1_C2_pp', 'f',  [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C1_C2'],
+    ['op_C2_pp', 'f',     [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C2'],
+    ['op_C2_C3_pp', 'f',  [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C2_C3'],
+    ['op_C3_pp', 'f',     [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C3'],
+    ['op_C3_C4_pp', 'f',  [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C3_C4'],
+    ['op_C4_pp', 'f',     [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C4'],
+    ['op_fin_pp', 'f',    [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'final post-propagation (resize) parameters'],
 
     #[ 0]: Auto-Resize (1) or not (0) Before propagation
     #[ 1]: Auto-Resize (1) or not (0) After propagation
