@@ -3,26 +3,15 @@ from Diagnostic_functions import *
 import h5py
 
 t_window = 8000e-15  # total time window [s]
-ev_window = 100e-3   # total energy window [eV]
+ev_window = 500e-3   # total energy window [eV]
 t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
 
-sigT = 100e-15        # pulse duration [s]
+sigT = 100e-15/2.355        # pulse duration [s]
 pulseRange = int(t_window/sigT)
 nx = 256; ny = 256; nz = 2*int(t_window/t_res/2)
 range_x = 4e-3; range_y = 4e-3
 factor = -1 # factor = 0.5
 d_slit = 10e-6
-
-xRange = 5
-xRes = 0.4
-yRange = 1
-yRes = 1
-
-tRange = 1
-tRes = 1
-
-fRange = 1
-fRes = 1
 
 def rCRL(fCRL, nCRL):
     # calculates the min radius of curvature of each lens
@@ -37,8 +26,9 @@ def mkdir(path):
     if not os.path.exists(path):
         os.mkdir(path)
 dir_output = 'output/'; mkdir(dir_output)
-dir_type = dir_output+'f1_scan/'; mkdir(dir_type)
-dir_plot = dir_type+'{}fs/'.format(round(sigT*1e15)); mkdir(dir_plot)
+dir_case = dir_output+'f1_scan/'; mkdir(dir_case)
+dir_param = dir_case+'{}fs/'.format(round(sigT*2.355*1e15,2)); mkdir(dir_param)
+dir_plot = dir_param+'{}fs_{}meV/'.format(round(t_window*1e15,1),round(ev_window*1e3,1)); mkdir(dir_plot)
 
 ## define bl
 def set_optics_CC1(v=None):
@@ -276,22 +266,21 @@ def set_optics_CC2(v=None):
             el.append(crystal)
             pp.append(v.op_C4_pp)
 
-        elif el_name == 'C4_After_HRM':
-            # C4_After_HRM: drift 340.4m
-            el.append(srwlib.SRWLOptD(
-                _L=v.op_C4_After_HRM_L,
-            ))
-            pp.append(v.op_C4_After_HRM_pp)
-        elif el_name == 'After_HRM':
-            # After_HRM: watch 350.4m
-            pass
+#         elif el_name == 'C4_After_HRM':
+#             # C4_After_HRM: drift 340.4m
+#             el.append(srwlib.SRWLOptD(
+#                 _L=v.op_C4_After_HRM_L,
+#             ))
+#             pp.append(v.op_C4_After_HRM_pp)
+#         elif el_name == 'After_HRM':
+#             # After_HRM: watch 350.4m
+#             pass
     pp.append(v.op_fin_pp)
     return srwlib.SRWLOptC(el, pp)
 
 
-## Params
 varParam = srwl_bl.srwl_uti_ext_options([
-    ['name', 's', 'mono_only', 'simulation name'],
+    ['name', 's', 'full_beamline', 'simulation name'],
 
 #---Data Folder
     ['fdir', 's', '', 'folder (directory) name for reading-in input and saving output data files'],
@@ -306,8 +295,8 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['gbm_pen', 'f', 0.001, 'energy per pulse [J]'],
     ['gbm_rep', 'f', 1, 'rep. rate [Hz]'],
     ['gbm_pol', 'f', 2, 'polarization 1- lin. hor., 2- lin. vert., 3- lin. 45 deg., 4- lin.135 deg., 5- circ. right, 6- circ. left'],
-    ['gbm_sx', 'f', 9.787234042553194e-06, 'rms beam size vs horizontal position [m] at waist (for intensity)'],
-    ['gbm_sy', 'f', 9.787234042553194e-06, 'rms beam size vs vertical position [m] at waist (for intensity)'],
+    ['gbm_sx', 'f', 9.787229999999999e-06, 'rms beam size vs horizontal position [m] at waist (for intensity)'],
+    ['gbm_sy', 'f', 9.787229999999999e-06, 'rms beam size vs vertical position [m] at waist (for intensity)'],
     ['gbm_st', 'f', sigT, 'rms pulse duration [s] (for intensity)'],
     ['gbm_mx', 'f', 0, 'transverse Gauss-Hermite mode order in horizontal direction'],
     ['gbm_my', 'f', 0, 'transverse Gauss-Hermite mode order in vertical direction'],
@@ -350,15 +339,15 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_r', 'f', 290.0, 'longitudinal position of the first optical element [m]'],
     # Former appParam:
     ['rs_type', 's', 'g', 'source type, (u) idealized undulator, (t), tabulated undulator, (m) multipole, (g) gaussian beam'],
-    
+
 #---Beamline optics:
     # CRL: crl
     ['op_CRL_foc_plane', 'f', 1, 'focalPlane'],
     ['op_CRL_delta', 'f', 3.791135e-06, 'refractiveIndex'],
     ['op_CRL_atten_len', 'f', 0.008387, 'attenuationLength'],
     ['op_CRL_shape', 'f', 1, 'shape'],
-    ['op_CRL_apert_h', 'f', 0.01, 'horizontalApertureSize'],
-    ['op_CRL_apert_v', 'f', 0.01, 'verticalApertureSize'],
+    ['op_CRL_apert_h', 'f', range_x, 'horizontalApertureSize'],
+    ['op_CRL_apert_v', 'f', range_y, 'verticalApertureSize'],
     ['op_CRL_r_min', 'f', rCRL(fCRL0, nCRL0), 'tipRadius'],
     ['op_CRL_wall_thick', 'f', 5e-05, 'tipWallThickness'],
     ['op_CRL_x', 'f', 0.0, 'horizontalOffset'],
@@ -367,7 +356,8 @@ varParam = srwl_bl.srwl_uti_ext_options([
 
     # CRL_C1: drift
     ['op_CRL_C1_L', 'f', 10.0, 'length'],
-
+    
+    ### 5 degree miscut
     # C1: crystal
     ['op_C1_hfn', 's', '', 'heightProfileFile'],
     ['op_C1_dim', 's', 'x', 'orientation'],
@@ -392,7 +382,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C1_diffractionAngle', 'f', 1.57079632, 'diffractionAngle'],
 
     # C1_C2: drift
-    ['op_C1_C2_L', 'f', 0.19999999999998863, 'length'],
+    ['op_C1_C2_L', 'f', 0.2, 'length'],
 
     # C2: crystal
     ['op_C2_hfn', 's', '', 'heightProfileFile'],
@@ -486,7 +476,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C3_diffractionAngle', 'f', -1.57079632, 'diffractionAngle'],
 
     # C3_C4: drift
-    ['op_C3_C4_L', 'f', 0.19999999999998863, 'length'],
+    ['op_C3_C4_L', 'f', 0.2, 'length'],
 
     # C4: crystal
     ['op_C4_hfn', 's', '', 'heightProfileFile'],
@@ -510,20 +500,19 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C4_amp_coef', 'f', 1.0, 'heightAmplification'],
     ['op_C4_energy', 'f', 9481.0, 'energy'],
     ['op_C4_diffractionAngle', 'f', 1.57079632, 'diffractionAngle'],
-
+    
     # C4_After_HRM: drift
     ['op_C4_After_HRM_L', 'f', 10.0, 'length'],
-
+    
 #---Propagation parameters
 #                               [0][1] [2] [3][4] [5]  [6]  [7]  [8]  [9] [10] [11]
     ['op_CRL_pp', 'f',          [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL'],
     ['op_CRL_C1_pp', 'f',       [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL_C1'],
     ['op_C1_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, -0.997381741513, 6.777e-09, 0.072316399909, 0.072316399909, 6.304e-09], 'C1'],
     ['op_C1_C2_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C1_C2'],
-    ['op_C2_pp', 'f',           [0, 0, 1.0, 0, 0, xRange, xRes, yRange, yRes, 0.0, 0.0, 0.0, 0.997382667547, 6.777e-09, 0.072303626994, 0.072303626994, -6.304e-09], 'C2'],
-    # higher resolution after C2, less range (<10), or not resizing range at all since axis shrinks automatically
+    ['op_C2_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.997382667547, 6.777e-09, 0.072303626994, 0.072303626994, -6.304e-09], 'C2'],
     ['op_C2_CRL1_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C2_CRL1'],
-    ['op_CRL1_pp', 'f',         [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1'],
+    ['op_CRL1_pp', 'f',         [0, 0, 1.0, 0, 0, 5.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1'],
     ['op_CRL1_Slit_pp', 'f',    [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1_Slit'],
     ['op_Slit_pp', 'f',         [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Slit'],
     ['op_Slit_CRL2_pp', 'f',    [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Slit_CRL2'],
@@ -554,141 +543,125 @@ varParam = srwl_bl.srwl_uti_ext_options([
     #[16]: Optional: Orientation of the Horizontal Base vector of the Output Frame in the Incident Beam Frame: Vertical Coordinate
 ])
 
+def plot_wfr_diagnostic(_wfr, label=None, dir_plot=None, if_log=0, i=0):
+    if if_log == 1:
+        pltname = 'nx{}_ny{}_nz{}_{}_{}_log.png'.format(nx,ny,nz,i,label)
+    else:
+        pltname = 'nx{}_ny{}_nz{}_{}_{}.png'.format(nx,ny,nz,i,label)
+    
+    cent_t, fwhm_t = fit_pulse_duration(_wfr); tstart = cent_t - fwhm_t*5; tfin = cent_t + fwhm_t*5
+    taxis = get_axis_t(_wfr); tstart = max(taxis.min()*1e15, tstart); tfin = min(taxis.max()*1e15, tfin)
+    
+    plt.figure(figsize=(20,4))
+    plt.subplot(1,4,1); plot_spatial_from_wf(_wfr); plt.title(label)
+    plt.subplot(1,4,2); plot_tilt_from_wf(_wfr, ori='Horizontal', type='slice', if_log=if_log); plt.xlim([tstart, tfin]); plt.title(label+' {}fs'.format(round(fwhm_t,2)))
+    plt.subplot(1,4,3); plot_tprofile_from_wf(_wfr, if_short=1); plt.xlim([tstart, tfin])
+    plt.subplot(1,4,4); plot_spectrum_from_wf(_wfr, if_short=1)
+    plt.savefig(dir_plot+pltname)
+    plt.close('all')
+    
 
-def main(f1=10.):
+def main(f1=10., if_close=0, dirname=None):
     tstart = time()
+    # initialization
     v = srwl_bl.srwl_uti_parse_options(varParam, use_sys_argv=True)
-    
-    #Necessary for initial wavefront calculation without ropagation
     v.si = True
-    
-    #srwl_bl.SRWLBeamline(_name=v.name, _mag_approx=mag).calc_all(v, op)
     srwl_bl.SRWLBeamline(_name=v.name).calc_all(v)
     
+    # incident beam
     wfr = v.w_res
+    srwlpy.SetRepresElecField(wfr, 'f')
+    plot_wfr_diagnostic(wfr, label='input', dir_plot=dirname, i=1)
     
-    #Coordinates of central point for resulting distribution cuts: 
-    tc = 0.5*(v.w_e + v.w_ef)
-    xc = v.w_x
-    yc = v.w_y
-    
-    # if tRange != 1 or tRes != 1:
-    #     print('Resizing in Time domain: ', end='')
-    #     t0 = time();
-    #     srwlpy.ResizeElecField(wfr, 't', [0, tRange, tRes])
-    #     print('done in', round(time() - t0, 3), 's')
-    
-    print('Switching from Time to Frequency domain: ', end='')
-    t0 = time();
-    srwlpy.SetRepresElecField(wfr, 'f');
-    print('done in', round(time() - t0, 3), 's')
+    # iagnostics - input
+    _, axis_ev_in, int_ev_in = get_spectrum(wfs[np.argwhere(labels=='input')[0,0]])
 
-    # if fRange != 1 or fRes != 1:
-    # print('Resizing in Frequency domain: ', end='')
-    # t0 = time();
-    # srwlpy.ResizeElecField(wfr, 'f', [0, fRange, fRes])
-    # print('done in', round(time() - t0, 3), 's')
-    
-    wfr0 = deepcopy(wfr)    # preserve copy of input after resizing
-    
+    # first pair of crystals
     print('Propagating through CC1: ', end='')
     t0 = time()
     bl1 = set_optics_CC1(v)
     srwlpy.PropagElecField(wfr, bl1)
     print('done in', round(time() - t0, 3), 's')
-    wfr1 = deepcopy(wfr)      # preserve copy of beam after CC1
-
+    plot_wfr_diagnostic(wfr, label='after C2', dir_plot=dirname, i=2)
+    
+    # CRL1 -> focus
     print('Propagating to focus: ', end='')
     t0 = time()
-    bl2 = set_optics_CC1_focus(v, f1)
+    bl2 = set_optics_CC1_focus(v)
     srwlpy.PropagElecField(wfr, bl2)
     print('done in', round(time() - t0, 3), 's')
-    wfr_open = deepcopy(wfr)   # duplicate beam at focus for open slit propagation
-
-    print('Shift slit to pulse center: ', end='')
-    xc, yc = fit_pulse_position(wfr)
-    srwlpy.SetRepresElecField(wfr, 'f')
-    bl_slit = set_optics_slit(v, xc=xc, yc=0)
-    srwlpy.PropagElecField(wfr, bl_slit)
-    print('done in', round(time() - t0, 3), 's')
-    wfr2 = deepcopy(wfr)      # preserve copy of beam at focus after shifted slit
-    wfr2_open = deepcopy(wfr_open)      # open slit
     
+    # slit (or not)
+    if if_close == 1:
+        print('Propagating through slit: ', end='')
+        t0 = time()
+        bl_slit = set_optics_slit(v)
+        srwlpy.PropagElecField(wfr, bl_slit)
+        print('done in', round(time() - t0, 3), 's')
+        label_focus = 'focus closed'
+        label_C3 = 'before C3 closed'
+        label_output = 'output closed'
+    else:
+        label_focus = 'focus open'
+        label_C3 = 'before C3 open'
+        label_output = 'output open'
+
+    plot_wfr_diagnostic(wfr, label=label_focus, dir_plot=dirname, i=3)
+    
+    # focus -> CRL2
     print('Propagating to CC2: ', end='')
     t0 = time()
-    bl3 = set_optics_focus_CC2(v, f1)
+    bl3 = set_optics_focus_CC2(v)
     srwlpy.PropagElecField(wfr, bl3)
-    srwlpy.PropagElecField(wfr_open, bl3)
     print('done in', round(time() - t0, 3), 's')
-    wfr3 = deepcopy(wfr)      # preserve copy of beam before CC2
-    wfr3_open = deepcopy(wfr_open)      # open slit
+    plot_wfr_diagnostic(wfr, label=label_C3, dir_plot=dirname, i=4)
     
+    # second pair of crystals
     print('Propagating through CC2: ', end='')
     t0 = time()
     bl4 = set_optics_CC2(v)
     srwlpy.PropagElecField(wfr, bl4)
-    srwlpy.PropagElecField(wfr_open, bl4)
     print('done in', round(time() - t0, 3), 's')
+    plot_wfr_diagnostic(wfr, label=label_output, dir_plot=dirname, i=5)
     
-    print('\n\n\n\n everything lasted: {}s'.format(time()-tstart))
-    #uti_plot_show()
-    return wfr0, wfr1, wfr2, wfr2_open, wfr3, wfr3_open, wfr, wfr_open
+    # diagnostics - output
+    try:
+        _, axis_ev_out, int_ev_out = get_spectrum(wfr)
+    except:
+        axis_ev_out = np.zeros((5))
+        int_ev_out = np.zeros((5))
+    try:
+        bw_out = fit_pulse_bandwidth(wfr)
+    except:
+        bw_out = 1e30
+    try:
+        centE_out = fit_central_energy(wfr)
+    except:
+        centE_out = 1e30
+    try:
+        _, dur_out = fit_pulse_duration(wfr)
+    except:
+        dur_out = 1e30
+    try:
+        ptilt_x_out = fit_pulsefront_tilt(wfr, dim='x')
+    except:
+        ptilt_x_out = 1e30
+    try:
+        ptilt_y_out = fit_pulsefront_tilt(wfr, dim='y')    # fs/um
+    except:
+        ptilt_y_out = 1e30
+
+    print('return: input spectrum, output spectrum, output bandwidth, output central energy, output pulse duration, pulsefront tilt')
+    return axis_ev_in,int_ev_in, axis_ev_out, int_ev_out, bw_out, centE_out, dur_out, ptilt_x_out, ptilt_y_out
+    
 
 if __name__ == '__main__':
-    print(xRange, xRes, yRange, yRes, d_slit, sigT)
-    f1_list = np.linspace(10,5,20)
+    print(nx, ny, nz)
+    f1_list = np.linspace(12,8,5)
     for irep, f1 in enumerate(f1_list):
-        if irep <3: continue
-        dir_case = dir_plot+'rep_{}_f{}/'.format(irep,round(f1,2)); mkdir(dir_case)
-        wfs = main(f1=f1)
-        labels = np.array(['input', 'after C2', 'focus', 'focus open', 'before C3', 'before C3 open', 'output', 'output open'])
-
-        ## Plots
-        if_short = 0
-        for i in range(len(wfs)):
-            plt.figure(figsize=(20,4))
-            plt.subplot(1,4,1); plot_spatial_from_wf(wfs[i]); plt.title(labels[i])
-            plt.subplot(1,4,2); plot_tilt_from_wf(wfs[i],ori='Horizontal',type='slice')
-            plt.subplot(1,4,3); plot_tprofile_from_wf(wfs[i], if_short=if_short)
-            plt.subplot(1,4,4); plot_spectrum_from_wf(wfs[i], if_short=if_short); plt.title('{} pts'.format(len(get_axis_ev(wfs[i]))))
-
-            plt.savefig(dir_case+'{}x{}H_{}x{}V_{}_{}.png'.format(xRange,xRes,yRange,yRes, i+1, labels[i]))
-            plt.close('all')
-
-        ## Diagnostics
-        # open slit
-        try:
-            _, dur_out = fit_pulse_duration(wfs[np.argwhere(labels=='output open')[0,0]])
-        except:
-            dur_out = 1e30
-        try:
-            ptilt_x_out = fit_pulsefront_tilt(wfs[np.argwhere(labels=='output open')[0,0]], dim='x')
-        except:
-            ptilt_x_out = 1e30
-        try:
-            ptilt_y_out = fit_pulsefront_tilt(wfs[np.argwhere(labels=='output open')[0,0]], dim='y')    # fs/um
-        except:
-            ptilt_y_out = 1e30
-        # closed slit
-        try:
-            bw_out = fit_pulse_bandwidth(wfs[np.argwhere(labels=='output')[0,0]])
-        except:
-            bw_out = 1e30
-        try:
-            _, axis_ev_in, int_ev_in = get_spectrum(wfs[np.argwhere(labels=='input')[0,0]])
-        except:
-            axis_ev_in = np.zeros((5))
-            int_ev_in = np.zeros((5))
-        try:
-            _, axis_ev_out, int_ev_out = get_spectrum(wfs[np.argwhere(labels=='output')[0,0]])
-        except:
-            axis_ev_out = np.zeros((5))
-            int_ev_out = np.zeros((5))
-        try:
-            centE_out = fit_central_energy(wfs[np.argwhere(labels=='output')[0,0]])
-        except:
-            centE_out = 1e30
-
+        dir_f1 = dir_plot+'rep_{}_f{}/'.format(irep,round(f1,2)); mkdir(dir_f1)
+        axis_ev_in,int_ev_in, axis_ev_out, int_ev_out, bw_out, centE_out, dur_out, ptilt_x_out, ptilt_y_out = main(f1=f1, if_close=0, dirname=dir_f1)
+        
         with h5py.File(dir_plot+'loop_f1_{}-{}m.h5'.format(f1_list.min(), f1_list.max()), 'a') as f:
             grp = f.create_group('rep_{}'.format(irep))
             grp.create_dataset('f1', data=[f1])

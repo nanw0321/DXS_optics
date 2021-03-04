@@ -1,20 +1,28 @@
-def main():
-    v = srwl_bl.srwl_uti_parse_options(varParam, use_sys_argv=True)
-    v.si = True
-    srwl_bl.SRWLBeamline(_name=v.name).calc_all(v)
+    # CRL_C2: drift
+    ['op_C1_C2_L', 'f', 2.6, 'length'],
 
-    wfr = v.w_res       # initialize wavefront
-
-    # propagation
-    srwlpy.SetRepresElecField(wfr, 'f') # switch to frequency domain
-    bl = set_optics(v)                  # initialize beamline
-    srwlpy.PropagateElecField(wfr, bl)  # propagate through beamline
-
-    # resizing
-    srwlpy.ResizeElecField(wfr, 'f', [0, fRange, fRes]) # in frequency
-    srwlpy.ResizeElecField(wfr, 't', [0, tRange, tRes]) # in time
-
-    
+    # C2: crystal
+    ['op_C2_hfn', 's', '', 'heightProfileFile'],
+    ['op_C2_dim', 's', 'x', 'orientation'],
+    ['op_C2_d_sp', 'f', 0.7838928390938714, 'dSpacing'],
+    ['op_C2_psi0r', 'f', -1.0873035035585694e-05, 'psi0r'],
+    ['op_C2_psi0i', 'f', 1.8438837339536554e-07, 'psi0i'],
+    ['op_C2_psiHr', 'f', -3.244798554456362e-06, 'psiHr'],
+    ['op_C2_psiHi', 'f', 1.5044880611361188e-07, 'psiHi'],
+    ['op_C2_psiHBr', 'f', -3.244798554456362e-06, 'psiHBr'],
+    ['op_C2_psiHBi', 'f', 1.5044880611361188e-07, 'psiHBi'],
+    ['op_C2_tc', 'f', 0.01, 'crystalThickness'],
+    ['op_C2_uc', 'f', 1, 'useCase'],
+    ['op_C2_ang_as', 'f', 0.08726646259971647, 'asymmetryAngle'],
+    ['op_C2_nvx', 'f', 0.622180932039, 'nvx'],
+    ['op_C2_nvy', 'f', 4.228e-09, 'nvy'],
+    ['op_C2_nvz', 'f', -0.782873481354, 'nvz'],
+    ['op_C2_tvx', 'f', 0.782873481354, 'tvx'],
+    ['op_C2_tvy', 'f', 5.32e-09, 'tvy'],
+    ['op_C2_ang', 'f', 0.0, 'grazingAngle'],
+    ['op_C2_amp_coef', 'f', 1.0, 'heightAmplification'],
+    ['op_C2_energy', 'f', 9481.0, 'energy'],
+    ['op_C2_diffractionAngle', 'f', -1.57079632, 'diffractionAngle'],
 
 
 
@@ -39,6 +47,4 @@ def main():
 
 ### Won't have LCLS-II data by the design review (end of year), so need a way to simulate beam fluctuations.
 
-
-### Try a single crystal reflection and see if there's tail lol
 ### Can have a weekly meeting about XPCS modelling.
