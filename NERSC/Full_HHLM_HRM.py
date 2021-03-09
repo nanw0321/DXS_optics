@@ -1,17 +1,17 @@
 ##### diagnostic
 from Diagnostic_functions import *
 
-# t_window = 8000e-15  # total time window [s]
-# ev_window = 100e-3   # total energy window [eV]
-# t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
-
-# sigT = 400e-15/2.355
-
 t_window = 8000e-15  # total time window [s]
-ev_window = 400e-3   # total energy window [eV]
+ev_window = 100e-3   # total energy window [eV]
 t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
 
-sigT = 100e-15/2.355
+sigT = 400e-15/2.355
+
+# t_window = 8000e-15  # total time window [s]
+# ev_window = 400e-3   # total energy window [eV]
+# t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
+
+# sigT = 100e-15/2.355
 
 pulseRange = int(t_window/sigT)
 nx = 256; ny = 256; nz = 2*int(t_window/t_res/2)
