@@ -1,28 +1,36 @@
-    # CRL_C2: drift
-    ['op_C1_C2_L', 'f', 2.6, 'length'],
-
-    # C2: crystal
-    ['op_C2_hfn', 's', '', 'heightProfileFile'],
-    ['op_C2_dim', 's', 'x', 'orientation'],
-    ['op_C2_d_sp', 'f', 0.7838928390938714, 'dSpacing'],
-    ['op_C2_psi0r', 'f', -1.0873035035585694e-05, 'psi0r'],
-    ['op_C2_psi0i', 'f', 1.8438837339536554e-07, 'psi0i'],
-    ['op_C2_psiHr', 'f', -3.244798554456362e-06, 'psiHr'],
-    ['op_C2_psiHi', 'f', 1.5044880611361188e-07, 'psiHi'],
-    ['op_C2_psiHBr', 'f', -3.244798554456362e-06, 'psiHBr'],
-    ['op_C2_psiHBi', 'f', 1.5044880611361188e-07, 'psiHBi'],
-    ['op_C2_tc', 'f', 0.01, 'crystalThickness'],
-    ['op_C2_uc', 'f', 1, 'useCase'],
-    ['op_C2_ang_as', 'f', 0.08726646259971647, 'asymmetryAngle'],
-    ['op_C2_nvx', 'f', 0.622180932039, 'nvx'],
-    ['op_C2_nvy', 'f', 4.228e-09, 'nvy'],
-    ['op_C2_nvz', 'f', -0.782873481354, 'nvz'],
-    ['op_C2_tvx', 'f', 0.782873481354, 'tvx'],
-    ['op_C2_tvy', 'f', 5.32e-09, 'tvy'],
-    ['op_C2_ang', 'f', 0.0, 'grazingAngle'],
-    ['op_C2_amp_coef', 'f', 1.0, 'heightAmplification'],
-    ['op_C2_energy', 'f', 9481.0, 'energy'],
-    ['op_C2_diffractionAngle', 'f', -1.57079632, 'diffractionAngle'],
+    # incident beam
+    wfr = v.w_res
+    srwlpy.SetRepresElecField(wfr, 'f')
+    plot_wfr_diagnostic(wfr, label='input', dir_plot=dir_plot, i=1)
+    
+    print('Propagating through HHLM1: ', end='')
+    t0 = time()
+    bl1 = set_optics_HHLM1(v)
+    srwlpy.PropagElecField(wfr, bl1)
+    print('done in', round(time() - t0, 3), 's')
+    plot_wfr_diagnostic(wfr, label='after HHLM1', dir_plot=dir_plot, i=2)
+    
+    print('Propagating through HHLM2: ', end='')
+    t0 = time()
+    bl2 = set_optics_HHLM2(v, drift=drift_list[0])
+    srwlpy.PropagElecField(wfr, bl2)
+    print('done in', round(time() - t0, 3), 's')
+    plot_wfr_diagnostic(wfr, label='after HHLM2', dir_plot=dir_plot, i=3)
+    
+    print('Propagating through HHLM3: ', end='')
+    t0 = time()
+    bl3 = set_optics_HHLM3(v, drift=drift_list[1])
+    srwlpy.PropagElecField(wfr, bl3)
+    print('done in', round(time() - t0, 3), 's')
+    plot_wfr_diagnostic(wfr, label='after HHLM3', dir_plot=dir_plot, i=4)
+    
+    print('Propagating through HHLM4: ', end='')
+    t0 = time()
+    bl4 = set_optics_HHLM4(v, drift=drift_list[2])
+    srwlpy.PropagElecField(wfr, bl4)
+    print('done in', round(time() - t0, 3), 's')
+    plot_wfr_diagnostic(wfr, label='after HHLM4', dir_plot=dir_plot, i=5)
+    
 
 
 

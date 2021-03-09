@@ -1,0 +1,25 @@
+1. Steps to get conda working:
+	module load python
+	conda create --name myenv
+	conda activate myenv
+
+2. Compile SRW:
+	conda install srwpy --channel conda-forge
+
+3. Run SRW scripts:
+	from srwpy import *****!
+	#!/bin/bash -l
+	#SBATCH -N 1		# number of nodes
+	#SBATCH -t 00:30:00		# time limit
+	#SBATCH -q debug		# queue
+	#SBATCH -L SCRATCH	# hostname
+	#SBATCH -C haswell		# processor archetecture
+	#SBATCH -o slurm.log	# output log file
+	#export OMP_NUM_THREADS=32
+	#SBATCH --account=lcls	# account shown in Iris
+
+	module load python
+	conda activate myenv
+	srun -n 1 python Full_HHLM_HRM.py
+
+
