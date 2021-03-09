@@ -48,3 +48,8 @@
 ### Won't have LCLS-II data by the design review (end of year), so need a way to simulate beam fluctuations.
 
 ### Can have a weekly meeting about XPCS modelling.
+
+
+
+### Next, high heat load mono simulation; the parameters: https://docs.google.com/spreadsheets/d/1dCrDyQOWnNd47cDOBF22fLEGHUD4JVOU/edit#gid=1087546977
+### Note: the distances are in lab frame, need to translate to path-lengths in SRW by multiplying a bunch of cosines
