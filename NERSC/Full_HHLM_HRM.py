@@ -927,7 +927,7 @@ def main(drift_list, if_close=0, if_log=1):
     # resize elec field
     print('Resizing in frequency domain: ', end='')
     t0 = time();
-    srwlpy.ResizeElecField(wfr, 'f', [0, 1, 4.])
+    srwlpy.ResizeElecField(wfr, 'f', [0, 2., 2.])
     print('done in', round(time() - t0, 3), 's')
     srwlpy.SetRepresElecField(wfr, 'f')
     
