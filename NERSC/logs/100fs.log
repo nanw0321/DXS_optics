@@ -1,0 +1,29 @@
+Warning: Python module not loaded, you already have Python loaded via conda init
+drift between crystals (mm): [180.97478779 319.77349123 180.97478779]
+256 256 798
+Gaussian beam electric field calculation ... completed (lasted 1.473 s)
+Extracting intensity and saving it to a file ... completed (lasted 32.966 s)
+plotting input
+plot lasted 31.75s
+Propagating through HHLM1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 3.678 s
+Propagating through HHLM2: done in 2.625 s
+Propagating through HHLM3: done in 2.581 s
+Propagating through HHLM4: done in 2.202 s
+plotting after HHLM4
+plot lasted 29.02s
+Resizing in frequency domain: done in 23.784 s
+Propagating through CC1: done in 17.099 s
+plotting after C2
+plot lasted 47.12s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 10.0 m
+done in 34.942 s
+plotting focus open
+plot lasted 218.11s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 10.0 m
+done in 28.044 s
+plotting before C3 open
+plot lasted 226.8s
+Propagating through CC2: done in 45.532 s
+plotting output open
+plot lasted 223.91s

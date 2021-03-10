@@ -1,0 +1,5 @@
+# ignore files
+*.ini
+*.h5
+*.dat
+*.ppk

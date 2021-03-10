@@ -12,6 +12,8 @@
 	#SBATCH -N 1		# number of nodes
 	#SBATCH -t 00:30:00		# time limit
 	#SBATCH -q debug		# queue
+		*** Note: the debug queue has relatively high priority but a maximum of 30min time limit (and 5 jobs max)
+		*** for large scale simulations, refer to https://docs.nersc.gov/jobs/policy/
 	#SBATCH -L SCRATCH	# hostname
 	#SBATCH -C haswell		# processor archetecture
 	#SBATCH -o slurm.log	# output log file
@@ -23,3 +25,7 @@
 	srun -n 1 python Full_HHLM_HRM.py
 
 
+4. Some reminders for using NERSC in the future
+	Setup MFA and use password + OTP to login (like <PasswordOTP> with no space in between)
+	SSH sessions drop out frequently, better use sshproxy -u <username> to generate Putty key every 24 hrs for better workflow
+	Large data transfer should be done via Globus; smaller files can be transferred through scp/sftp etc. through the data transfer node: <username>@dtn01.nersc.gov

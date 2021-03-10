@@ -1,4 +1,0 @@
-Warning: Python module not loaded, you already have Python loaded via conda init
-slurmstepd: error: *** STEP 40463000.0 ON nid01328 CANCELLED AT 2021-03-09T01:59:14 DUE TO TIME LIMIT ***
-srun: got SIGCONT
-srun: forcing job termination

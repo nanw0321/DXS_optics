@@ -2,16 +2,16 @@
 from Diagnostic_functions import *
 
 t_window = 8000e-15  # total time window [s]
-ev_window = 100e-3   # total energy window [eV]
+ev_window = 400e-3   # total energy window [eV]
 t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
 
-sigT = 400e-15/2.355
+sigT = 100e-15/2.355
 
 # t_window = 8000e-15  # total time window [s]
-# ev_window = 400e-3   # total energy window [eV]
+# ev_window = 1500e-3   # total energy window [eV]
 # t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
 
-# sigT = 100e-15/2.355
+# sigT = 30e-15/2.355
 
 pulseRange = int(t_window/sigT)
 nx = 256; ny = 256; nz = 2*int(t_window/t_res/2)
@@ -828,7 +828,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C1_C2_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C1_C2'],
     ['op_C2_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.997382667547, 6.777e-09, 0.072303626994, 0.072303626994, -6.304e-09], 'C2'],
     ['op_C2_CRL1_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C2_CRL1'],
-    ['op_CRL1_pp', 'f',         [0, 0, 1.0, 0, 0, 5.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1'],
+    ['op_CRL1_pp', 'f',         [0, 0, 1.0, 0, 0, 5.0, 0.25, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1'],
     ['op_CRL1_Slit_pp', 'f',    [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1_Slit'],
     ['op_Slit_pp', 'f',         [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Slit'],
     ['op_Slit_CRL2_pp', 'f',    [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Slit_CRL2'],
@@ -874,7 +874,7 @@ def plot_wfr_diagnostic(_wfr, label=None, dir_plot=None, if_log=0, i=0):
     plt.figure(figsize=(20,4))
     plt.subplot(1,4,1); plot_spatial_from_wf(_wfr); plt.title(label)
     plt.subplot(1,4,2); plot_tilt_from_wf(_wfr, ori='Horizontal', type='slice', if_log=if_log); plt.xlim([tstart, tfin]); plt.title(label+' {}fs'.format(round(fwhm_t,2)))
-    plt.subplot(1,4,3); plot_tprofile_from_wf(_wfr, if_short=1); plt.xlim([tstart, tfin])
+    plt.subplot(1,4,3); plot_tprofile_from_wf(_wfr, if_short=1)#; plt.xlim([tstart, tfin])
     plt.subplot(1,4,4); plot_spectrum_from_wf(_wfr, if_short=1)
     plt.savefig(dir_plot+pltname)
     plt.close('all')
@@ -882,7 +882,7 @@ def plot_wfr_diagnostic(_wfr, label=None, dir_plot=None, if_log=0, i=0):
 
 
 
-def main(drift_list, if_close=0):
+def main(drift_list, if_close=0, if_log=1):
     tstart = time()
     # initialization
     v = srwl_bl.srwl_uti_parse_options(varParam, use_sys_argv=True)
@@ -892,7 +892,7 @@ def main(drift_list, if_close=0):
     # incident beam
     wfr = v.w_res
     srwlpy.SetRepresElecField(wfr, 'f')
-    plot_wfr_diagnostic(wfr, label='input', dir_plot=dir_plot, i=1)
+    plot_wfr_diagnostic(wfr, label='input', dir_plot=dir_plot, i=1, if_log=if_log)
     
     
     # pre mono
@@ -901,33 +901,33 @@ def main(drift_list, if_close=0):
     bl1 = set_optics_HHLM1(v)
     srwlpy.PropagElecField(wfr, bl1)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label='after HHLM1', dir_plot=dir_plot, i=2)
+    # plot_wfr_diagnostic(wfr, label='after HHLM1', dir_plot=dir_plot, i=2, if_log=if_log)
     
     print('Propagating through HHLM2: ', end='')
     t0 = time()
     bl2 = set_optics_HHLM2(v, drift=drift_list[0])
     srwlpy.PropagElecField(wfr, bl2)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label='after HHLM2', dir_plot=dir_plot, i=3)
+    # plot_wfr_diagnostic(wfr, label='after HHLM2', dir_plot=dir_plot, i=3, if_log=if_log)
     
     print('Propagating through HHLM3: ', end='')
     t0 = time()
     bl3 = set_optics_HHLM3(v, drift=drift_list[1])
     srwlpy.PropagElecField(wfr, bl3)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label='after HHLM3', dir_plot=dir_plot, i=4)
+    # plot_wfr_diagnostic(wfr, label='after HHLM3', dir_plot=dir_plot, i=4, if_log=if_log)
     
     print('Propagating through HHLM4: ', end='')
     t0 = time()
     bl4 = set_optics_HHLM4(v, drift=drift_list[2])
     srwlpy.PropagElecField(wfr, bl4)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label='after HHLM4', dir_plot=dir_plot, i=5)
+    plot_wfr_diagnostic(wfr, label='after HHLM4', dir_plot=dir_plot, i=5, if_log=if_log)
     
     # resize elec field
     print('Resizing in frequency domain: ', end='')
     t0 = time();
-    srwlpy.ResizeElecField(wfr, 'f', [0, 1, 2.])
+    srwlpy.ResizeElecField(wfr, 'f', [0, 1, 4.])
     print('done in', round(time() - t0, 3), 's')
     srwlpy.SetRepresElecField(wfr, 'f')
     
@@ -937,7 +937,7 @@ def main(drift_list, if_close=0):
     bl1 = set_optics_CC1(v, drift=5.0-np.sum(drift_list))
     srwlpy.PropagElecField(wfr, bl1)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label='after C2', dir_plot=dir_plot, i=6)
+    plot_wfr_diagnostic(wfr, label='after C2', dir_plot=dir_plot, i=6, if_log=if_log)
     
     print('Propagating to focus: ', end='')
     t0 = time()
@@ -959,23 +959,25 @@ def main(drift_list, if_close=0):
         label_C3 = 'before C3 open'
         label_output = 'output open'
 
-    plot_wfr_diagnostic(wfr, label=label_focus, dir_plot=dir_plot, i=7)
+    plot_wfr_diagnostic(wfr, label=label_focus, dir_plot=dir_plot, i=7, if_log=if_log)
     
     print('Propagating to CC2: ', end='')
     t0 = time()
     bl3 = set_optics_focus_CC2(v)
     srwlpy.PropagElecField(wfr, bl3)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label=label_C3, dir_plot=dir_plot, i=8)
+    plot_wfr_diagnostic(wfr, label=label_C3, dir_plot=dir_plot, i=8, if_log=if_log)
     
     print('Propagating through CC2: ', end='')
     t0 = time()
     bl4 = set_optics_CC2(v)
     srwlpy.PropagElecField(wfr, bl4)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label=label_output, dir_plot=dir_plot, i=9)
+    plot_wfr_diagnostic(wfr, label=label_output, dir_plot=dir_plot, i=9, if_log=if_log)
 
 
 if __name__ == '__main__':
+    time_stamp=time()
     print(nx, ny, nz)
-    main(drift_list, if_close=0)
+    main(drift_list, if_close=0, if_log=1)
+    print('\n\neverything lasted: {}s'.format(round(time()-time_stamp,2)))
