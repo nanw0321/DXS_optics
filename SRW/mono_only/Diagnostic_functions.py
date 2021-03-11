@@ -30,6 +30,14 @@ import matplotlib.pyplot as plt
 
 
 ####### get info from SRW wavefront
+def get_dimension(_wfr):
+    # get nx, ny, nz dimensions
+    mesh_temp = deepcopy(_wfr.mesh)
+    nx = mesh_temp.nx
+    ny = mesh_temp.ny
+    nz = mesh_temp.ne
+    return nx, ny, nz
+
 def get_axis_sp(_wfr):
     # get axis in space (x, y); this leaves the pulse in time domain
     srwlpy.SetRepresElecField(_wfr, 't')

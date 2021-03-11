@@ -828,7 +828,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C1_C2_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C1_C2'],
     ['op_C2_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.997382667547, 6.777e-09, 0.072303626994, 0.072303626994, -6.304e-09], 'C2'],
     ['op_C2_CRL1_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C2_CRL1'],
-    ['op_CRL1_pp', 'f',         [0, 0, 1.0, 0, 0, 5.0, 0.25, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1'],
+    ['op_CRL1_pp', 'f',         [0, 0, 1.0, 0, 0, 5.0, 8.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1'],
     ['op_CRL1_Slit_pp', 'f',    [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1_Slit'],
     ['op_Slit_pp', 'f',         [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Slit'],
     ['op_Slit_CRL2_pp', 'f',    [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Slit_CRL2'],
@@ -840,7 +840,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C4_After_HRM_pp', 'f', [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C4_After_HRM'],
     ['op_fin_pp', 'f',          [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'final post-propagation (resize) parameters'],
 
-    #[ 0]: Auto-Resize (1) or not (0) Before propagation
+    #[ 0]: Auto-Resize (1) or not (0) Before propagation  
     #[ 1]: Auto-Resize (1) or not (0) After propagation
     #[ 2]: Relative Precision for propagation with Auto-Resizing (1. is nominal)
     #[ 3]: Allow (1) or not (0) for semi-analytical treatment of the quadratic (leading) phase terms at the propagation
@@ -863,6 +863,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
 def plot_wfr_diagnostic(_wfr, label=None, dir_plot=None, if_log=0, i=0):
     t0 = time()
     print('plotting {}'.format(label))
+    nx, ny, nz = get_dimension(_wfr)
     if if_log == 1:
         pltname = 'nx{}_ny{}_nz{}_{}_{}_log.png'.format(nx,ny,nz,i,label)
     else:
@@ -879,7 +880,6 @@ def plot_wfr_diagnostic(_wfr, label=None, dir_plot=None, if_log=0, i=0):
     plt.savefig(dir_plot+pltname)
     plt.close('all')
     print('plot lasted {}s'.format(round(time()-t0,2)))
-
 
 
 def main(drift_list, if_close=0, if_log=1):
@@ -901,21 +901,21 @@ def main(drift_list, if_close=0, if_log=1):
     bl1 = set_optics_HHLM1(v)
     srwlpy.PropagElecField(wfr, bl1)
     print('done in', round(time() - t0, 3), 's')
-    # plot_wfr_diagnostic(wfr, label='after HHLM1', dir_plot=dir_plot, i=2, if_log=if_log)
+    plot_wfr_diagnostic(wfr, label='after HHLM1', dir_plot=dir_plot, i=2, if_log=if_log)
     
     print('Propagating through HHLM2: ', end='')
     t0 = time()
     bl2 = set_optics_HHLM2(v, drift=drift_list[0])
     srwlpy.PropagElecField(wfr, bl2)
     print('done in', round(time() - t0, 3), 's')
-    # plot_wfr_diagnostic(wfr, label='after HHLM2', dir_plot=dir_plot, i=3, if_log=if_log)
+    plot_wfr_diagnostic(wfr, label='after HHLM2', dir_plot=dir_plot, i=3, if_log=if_log)
     
     print('Propagating through HHLM3: ', end='')
     t0 = time()
     bl3 = set_optics_HHLM3(v, drift=drift_list[1])
     srwlpy.PropagElecField(wfr, bl3)
     print('done in', round(time() - t0, 3), 's')
-    # plot_wfr_diagnostic(wfr, label='after HHLM3', dir_plot=dir_plot, i=4, if_log=if_log)
+    plot_wfr_diagnostic(wfr, label='after HHLM3', dir_plot=dir_plot, i=4, if_log=if_log)
     
     print('Propagating through HHLM4: ', end='')
     t0 = time()
@@ -927,7 +927,7 @@ def main(drift_list, if_close=0, if_log=1):
     # resize elec field
     print('Resizing in frequency domain: ', end='')
     t0 = time();
-    srwlpy.ResizeElecField(wfr, 'f', [0, 2., 2.])
+    srwlpy.ResizeElecField(wfr, 'f', [0, 1., 2.])
     print('done in', round(time() - t0, 3), 's')
     srwlpy.SetRepresElecField(wfr, 'f')
     
