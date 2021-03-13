@@ -1,17 +1,17 @@
 ##### diagnostic
 from Diagnostic_functions import *
 
-t_window = 8000e-15  # total time window [s]
-ev_window = 400e-3   # total energy window [eV]
-t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
-
-sigT = 100e-15/2.355
-
 # t_window = 8000e-15  # total time window [s]
-# ev_window = 1500e-3   # total energy window [eV]
+# ev_window = 400e-3   # total energy window [eV]
 # t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
 
-# sigT = 30e-15/2.355
+# sigT = 100e-15/2.355
+
+t_window = 20000e-15  # total time window [s]
+ev_window = 2000e-3   # total energy window [eV]
+t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
+
+sigT = 20e-15/2.355
 
 pulseRange = int(t_window/sigT)
 nx = 256; ny = 256; nz = 2*int(t_window/t_res/2)
@@ -32,7 +32,7 @@ def mkdir(path):
     if not os.path.exists(path):
         os.mkdir(path)
 dir_output = 'output/'; mkdir(dir_output)
-dir_case = dir_output+'Full_HHLM_HRM/'; mkdir(dir_case)
+dir_case = dir_output+'HHLM_only/'; mkdir(dir_case)
 dir_param = dir_case+'{}fs/'.format(round(sigT*2.355*1e15,2)); mkdir(dir_param)
 dir_plot = dir_param+'{}fs_{}meV/'.format(round(t_window*1e15,1),round(ev_window*1e3,1)); mkdir(dir_plot)
 
@@ -923,57 +923,6 @@ def main(drift_list, if_close=0, if_log=1):
     srwlpy.PropagElecField(wfr, bl4)
     print('done in', round(time() - t0, 3), 's')
     plot_wfr_diagnostic(wfr, label='after HHLM4', dir_plot=dir_plot, i=5, if_log=if_log)
-    
-    # resize elec field
-    print('Resizing in frequency domain: ', end='')
-    t0 = time();
-    srwlpy.ResizeElecField(wfr, 'f', [0, 1., 2.])
-    print('done in', round(time() - t0, 3), 's')
-    srwlpy.SetRepresElecField(wfr, 'f')
-    
-    # 4f mono
-    print('Propagating through CC1: ', end='')
-    t0 = time()
-    bl1 = set_optics_CC1(v, drift=5.0-np.sum(drift_list))
-    srwlpy.PropagElecField(wfr, bl1)
-    print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label='after C2', dir_plot=dir_plot, i=6, if_log=if_log)
-    
-    print('Propagating to focus: ', end='')
-    t0 = time()
-    bl2 = set_optics_CC1_focus(v)
-    srwlpy.PropagElecField(wfr, bl2)
-    print('done in', round(time() - t0, 3), 's')
-    
-    if if_close == 1:
-        print('Propagating through slit: ', end='')
-        t0 = time()
-        bl_slit = set_optics_slit(v)
-        srwlpy.PropagElecField(wfr, bl_slit)
-        print('done in', round(time() - t0, 3), 's')
-        label_focus = 'focus closed'
-        label_C3 = 'before C3 closed'
-        label_output = 'output closed'
-    else:
-        label_focus = 'focus open'
-        label_C3 = 'before C3 open'
-        label_output = 'output open'
-
-    plot_wfr_diagnostic(wfr, label=label_focus, dir_plot=dir_plot, i=7, if_log=if_log)
-    
-    print('Propagating to CC2: ', end='')
-    t0 = time()
-    bl3 = set_optics_focus_CC2(v)
-    srwlpy.PropagElecField(wfr, bl3)
-    print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label=label_C3, dir_plot=dir_plot, i=8, if_log=if_log)
-    
-    print('Propagating through CC2: ', end='')
-    t0 = time()
-    bl4 = set_optics_CC2(v)
-    srwlpy.PropagElecField(wfr, bl4)
-    print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label=label_output, dir_plot=dir_plot, i=9, if_log=if_log)
 
 
 if __name__ == '__main__':

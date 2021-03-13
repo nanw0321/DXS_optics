@@ -55,8 +55,7 @@ def get_dimension(_wfr):
     return nx, ny, nz
 
 def get_axis_sp(_wfr):
-    # get axis in space (x, y); this leaves the pulse in time domain
-    srwlpy.SetRepresElecField(_wfr, 't')
+    # get axis in space (x, y)
     mesh_temp = deepcopy(_wfr.mesh)
     axis_x = np.linspace(mesh_temp.xStart, mesh_temp.xFin, mesh_temp.nx)
     axis_y = np.linspace(mesh_temp.yStart, mesh_temp.yFin, mesh_temp.ny)
@@ -204,6 +203,39 @@ def plot_spectrum_from_wf(_wfr, if_short=1):
     plt.xlabel('photon energy (meV) + {}eV'.format(ev_cent))
     plt.ylabel('intensity (a.u.)')
     plt.title('{} meV/{} pts'.format(round(ev_range,2), npts))
+
+def plot_spatial_spectrum_from_wf(_wfr, ori='Vertical', if_slice=1):
+    # spatial spectrum
+    nx, ny, nz = get_dimension(_wfr)
+    intensity_f = get_intensity(_wfr, domain='f')
+    axis_ev = get_axis_ev(_wfr)
+    ecent = axis_ev[int(axis_ev.size/2)]
+    axis_x, axis_y = get_axis_sp(_wfr)
+    
+    if ori == 'Vertical':
+        xlabel = 'y (um)'
+        axis_sp = axis_y * 1e6
+        if if_slice == 1:
+            intensity_f = intensity_f[:,int(nx/2),:]
+        else:
+            intensity_f = intensity_f.sum(axis=1)
+    elif ori == 'Horizontal':
+        xlabel = 'x (um)'
+        axis_sp = axis_x * 1e6
+        if if_slice == 1:
+            intensity_f = intensity_f[int(ny/2)]
+        else:
+            intensity_f = intensity_f.sum(axis=0)
+    if if_slice == 1:
+        title = 'spatial spectrum (central slice)'
+    else:
+        title = 'spatial spectrum (projection)'
+        
+    plt.imshow(intensity_f, cmap='jet',
+               extent=[axis_sp.min(), axis_sp.max(), (axis_ev.min()-ecent)*1e3, (axis_ev.max()-ecent)*1e3])
+    plt.colorbar()
+    plt.title(title); plt.xlabel(xlabel); plt.ylabel('meV around {}eV'.format(ecent))
+    plt.axis('tight')
 
 ####### Fit
 def fit_pulse_position(_wfr):

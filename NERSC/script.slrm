@@ -4,7 +4,7 @@
 #SBATCH -q regular
 #SBATCH -L SCRATCH
 #SBATCH -C haswell
-#SBATCH -o 100fs_40x.log
+#SBATCH -o 20fs_HHLM.log
 #SBATCH --account=lcls
 
 #export OMP_NUM_THREADS=32
@@ -13,4 +13,4 @@
 
 module load python
 conda activate SRWmp
-srun -n 1 python Full_HHLM_HRM.py
+srun -n 1 python HHLM.py
