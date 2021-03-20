@@ -9,41 +9,41 @@ try:
 except:
     pass
 
-# from srwpy import srwl_bl
-# from srwpy import srwlib
-# from srwpy import srwlpy
-# from srwpy import srwl_uti_smp
-# from srwpy import uti_io
-# from srwpy.uti_plot import *
-# import math
-
-# from time import *
-# from copy import *
-# from array import *
-
-# from util_Matt import Util
-# import numpy as np
-# import matplotlib
-# matplotlib.use('Agg')   # allows plot without X11 forwarding
-# import matplotlib.pyplot as plt
-
-import srwl_bl
-import srwlib
-import srwlpy
-import srwl_uti_smp
-import uti_io
+from srwpy import srwl_bl
+from srwpy import srwlib
+from srwpy import srwlpy
+from srwpy import srwl_uti_smp
+from srwpy import uti_io
+from srwpy.uti_plot import *
 import math
 
 from time import *
 from copy import *
 from array import *
-from uti_plot import *
 
 from util_Matt import Util
 import numpy as np
 import matplotlib
-#matplotlib.use('Agg')   # allows plot without X11 forwarding
+# matplotlib.use('Agg')   # allows plot without X11 forwarding
 import matplotlib.pyplot as plt
+
+# import srwl_bl
+# import srwlib
+# import srwlpy
+# import srwl_uti_smp
+# import uti_io
+# import math
+
+# from time import *
+# from copy import *
+# from array import *
+# from uti_plot import *
+
+# from util_Matt import Util
+# import numpy as np
+# import matplotlib
+# #matplotlib.use('Agg')   # allows plot without X11 forwarding
+# import matplotlib.pyplot as plt
 
 ####### get info from SRW wavefront
 def get_dimension(_wfr):
@@ -145,15 +145,25 @@ def get_spectrum(_wfr):
 
 
 ####### plot
-def plot_spatial_from_wf(_wfr):
-    # plot wavefront projection (y vs x)
+def plot_spatial_from_wf(_wfr, if_slice=0):
+    # plot wavefront projection (y vs x) or lineout (if_slice)
+    nx, ny, nz = get_dimension(_wfr)
     img = get_intensity(_wfr, domain='t').sum(axis=-1)
     axis_x, axis_y = get_axis_sp(_wfr)
-    plt.imshow(img,cmap='jet',
-        extent = [axis_x.min()*1e6, axis_x.max()*1e6, axis_y.max()*1e6, axis_y.min()*1e6])
-    plt.colorbar()
-    plt.xlabel(r'x ($\mu$m)')
-    plt.ylabel(r'y ($\mu$m)')
+    if if_slice == 1:
+        if nx >= ny:
+            plt.plot(axis_x*1e6, img[int(ny/2)]/img[int(ny/2)].max())
+            plt.xlabel(r'x ($\mu$m)')
+        else:
+            plt.plot(axis_y*1e6, img[:,int(nx/2)]/img[:,int(nx/2)].max())
+            plt.xlabel(r'y ($\mu$m)')
+        plt.ylabel('intensity (a.u.)')
+    else:
+        plt.imshow(img,cmap='jet',
+            extent = [axis_x.min()*1e6, axis_x.max()*1e6, axis_y.max()*1e6, axis_y.min()*1e6])
+        plt.colorbar()
+        plt.xlabel(r'x ($\mu$m)')
+        plt.ylabel(r'y ($\mu$m)')
 
 def plot_tprofile_from_wf(_wfr, if_short=1):
     # plot temporal profile (intensity vs time), if_short then only plot slices with > 1% intensity
@@ -164,7 +174,7 @@ def plot_tprofile_from_wf(_wfr, if_short=1):
     if if_short == 1:
         axis_t = axis_t[aw]
         int0 = int0[aw]
-    plt.plot(axis_t*1e15, int0)
+    plt.plot(axis_t*1e15, int0/int0.max())
     plt.xlabel('time (fs)')
     plt.ylabel('intensity (a.u.)')
     plt.title('{} fs/{} pts'.format(round(trange,2), npts))
@@ -202,7 +212,7 @@ def plot_spectrum_from_wf(_wfr, if_short=1):
     if if_short == 1:
         axis_ev = axis_ev[aw]
         int0 = int0[aw]
-    plt.plot( (axis_ev-ev_cent)*1e3, int0)
+    plt.plot( (axis_ev-ev_cent)*1e3, int0/int0.max())
     plt.xlabel('photon energy (meV) + {}eV'.format(ev_cent))
     plt.ylabel('intensity (a.u.)')
     plt.title('{} meV/{} pts'.format(round(ev_range,2), npts))

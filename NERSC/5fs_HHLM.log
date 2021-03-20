@@ -1,0 +1,25 @@
+Warning: Python module not loaded, you already have Python loaded via conda init
+C1, C2 Bragg angle: 19.90987691838631, 42.92647775935088 degree
+drift between crystals (mm): [0.18097479 0.31977349 0.18097479]
+crystal positions (m): [0, 0.18097478778649917, 0.5007482790135247, 0.6817230668000238]
+2048 2 499998
+Gaussian beam electric field calculation ... completed (lasted 44.425 s)
+Extracting intensity and saving it to a file ... completed (lasted 759.485 s)
+plotting input
+plot lasted 1206.25s
+Propagating through C1: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 556.689 s
+plotting after C1
+plot lasted 1459.32s
+Propagating through C2: done in 655.717 s
+plotting after C2
+plot lasted 1283.69s
+Propagating through C3: done in 628.045 s
+plotting after C3
+plot lasted 1405.78s
+Propagating through C4: done in 450.017 s
+plotting after C4
+plot lasted 1409.72s
+
+
+everything lasted: 9877.8s

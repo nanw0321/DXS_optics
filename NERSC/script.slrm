@@ -1,13 +1,13 @@
 #!/bin/bash -l
 #SBATCH -N 1
-#SBATCH -t 02:00:00
+#SBATCH -t 04:00:00
 #SBATCH -q regular
 #SBATCH -L SCRATCH
 #SBATCH -C haswell
-#SBATCH -o 20fs_HHLM.log
+#SBATCH -o 5fs_HHLM.log
 #SBATCH --account=lcls
 
-#export OMP_NUM_THREADS=32
+#export OMP_NUM_THREADS=48
 #export OMP_DISPLAY_ENV=true 
 #export OMP_DISPLAY_AFFINITY=true 
 
