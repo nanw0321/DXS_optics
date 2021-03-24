@@ -18,9 +18,25 @@ import srwl_uti_smp
 def set_optics(v=None):
     el = []
     pp = []
-    names = ['CRL_C1', 'C1', 'C1_C2', 'C2', 'C2_C3', 'C3', 'C3_C4', 'C4']
+    names = ['CRL', 'CRL_C1', 'C1', 'C1_C2', 'C2', 'C2_C3', 'C3', 'C3_C4', 'C4', 'C4_Watchpoint', 'Watchpoint']
     for el_name in names:
-        if el_name == 'CRL_C1':
+        if el_name == 'CRL':
+            # CRL: crl 290.0m
+            el.append(srwlib.srwl_opt_setup_CRL(
+                _foc_plane=v.op_CRL_foc_plane,
+                _delta=v.op_CRL_delta,
+                _atten_len=v.op_CRL_atten_len,
+                _shape=v.op_CRL_shape,
+                _apert_h=v.op_CRL_apert_h,
+                _apert_v=v.op_CRL_apert_v,
+                _r_min=v.op_CRL_r_min,
+                _n=v.op_CRL_n,
+                _wall_thick=v.op_CRL_wall_thick,
+                _xc=v.op_CRL_x,
+                _yc=v.op_CRL_y,
+            ))
+            pp.append(v.op_CRL_pp)
+        elif el_name == 'CRL_C1':
             # CRL_C1: drift 290.0m
             el.append(srwlib.SRWLOptD(
                 _L=v.op_CRL_C1_L,
@@ -140,6 +156,15 @@ def set_optics(v=None):
             el.append(crystal)
             pp.append(v.op_C4_pp)
 
+        elif el_name == 'C4_Watchpoint':
+            # C4_Watchpoint: drift 295.68172306680003m
+            el.append(srwlib.SRWLOptD(
+                _L=v.op_C4_Watchpoint_L,
+            ))
+            pp.append(v.op_C4_Watchpoint_pp)
+        elif el_name == 'Watchpoint':
+            # Watchpoint: watch 300.0m
+            pass
     pp.append(v.op_fin_pp)
     return srwlib.SRWLOptC(el, pp)
 
@@ -286,6 +311,19 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['rs_type', 's', 'g', 'source type, (u) idealized undulator, (t), tabulated undulator, (m) multipole, (g) gaussian beam'],
 
 #---Beamline optics:
+    # CRL: crl
+    ['op_CRL_foc_plane', 'f', 1, 'focalPlane'],
+    ['op_CRL_delta', 'f', 3.791135e-06, 'refractiveIndex'],
+    ['op_CRL_atten_len', 'f', 0.008387, 'attenuationLength'],
+    ['op_CRL_shape', 'f', 1, 'shape'],
+    ['op_CRL_apert_h', 'f', 0.001, 'horizontalApertureSize'],
+    ['op_CRL_apert_v', 'f', 0.001, 'verticalApertureSize'],
+    ['op_CRL_r_min', 'f', 0.0021988583, 'tipRadius'],
+    ['op_CRL_wall_thick', 'f', 8e-05, 'tipWallThickness'],
+    ['op_CRL_x', 'f', 0.0, 'horizontalOffset'],
+    ['op_CRL_y', 'f', 0.0, 'verticalOffset'],
+    ['op_CRL_n', 'i', 1, 'numberOfLenses'],
+
     # CRL_C1: drift
     ['op_CRL_C1_L', 'f', 5.0, 'length'],
 
@@ -302,12 +340,12 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C1_tc', 'f', 0.01, 'crystalThickness'],
     ['op_C1_uc', 'f', 1, 'useCase'],
     ['op_C1_ang_as', 'f', 0.29670597283903605, 'asymmetryAngle'],
-    ['op_C1_nvx', 'f', -0.998705946701, 'nvx'],
-    ['op_C1_nvy', 'f', 6.786e-09, 'nvy'],
-    ['op_C1_nvz', 'f', -0.050856976162, 'nvz'],
-    ['op_C1_tvx', 'f', -0.050856976162, 'tvx'],
-    ['op_C1_tvy', 'f', 3.46e-10, 'tvy'],
-    ['op_C1_ang', 'f', 0.05087889763248938, 'grazingAngle'],
+    ['op_C1_nvx', 'f', -0.9987059467008561, 'nvx'],
+    ['op_C1_nvy', 'f', 6.786103748077567e-09, 'nvy'],
+    ['op_C1_nvz', 'f', -0.050856976162044404, 'nvz'],
+    ['op_C1_tvx', 'f', -0.050856976162044404, 'tvx'],
+    ['op_C1_tvy', 'f', 3.4556789982999425e-10, 'tvy'],
+    ['op_C1_ang', 'f', 0.05087892473611022, 'grazingAngle'],
     ['op_C1_amp_coef', 'f', 1.0, 'heightAmplification'],
     ['op_C1_energy', 'f', 9481.0, 'energy'],
     ['op_C1_diffractionAngle', 'f', 1.57079632, 'diffractionAngle'],
@@ -380,26 +418,31 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C4_tc', 'f', 0.01, 'crystalThickness'],
     ['op_C4_uc', 'f', 1, 'useCase'],
     ['op_C4_ang_as', 'f', -0.29670597283903605, 'asymmetryAngle'],
-    ['op_C4_nvx', 'f', 0.799585811806, 'nvx'],
-    ['op_C4_nvy', 'f', 5.433e-09, 'nvy'],
-    ['op_C4_nvz', 'f', -0.600551854179, 'nvz'],
-    ['op_C4_tvx', 'f', 0.600551854179, 'tvx'],
-    ['op_C4_tvy', 'f', 4.081e-09, 'tvy'],
-    ['op_C4_ang', 'f', 0.6441911322682903, 'grazingAngle'],
+    ['op_C4_nvx', 'f', 0.7995858118062215, 'nvx'],
+    ['op_C4_nvy', 'f', 5.433102999268635e-09, 'nvy'],
+    ['op_C4_nvz', 'f', -0.6005518541792921, 'nvz'],
+    ['op_C4_tvx', 'f', 0.6005518541792921, 'tvx'],
+    ['op_C4_tvy', 'f', 4.080687816092217e-09, 'tvy'],
+    ['op_C4_ang', 'f', 0.6441911051077359, 'grazingAngle'],
     ['op_C4_amp_coef', 'f', 1.0, 'heightAmplification'],
     ['op_C4_energy', 'f', 9481.0, 'energy'],
     ['op_C4_diffractionAngle', 'f', -1.57079632, 'diffractionAngle'],
 
+    # C4_Watchpoint: drift
+    ['op_C4_Watchpoint_L', 'f', 4.318276933199968, 'length'],
+
 #---Propagation parameters
-    ['op_CRL_C1_pp', 'f', [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL_C1'],
-    ['op_C1_pp', 'f',     [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, -0.640439232226, 4.352e-09, 0.768008847492, 0.768008847492, 1.576e-09], 'C1'],
-    ['op_C1_C2_pp', 'f',  [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C1_C2'],
-    ['op_C2_pp', 'f',     [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.997381741513, 6.777e-09, 0.072316399909, 0.072316399909, -6.304e-09], 'C2'],
-    ['op_C2_C3_pp', 'f',  [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C2_C3'],
-    ['op_C3_pp', 'f',     [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, -0.997381741513, 6.777e-09, 0.072316399909, 0.072316399909, 6.304e-09], 'C3'],
-    ['op_C3_C4_pp', 'f',  [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C3_C4'],
-    ['op_C4_pp', 'f',     [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.640439135646, 4.352e-09, 0.768008928029, 0.768008928029, -1.576e-09], 'C4'],
-    ['op_fin_pp', 'f',    [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'final post-propagation (resize) parameters'],
+    ['op_CRL_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL'],
+    ['op_CRL_C1_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL_C1'],
+    ['op_C1_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, -0.640439232226, 4.352e-09, 0.768008847492, 0.768008847492, 1.576e-09], 'C1'],
+    ['op_C1_C2_pp', 'f',         [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C1_C2'],
+    ['op_C2_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.997381741513, 6.777e-09, 0.072316399909, 0.072316399909, -6.304e-09], 'C2'],
+    ['op_C2_C3_pp', 'f',         [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C2_C3'],
+    ['op_C3_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, -0.997381741513, 6.777e-09, 0.072316399909, 0.072316399909, 6.304e-09], 'C3'],
+    ['op_C3_C4_pp', 'f',         [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C3_C4'],
+    ['op_C4_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.640439135646, 4.352e-09, 0.768008928029, 0.768008928029, -1.576e-09], 'C4'],
+    ['op_C4_Watchpoint_pp', 'f', [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C4_Watchpoint'],
+    ['op_fin_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'final post-propagation (resize) parameters'],
 
     #[ 0]: Auto-Resize (1) or not (0) Before propagation
     #[ 1]: Auto-Resize (1) or not (0) After propagation

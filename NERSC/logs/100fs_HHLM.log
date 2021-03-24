@@ -1,0 +1,49 @@
+Warning: Python module not loaded, you already have Python loaded via conda init
+/global/u2/n/nanw0321/DXS_optics/Diagnostic_functions.py:248: RuntimeWarning: divide by zero encountered in log
+  intensity_f = np.log(intensity_f)
+/global/u2/n/nanw0321/DXS_optics/Diagnostic_functions.py:248: RuntimeWarning: divide by zero encountered in log
+  intensity_f = np.log(intensity_f)
+/global/u2/n/nanw0321/DXS_optics/Diagnostic_functions.py:248: RuntimeWarning: divide by zero encountered in log
+  intensity_f = np.log(intensity_f)
+/global/u2/n/nanw0321/DXS_optics/Diagnostic_functions.py:248: RuntimeWarning: divide by zero encountered in log
+  intensity_f = np.log(intensity_f)
+/global/u2/n/nanw0321/DXS_optics/Diagnostic_functions.py:248: RuntimeWarning: divide by zero encountered in log
+  intensity_f = np.log(intensity_f)
+nx, ny, nz: [256, 8, 400]
+x resolution/range: 15.62/ 4000.0um
+y resolution/range: 500.0/ 4000.0um
+time resolution/range: 10.0/ 4000.0fs
+energy resolution/range: 1.0/ 400.0meV
+HHLM1, HHLM2 Bragg angle: 19.90987691838631, 42.92647775935088 degree
+
+b factor: 11.83, range_x multiplication factor: 12
+pulse stretching: 41840.71fs, nz scaling factor: 10
+nx, ny, nz: [3072, 8, 4000]
+
+drift between crystals (mm): [0.18097479 0.31977349 0.18097479]
+crystal positions (m): [0, 0.18097478778649917, 0.5007482790135247, 0.6817230668000238]
+256 8 400
+Gaussian beam electric field calculation ... completed (lasted 0.028 s)
+Extracting intensity and saving it to a file ... completed (lasted 0.492 s)
+plotting input
+plot lasted 27.62s
+Propagating through CRL0: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 0.988 s
+plotting after CRL0
+plot lasted 29.99s
+Resizing in frequency domain: done in 1.451 s
+Propagating through HHLM1: done in 8.879 s
+plotting after HHLM1
+plot lasted 73.97s
+Propagating through HHLM2: done in 15.745 s
+plotting after HHLM2
+plot lasted 80.29s
+Propagating through HHLM3: done in 13.463 s
+plotting after HHLM3
+plot lasted 76.5s
+Propagating through HHLM4: done in 10.817 s
+plotting after HHLM4
+plot lasted 76.62s
+
+
+everything lasted: 417.02s

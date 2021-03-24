@@ -217,7 +217,7 @@ def plot_spectrum_from_wf(_wfr, if_short=1):
     plt.ylabel('intensity (a.u.)')
     plt.title('{} meV/{} pts'.format(round(ev_range,2), npts))
 
-def plot_spatial_spectrum_from_wf(_wfr, ori='Vertical', if_slice=1):
+def plot_spatial_spectrum_from_wf(_wfr, ori='Vertical', if_slice=1, if_log=0):
     # spatial spectrum
     nx, ny, nz = get_dimension(_wfr)
     intensity_f = get_intensity(_wfr, domain='f')
@@ -243,10 +243,15 @@ def plot_spatial_spectrum_from_wf(_wfr, ori='Vertical', if_slice=1):
         title = 'spatial spectrum (central slice)'
     else:
         title = 'spatial spectrum (projection)'
-        
+    
+    if if_log == 1:
+        intensity_f = np.log(intensity_f)
     plt.imshow(intensity_f, cmap='jet',
                extent=[axis_sp.min(), axis_sp.max(), (axis_ev.min()-ecent)*1e3, (axis_ev.max()-ecent)*1e3])
     plt.colorbar()
+    if if_log == 1:
+        cmin = np.max(intensity_f)-10
+        plt.clim(cmin)
     plt.title(title); plt.xlabel(xlabel); plt.ylabel('meV around {}eV'.format(ecent))
     plt.axis('tight')
 

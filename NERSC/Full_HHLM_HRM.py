@@ -1,17 +1,19 @@
 ##### diagnostic
 from Diagnostic_functions import *
 
-t_window = 8000e-15  # total time window [s]
-ev_window = 400e-3   # total energy window [eV]
+# sampling parameters
+t_window = 50000e-15  # total time window [s]
+ev_window = 100e-3   # total energy window [eV]
 t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
 
-sigT = 100e-15/2.355
+sigT = 2000e-15/2.355
 
-# t_window = 8000e-15  # total time window [s]
-# ev_window = 1500e-3   # total energy window [eV]
+# sampling parameters
+# t_window = 50000e-15  # total time window [s]
+# ev_window = 20000e-3   # total energy window [eV]
 # t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
 
-# sigT = 30e-15/2.355
+# sigT = 10e-15/2.355
 
 pulseRange = int(t_window/sigT)
 nx = 256; ny = 256; nz = 2*int(t_window/t_res/2)
@@ -48,29 +50,32 @@ for i in range(len(zlist)):
     posz.append(300+zlist[i]/1e3)
 
 # Si 220
-C1 = srwlib.SRWLOptCryst(_d_sp=1.9201374688016222, _psi0r=-1.0873035035585694e-05, _psi0i=1.8438837339536554e-07,
+HHLM1 = srwlib.SRWLOptCryst(_d_sp=1.9201374688016222, _psi0r=-1.0873035035585694e-05, _psi0i=1.8438837339536554e-07,
                          _psi_hr=-6.610167427198717e-06, _psi_hi=1.7824173540780476e-07,
                          _psi_hbr=-6.610167427198717e-06, _psi_hbi=1.7824173540780476e-07,
                          _tc=0.01, _ang_as=0)
 
 # Si 440
-C2 = srwlib.SRWLOptCryst(_d_sp=0.9600687344008111, _psi0r=-1.0873035035585694e-05, _psi0i=1.8438837339536554e-07,
+HHLM2 = srwlib.SRWLOptCryst(_d_sp=0.9600687344008111, _psi0r=-1.0873035035585694e-05, _psi0i=1.8438837339536554e-07,
                          _psi_hr=-4.181686438547451e-06, _psi_hi=1.6100412693351052e-07,
                          _psi_hbr=-4.181686438547451e-06, _psi_hbi=1.6100412693351052e-07,
                          _tc=0.01, _ang_as=0)
 
-thetaB1 = C1.get_ang_inc(_e=9481.0)
-thetaB2 = C2.get_ang_inc(_e=9481.0)
+thetaB1 = HHLM1.get_ang_inc(_e=9481.0)
+thetaB2 = HHLM2.get_ang_inc(_e=9481.0)
+
+print('HHLM1, HHLM2 Bragg angle: {}, {} degree'.format(np.rad2deg(thetaB1),np.rad2deg(thetaB2)))
 
 deviation_angle = [thetaB1*2, (thetaB2-thetaB1)*2, thetaB1*2]
 
 drift_list = []
+pos_beam = [0]
 posx = [0]
 for i in range(len(zlist)-1):
     driftz = posz[i+1]-posz[i]
     drift = driftz/np.cos(deviation_angle[i])
     drift_list.append(drift)
-    
+    pos_beam.append(pos_beam[i]+drift)
     driftx = driftz*np.tan(deviation_angle[i])*(-1)**i
     posx.append(posx[-1]+driftx)
     
@@ -81,9 +86,10 @@ plt.plot((np.asarray([min(posz)-0.1,max(posz)+0.1])-posz[0])*1e3,[0,0],'--',labe
 plt.legend()
 plt.xlabel('z (mm)')
 plt.ylabel('x (mm)')
-plt.savefig(dir_plot+'HHLM_crystal_geometry.png')
+plt.axis('equal')
 
-print('drift between crystals (mm): {}'.format(np.asarray(drift_list)*1e3))
+print('drift between crystals (mm): {}'.format(np.asarray(drift_list)))
+print('crystal positions (m): {}'.format(pos_beam))
 
 ## define bl HHLM
 def set_optics_HHLM1(v=None):
@@ -114,7 +120,7 @@ def set_optics_HHLM1(v=None):
             ))
             pp.append(v.op_CRL_HHLM1_pp)
         elif el_name == 'HHLM1':
-            # HHLM1: crystal 300.0m
+            # HHLM1: crystal 290.1m
             crystal = srwlib.SRWLOptCryst(
                 _d_sp=v.op_HHLM1_d_sp,
                 _psi0r=v.op_HHLM1_psi0r,
@@ -136,8 +142,10 @@ def set_optics_HHLM1(v=None):
             )
             el.append(crystal)
             pp.append(v.op_HHLM1_pp)
+
+#     pp.append(v.op_fin_pp)
     return srwlib.SRWLOptC(el, pp)
-            
+
 def set_optics_HHLM2(v=None, drift=.2):
     el = []
     pp = []
@@ -147,7 +155,7 @@ def set_optics_HHLM2(v=None, drift=.2):
             # HHLM1_HHLM2: drift
             el.append(srwlib.SRWLOptD(
 #                 _L=v.op_HHLM1_HHLM2_L,
-                _L = drift,
+                _L = drift
             ))
             pp.append(v.op_HHLM1_HHLM2_pp)
         elif el_name == 'HHLM2':
@@ -184,7 +192,7 @@ def set_optics_HHLM3(v=None, drift=.2):
             # HHLM2_HHLM3: drift
             el.append(srwlib.SRWLOptD(
 #                 _L=v.op_HHLM1_HHLM2_L,
-                _L = drift,
+                _L = drift
             ))
             pp.append(v.op_HHLM2_HHLM3_pp)
         elif el_name == 'HHLM3':
@@ -216,13 +224,13 @@ def set_optics_HHLM3(v=None, drift=.2):
 def set_optics_HHLM4(v=None, drift=.2):
     el = []
     pp = []
-    names = ['HHLM3_HHLM4', 'HHLM4']
+    names = ['HHLM3_HHLM4', 'HHLM4', 'HHLM4_After_HHLM', 'After_HHLM']
     for el_name in names:
         if el_name == 'HHLM3_HHLM4':
             # HHLM3_HHLM4: drift
             el.append(srwlib.SRWLOptD(
 #                 _L=v.op_HHLM1_HHLM2_L,
-                _L = drift,
+                _L = drift
             ))
             pp.append(v.op_HHLM3_HHLM4_pp)
         elif el_name == 'HHLM4':
@@ -248,6 +256,15 @@ def set_optics_HHLM4(v=None, drift=.2):
             )
             el.append(crystal)
             pp.append(v.op_HHLM4_pp)
+#         elif el_name == 'HHLM4_After_HHLM':
+#             # HHLM4_After_HHLM: drift 301.2m
+#             el.append(srwlib.SRWLOptD(
+#                 _L=v.op_HHLM4_After_HHLM_L,
+#             ))
+#             pp.append(v.op_HHLM4_After_HHLM_pp)
+#         elif el_name == 'After_HHLM':
+#             # After_HHLM: watch 310.1m
+#             pass
     return srwlib.SRWLOptC(el, pp)
 
 
@@ -580,13 +597,13 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_HHLM1_nvz', 'f', -0.050856976162, 'nvz'],
     ['op_HHLM1_tvx', 'f', -0.050856976162, 'tvx'],
     ['op_HHLM1_tvy', 'f', 3.46e-10, 'tvy'],
-    ['op_HHLM1_ang', 'f', 0.7492083731847909, 'grazingAngle'],
+    ['op_HHLM1_ang', 'f', 0.05087889763248938, 'grazingAngle'],
     ['op_HHLM1_amp_coef', 'f', 1.0, 'heightAmplification'],
     ['op_HHLM1_energy', 'f', 9481.0, 'energy'],
     ['op_HHLM1_diffractionAngle', 'f', 1.57079632, 'diffractionAngle'],
 
     # HHLM1_HHLM2: drift
-    ['op_HHLM1_HHLM2_L', 'f', 0.19999999999998863, 'length'],
+    ['op_HHLM1_HHLM2_L', 'f', 0.1809747877899781, 'length'],
 
     # HHLM2: crystal
     ['op_HHLM2_hfn', 's', '', 'heightProfileFile'],
@@ -601,18 +618,18 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_HHLM2_tc', 'f', 0.01, 'crystalThickness'],
     ['op_HHLM2_uc', 'f', 1, 'useCase'],
     ['op_HHLM2_ang_as', 'f', 0.0, 'asymmetryAngle'],
-    ['op_HHLM2_nvx', 'f', 0.732228243073, 'nvx'],
-    ['op_HHLM2_nvy', 'f', 4.975e-09, 'nvy'],
-    ['op_HHLM2_nvz', 'f', -0.681059321973, 'nvz'],
-    ['op_HHLM2_tvx', 'f', 0.681059321973, 'tvx'],
-    ['op_HHLM2_tvy', 'f', 4.628e-09, 'tvy'],
-    ['op_HHLM2_ang', 'f', 1.4111790941168765, 'grazingAngle'],
+    ['op_HHLM2_nvx', 'f', 0.7322282430733594, 'nvx'],
+    ['op_HHLM2_nvy', 'f', 4.975415277322606e-09, 'nvy'],
+    ['op_HHLM2_nvz', 'f', -0.6810593219725439, 'nvz'],
+    ['op_HHLM2_tvx', 'f', 0.6810593219725439, 'tvx'],
+    ['op_HHLM2_tvy', 'f', 4.627727743855522e-09, 'tvy'],
+    ['op_HHLM2_ang', 'f', 0.7492083731847909, 'grazingAngle'],
     ['op_HHLM2_amp_coef', 'f', 1.0, 'heightAmplification'],
     ['op_HHLM2_energy', 'f', 9481.0, 'energy'],
     ['op_HHLM2_diffractionAngle', 'f', -1.57079632, 'diffractionAngle'],
 
     # HHLM2_HHLM3: drift
-    ['op_HHLM2_HHLM3_L', 'f', 0.8000000000000114, 'length'],
+    ['op_HHLM2_HHLM3_L', 'f', 0.31977349122354326, 'length'],
 
     # HHLM3: crystal
     ['op_HHLM3_hfn', 's', '', 'heightProfileFile'],
@@ -627,18 +644,18 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_HHLM3_tc', 'f', 0.01, 'crystalThickness'],
     ['op_HHLM3_uc', 'f', 1, 'useCase'],
     ['op_HHLM3_ang_as', 'f', 0.0, 'asymmetryAngle'],
-    ['op_HHLM3_nvx', 'f', -0.732228243073, 'nvx'],
-    ['op_HHLM3_nvy', 'f', 4.975e-09, 'nvy'],
-    ['op_HHLM3_nvz', 'f', -0.681059321973, 'nvz'],
-    ['op_HHLM3_tvx', 'f', -0.681059321973, 'tvx'],
-    ['op_HHLM3_tvy', 'f', 4.628e-09, 'tvy'],
+    ['op_HHLM3_nvx', 'f', -0.7322282430733594, 'nvx'],
+    ['op_HHLM3_nvy', 'f', 4.975415277322606e-09, 'nvy'],
+    ['op_HHLM3_nvz', 'f', -0.6810593219725439, 'nvz'],
+    ['op_HHLM3_tvx', 'f', -0.6810593219725439, 'tvx'],
+    ['op_HHLM3_tvy', 'f', 4.627727743855522e-09, 'tvy'],
     ['op_HHLM3_ang', 'f', 0.7492083731847909, 'grazingAngle'],
     ['op_HHLM3_amp_coef', 'f', 1.0, 'heightAmplification'],
     ['op_HHLM3_energy', 'f', 9481.0, 'energy'],
     ['op_HHLM3_diffractionAngle', 'f', 1.57079632, 'diffractionAngle'],
 
     # HHLM3_HHLM4: drift
-    ['op_HHLM3_HHLM4_L', 'f', 0.19999999999998863, 'length'],
+    ['op_HHLM3_HHLM4_L', 'f', 0.18097478778651066, 'length'],
 
     # HHLM4: crystal
     ['op_HHLM4_hfn', 's', '', 'heightProfileFile'],
@@ -658,13 +675,13 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_HHLM4_nvz', 'f', -0.600551854179, 'nvz'],
     ['op_HHLM4_tvx', 'f', 0.600551854179, 'tvx'],
     ['op_HHLM4_tvy', 'f', 4.081e-09, 'tvy'],
-    ['op_HHLM4_ang', 'f', 0.08728901635673195, 'grazingAngle'],
+    ['op_HHLM4_ang', 'f', 0.6441911322682903, 'grazingAngle'],
     ['op_HHLM4_amp_coef', 'f', 1.0, 'heightAmplification'],
     ['op_HHLM4_energy', 'f', 9481.0, 'energy'],
     ['op_HHLM4_diffractionAngle', 'f', -1.57079632, 'diffractionAngle'],
     
     # HHLM4_C1: drift
-    ['op_HHLM4_C1_L', 'f', 0.19999999999998863, 'length'],
+    ['op_HHLM4_C1_L', 'f', 4.31827693319997, 'length'],
 
     # C1: crystal
     ['op_C1_hfn', 's', '', 'heightProfileFile'],
@@ -863,22 +880,47 @@ varParam = srwl_bl.srwl_uti_ext_options([
 def plot_wfr_diagnostic(_wfr, label=None, dir_plot=None, if_log=0, i=0):
     t0 = time()
     print('plotting {}'.format(label))
+       
+    ''' some calculations '''
     nx, ny, nz = get_dimension(_wfr)
+    taxis = get_axis_t(_wfr)
+    try:
+        cent_t, fwhm_t = fit_pulse_duration(_wfr); tstart = cent_t - fwhm_t*5; tfin = cent_t + fwhm_t*5
+        tstart = max(taxis.min()*1e15, tstart); tfin = min(taxis.max()*1e15, tfin)
+        tilt = round(fit_pulsefront_tilt(_wfr, dim='x'),2)     # [fs/um]
+    except:
+        tstart = taxis.min()*1e15; tfin = taxis.max()*1e15
+    
     if if_log == 1:
-        pltname = 'nx{}_ny{}_nz{}_{}_{}_log.png'.format(nx,ny,nz,i,label)
+        pltname = '{}_{}_nx{}_ny{}_nz{}_log.png'.format(i,label,nx,ny,nz)
     else:
-        pltname = 'nx{}_ny{}_nz{}_{}_{}.png'.format(nx,ny,nz,i,label)
+        pltname = '{}_{}_nx{}_ny{}_nz{}.png'.format(i,label,nx,ny,nz)
+
+    ''' plots '''
+    plt.figure(figsize=(25,4))
+    # 1. spatial projection/lineout
+    plt.subplot(1,5,1); plot_spatial_from_wf(_wfr, if_slice=1); plt.title(label+'_{}x{}pts'.format(nx, ny))
     
-    cent_t, fwhm_t = fit_pulse_duration(_wfr); tstart = cent_t - fwhm_t*5; tfin = cent_t + fwhm_t*5
-    taxis = get_axis_t(_wfr); tstart = max(taxis.min()*1e15, tstart); tfin = min(taxis.max()*1e15, tfin)
-    
-    plt.figure(figsize=(20,4))
-    plt.subplot(1,4,1); plot_spatial_from_wf(_wfr); plt.title(label)
-    plt.subplot(1,4,2); plot_tilt_from_wf(_wfr, ori='Horizontal', type='slice', if_log=if_log); plt.xlim([tstart, tfin]); plt.title(label+' {}fs'.format(round(fwhm_t,2)))
-    plt.subplot(1,4,3); plot_tprofile_from_wf(_wfr, if_short=1)#; plt.xlim([tstart, tfin])
-    plt.subplot(1,4,4); plot_spectrum_from_wf(_wfr, if_short=1)
+    # 2. wavefront tilt
+    plt.subplot(1,5,2); plot_tilt_from_wf(_wfr, ori='Horizontal', type='slice', if_log=if_log)
+    title = 'H'
+    if fwhm_t is not None:
+        title += '_{}fs'.format(round(fwhm_t,2))
+    if tilt is not None:
+        title += '_{}fs/um_tilt'.format(tilt)
+        
+    plt.title(title); plt.xlim([tstart, tfin])
+
+    # 3. temporal profile
+    plt.subplot(1,5,3); plot_tprofile_from_wf(_wfr, if_short=1)
+
+    # 4. spatial spectrum
+    plt.subplot(1,5,4); plot_spatial_spectrum_from_wf(_wfr, ori='Horizontal', if_slice=1)
+
+    # 5. spectral response
+    plt.subplot(1,5,5); plot_spectrum_from_wf(_wfr, if_short=1)
+
     plt.savefig(dir_plot+pltname)
-    plt.close('all')
     print('plot lasted {}s'.format(round(time()-t0,2)))
 
 
@@ -891,8 +933,8 @@ def main(drift_list, if_close=0, if_log=1):
     
     # incident beam
     wfr = v.w_res
-    srwlpy.SetRepresElecField(wfr, 'f')
     plot_wfr_diagnostic(wfr, label='input', dir_plot=dir_plot, i=1, if_log=if_log)
+    srwlpy.SetRepresElecField(wfr, 'f')
     
     
     # pre mono
@@ -923,14 +965,16 @@ def main(drift_list, if_close=0, if_log=1):
     srwlpy.PropagElecField(wfr, bl4)
     print('done in', round(time() - t0, 3), 's')
     plot_wfr_diagnostic(wfr, label='after HHLM4', dir_plot=dir_plot, i=5, if_log=if_log)
+
+
+    # # resize elec field
+    # print('Resizing in frequency domain: ', end='')
+    # t0 = time();
+    # srwlpy.ResizeElecField(wfr, 'f', [0, 1., 2.])
+    # print('done in', round(time() - t0, 3), 's')
+    # srwlpy.SetRepresElecField(wfr, 'f')
     
-    # resize elec field
-    print('Resizing in frequency domain: ', end='')
-    t0 = time();
-    srwlpy.ResizeElecField(wfr, 'f', [0, 1., 2.])
-    print('done in', round(time() - t0, 3), 's')
-    srwlpy.SetRepresElecField(wfr, 'f')
-    
+
     # 4f mono
     print('Propagating through CC1: ', end='')
     t0 = time()
@@ -982,8 +1026,6 @@ if __name__ == '__main__':
     main(drift_list, if_close=0, if_log=1)
     print('\n\neverything lasted: {}s'.format(round(time()-time_stamp,2)))
 
-### ADD A SLIT OF CRL SIZE BEFORE TO SEE IF SIDE STRIPES GO AWAY
-### Add spatial spectrum plot x vs eV, there should be spatial chirp
 ### For the pre-mono, increase the time window to muuuuuuch higher and see if tilt shows up
 
 ### Increase bandwidth to see spectral resolution of pre-mono

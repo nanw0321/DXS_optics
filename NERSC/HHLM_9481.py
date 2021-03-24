@@ -2,23 +2,28 @@
 from Diagnostic_functions import *
 
 # sampling parameters
-t_window = 50000e-15  # total time window [s]
-ev_window = 10000e-3   # total energy window [eV]
-t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
+sigT = 2e-15/2.355
 
-sigT = 20e-15/2.355
+t_res =sigT*2.355/10          # time sampling resolution [s]
+t_window = sigT*2.355*40     # total time window [s]
+ev_window = 4/t_res *1e-15   # total energy window [eV]
 
-# sampling parameters
-# t_window = 50000e-15  # total time window [s]
-# ev_window = 20000e-3   # total energy window [eV]
-# t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
+range_x = 4e-3; range_y = 4e-3
+nx = 256; ny = 8; nz = 2*round(t_window/t_res/2)
 
-# sigT = 10e-15/2.355
+x_res = range_x/nx
+y_res = range_y/ny
+ev_res = ev_window/nz        # energy sampling resolution [eV]
 
 pulseRange = int(t_window/sigT)
-nx = 4096; ny = 2; nz = 2*int(t_window/t_res/2)
-range_x = 4e-3; range_y = 4e-3
 factor = -1 # factor = 0.5
+
+print('nx, ny, nz: {}'.format([nx, ny, nz]))
+print('x resolution/range: {}/ {}um'.format(round(x_res*1e6,2), round(range_x*1e6,2)))
+print('y resolution/range: {}/ {}um'.format(round(y_res*1e6,2), round(range_y*1e6,2)))
+print('time resolution/range: {}/ {}fs'.format(round(t_res*1e15,2), round(t_window*1e15,2)))
+print('energy resolution/range: {}/ {}meV'.format(round(ev_res*1e3,2), round(ev_window*1e3,2)))
+
 
 def rCRL(fCRL, nCRL):
     # calculates the min radius of curvature of each lens
@@ -38,6 +43,7 @@ dir_output = 'output/'; mkdir(dir_output)
 dir_case = dir_output+'HHLM_9481/'; mkdir(dir_case)
 dir_param = dir_case+'{}fs/'.format(round(sigT*2.355*1e15,2)); mkdir(dir_param)
 dir_plot = dir_param+'{}fs_{}meV/'.format(round(t_window*1e15,1),round(ev_window*1e3,1)); mkdir(dir_plot)
+
 
 # calculate crystal geometry
 z1 = 0      # position in lab frame [mm]
@@ -65,8 +71,23 @@ HHLM2 = srwlib.SRWLOptCryst(_d_sp=0.9600687344008111, _psi0r=-1.0873035035585694
 
 thetaB1 = HHLM1.get_ang_inc(_e=9481.0)
 thetaB2 = HHLM2.get_ang_inc(_e=9481.0)
+ang_asym = np.deg2rad(17)
 
-print('HHLM1, HHLM2 Bragg angle: {}, {} degree'.format(np.rad2deg(thetaB1),np.rad2deg(thetaB2)))
+b_factor = np.sin(thetaB1+ang_asym)/ np.sin(thetaB1-ang_asym)
+
+def calc_scale_factor(b_factor):
+    scale_factors = np.array([2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30])
+    idx = (np.abs(scale_factors - b_factor)).argmin()
+    return scale_factors[idx]
+
+x_scaling = calc_scale_factor(b_factor)
+t_stretching = range_x / np.sin(thetaB1-ang_asym) * (np.cos(thetaB1-ang_asym)-np.cos(thetaB1+ang_asym)) /3e8 * 0.8
+z_scaling = round(t_stretching/t_window)
+
+print('HHLM1, HHLM2 Bragg angle: {}, {} degree\n'.format(np.rad2deg(thetaB1),np.rad2deg(thetaB2)))
+print('b factor: {}, range_x multiplication factor: {}'.format(round(b_factor, 2), x_scaling))
+print('pulse stretching: {}fs, nz scaling factor: {}'.format(round(t_stretching*1e15,2), z_scaling))
+print('nx, ny, nz: {}\n'.format([nx*x_scaling, ny, nz*z_scaling]))
 
 deviation_angle = [thetaB1*2, (thetaB2-thetaB1)*2, thetaB1*2]
 
@@ -93,11 +114,12 @@ plt.axis('equal')
 print('drift between crystals (mm): {}'.format(np.asarray(drift_list)))
 print('crystal positions (m): {}'.format(pos_beam))
 
+
 ## define bl HHLM
-def set_optics_HHLM1(v=None):
+def set_optics_CRL0(v=None):
     el = []
     pp = []
-    names = ['CRL', 'CRL_HHLM1', 'HHLM1']
+    names = ['CRL','CRL_HHLM1']
     for el_name in names:
         if el_name == 'CRL':
             # CRL: crl 290.0m
@@ -121,8 +143,15 @@ def set_optics_HHLM1(v=None):
                 _L=v.op_CRL_HHLM1_L,
             ))
             pp.append(v.op_CRL_HHLM1_pp)
-        elif el_name == 'HHLM1':
-            # HHLM1: crystal 290.1m
+    return srwlib.SRWLOptC(el, pp)
+
+def set_optics_HHLM1(v=None):
+    el = []
+    pp = []
+    names = ['HHLM1']
+    for el_name in names:
+        if el_name == 'HHLM1':
+            # HHLM1: crystal 295.0m
             crystal = srwlib.SRWLOptCryst(
                 _d_sp=v.op_HHLM1_d_sp,
                 _psi0r=v.op_HHLM1_psi0r,
@@ -144,8 +173,6 @@ def set_optics_HHLM1(v=None):
             )
             el.append(crystal)
             pp.append(v.op_HHLM1_pp)
-
-#     pp.append(v.op_fin_pp)
     return srwlib.SRWLOptC(el, pp)
 
 def set_optics_HHLM2(v=None, drift=.2):
@@ -452,18 +479,18 @@ varParam = srwl_bl.srwl_uti_ext_options([
     
     
 #---Propagation parameters
-#                                [0][1] [2] [3][4] [5]  [6]  [7]  [8]  [9] [10] [11]
-    ['op_CRL_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL'],
+#                                   [0][1] [2] [3][4] [5]  [6]  [7]  [8]  [9] [10] [11]
+    ['op_CRL_pp', 'f',              [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL'],
     ['op_CRL_HHLM1_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL_HHLM1'],
-    ['op_HHLM1_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM1'],
-    ['op_HHLM1_HHLM2_pp', 'f',         [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM1_HHLM2'],
+    ['op_HHLM1_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, x_scaling, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM1'],
+    ['op_HHLM1_HHLM2_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM1_HHLM2'],
     ['op_HHLM2_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM2'],
-    ['op_HHLM2_HHLM3_pp', 'f',         [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM2_HHLM3'],
+    ['op_HHLM2_HHLM3_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM2_HHLM3'],
     ['op_HHLM3_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM3'],
-    ['op_HHLM3_HHLM4_pp', 'f',         [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM3_HHLM4'],
-    ['op_HHLM4_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM4'],
+    ['op_HHLM3_HHLM4_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM3_HHLM4'],
+    ['op_HHLM4_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1/x_scaling, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM4'],
     ['op_HHLM4_After_HHLM_pp', 'f', [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM4_After_HHLM'],
-    ['op_fin_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'final post-propagation (resize) parameters'],
+    ['op_fin_pp', 'f',              [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'final post-propagation (resize) parameters'],
 
     #[ 0]: Auto-Resize (1) or not (0) Before propagation
     #[ 1]: Auto-Resize (1) or not (0) After propagation
@@ -500,17 +527,17 @@ def plot_wfr_diagnostic(_wfr, label=None, dir_plot=None, if_log=0, i=0):
         tstart = taxis.min()*1e15; tfin = taxis.max()*1e15
     
     if if_log == 1:
-        pltname = 'nx{}_ny{}_nz{}_{}_{}_log.png'.format(nx,ny,nz,i,label)
+        pltname = '{}_{}_nx{}_ny{}_nz{}_log.png'.format(i,label,nx,ny,nz)
     else:
-        pltname = 'nx{}_ny{}_nz{}_{}_{}.png'.format(nx,ny,nz,i,label)
+        pltname = '{}_{}_nx{}_ny{}_nz{}.png'.format(i,label,nx,ny,nz)
 
     ''' plots '''
-    plt.figure(figsize=(20,4))
+    plt.figure(figsize=(25,4))
     # 1. spatial projection/lineout
-    plt.subplot(1,4,1); plot_spatial_from_wf(_wfr, if_slice=1); plt.title(label+'_{}x{}pts'.format(nx, ny))
+    plt.subplot(1,5,1); plot_spatial_from_wf(_wfr, if_slice=1); plt.title(label+'_{}x{}pts'.format(nx, ny))
     
     # 2. wavefront tilt
-    plt.subplot(1,4,2); plot_tilt_from_wf(_wfr, ori='Horizontal', type='slice', if_log=if_log)
+    plt.subplot(1,5,2); plot_tilt_from_wf(_wfr, ori='Horizontal', type='slice', if_log=if_log)
     title = 'H'
     if fwhm_t is not None:
         title += '_{}fs'.format(round(fwhm_t,2))
@@ -519,15 +546,19 @@ def plot_wfr_diagnostic(_wfr, label=None, dir_plot=None, if_log=0, i=0):
         
     plt.title(title); plt.xlim([tstart, tfin])
 
-    # 3. spectral response
-    plt.subplot(1,4,3); plot_spectrum_from_wf(_wfr, if_short=1)
-    
+    # 3. temporal profile
+    plt.subplot(1,5,3); plot_tprofile_from_wf(_wfr, if_short=1)
+
     # 4. spatial spectrum
-    plt.subplot(1,4,4); plot_spatial_spectrum_from_wf(_wfr, ori='Horizontal', if_slice=1)
+    plt.subplot(1,5,4); plot_spatial_spectrum_from_wf(_wfr, ori='Horizontal', if_slice=1, if_log=if_log)
+
+    # 5. spectral response
+    plt.subplot(1,5,5); plot_spectrum_from_wf(_wfr, if_short=1)
 
     plt.savefig(dir_plot+pltname)
+    plt.close('all')
     print('plot lasted {}s'.format(round(time()-t0,2)))
-
+    
 
 def main(drift_list, if_log=1):
     tstart = time()
@@ -541,33 +572,47 @@ def main(drift_list, if_log=1):
     plot_wfr_diagnostic(wfr, label='input', dir_plot=dir_plot, i=1, if_log=if_log)
     srwlpy.SetRepresElecField(wfr, 'f')
     
+    print('Propagating through CRL0: ', end='')
+    t0 = time()
+    bl1 = set_optics_CRL0(v)
+    srwlpy.PropagElecField(wfr, bl1)
+    print('done in', round(time() - t0, 3), 's')
+    plot_wfr_diagnostic(wfr, label='after CRL0', dir_plot=dir_plot, i=2, if_log=if_log)
+    
+    # resize elec field
+    print('Resizing in frequency domain: ', end='')
+    t0 = time();
+    srwlpy.ResizeElecField(wfr, 'f', [0, 1., z_scaling])
+    print('done in', round(time() - t0, 3), 's')
+    srwlpy.SetRepresElecField(wfr, 'f')
+    
     print('Propagating through HHLM1: ', end='')
     t0 = time()
     bl1 = set_optics_HHLM1(v)
     srwlpy.PropagElecField(wfr, bl1)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label='after HHLM1', dir_plot=dir_plot, i=2, if_log=if_log)
+    plot_wfr_diagnostic(wfr, label='after HHLM1', dir_plot=dir_plot, i=3, if_log=if_log)
     
     print('Propagating through HHLM2: ', end='')
     t0 = time()
     bl2 = set_optics_HHLM2(v, drift=drift_list[0])
     srwlpy.PropagElecField(wfr, bl2)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label='after HHLM2', dir_plot=dir_plot, i=3, if_log=if_log)
+    plot_wfr_diagnostic(wfr, label='after HHLM2', dir_plot=dir_plot, i=4, if_log=if_log)
     
     print('Propagating through HHLM3: ', end='')
     t0 = time()
     bl3 = set_optics_HHLM3(v, drift=drift_list[1])
     srwlpy.PropagElecField(wfr, bl3)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label='after HHLM3', dir_plot=dir_plot, i=4, if_log=if_log)
+    plot_wfr_diagnostic(wfr, label='after HHLM3', dir_plot=dir_plot, i=5, if_log=if_log)
     
     print('Propagating through HHLM4: ', end='')
     t0 = time()
     bl4 = set_optics_HHLM4(v, drift=drift_list[2])
     srwlpy.PropagElecField(wfr, bl4)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label='after HHLM4', dir_plot=dir_plot, i=5, if_log=if_log)
+    plot_wfr_diagnostic(wfr, label='after HHLM4', dir_plot=dir_plot, i=6, if_log=if_log)
 
 
 if __name__ == '__main__':
@@ -575,13 +620,3 @@ if __name__ == '__main__':
     print(nx, ny, nz)
     main(drift_list)
     print('\n\neverything lasted: {}s'.format(round(time()-time_stamp,2)))
-
-### ADD A SLIT OF CRL SIZE BEFORE TO SEE IF SIDE STRIPES GO AWAY
-### Add spatial spectrum plot x vs eV, there should be spatial chirp
-### For the pre-mono, increase the time window to muuuuuuch higher and see if tilt shows up
-
-### Increase bandwidth to see spectral resolution of pre-mono
-### Reduce bandwidth and increase time range a lot to see tilt from pre-mono
-
-### Offset mirrors; convex mirror in SRW?
-### Try to replace CRLs with parabolic mirrors in SRW
