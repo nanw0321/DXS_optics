@@ -1,15 +1,25 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
 ##### diagnostic
 from Diagnostic_functions import *
 
+
+# In[2]:
+
+
 # sampling parameters
-sigT = 2e-15/2.355
+sigT = 800e-15/2.355
 
 t_res =sigT*2.355/10          # time sampling resolution [s]
 t_window = sigT*2.355*40     # total time window [s]
 ev_window = 4/t_res *1e-15   # total energy window [eV]
 
 range_x = 4e-3; range_y = 4e-3
-nx = 256; ny = 8; nz = 2*round(t_window/t_res/2)
+nx = 256; ny = 256; nz = 2*round(t_window/t_res/2)
 
 x_res = range_x/nx
 y_res = range_y/ny
@@ -35,14 +45,14 @@ def rCRL(fCRL, nCRL):
 
 fCRL0 = 290.; nCRL0 = 1
 
-# I/O
-def mkdir(path):
-    if not os.path.exists(path):
-        os.mkdir(path)
-dir_output = 'output/'; mkdir(dir_output)
-dir_case = dir_output+'HHLM_9481/'; mkdir(dir_case)
-dir_param = dir_case+'{}fs/'.format(round(sigT*2.355*1e15,2)); mkdir(dir_param)
-dir_plot = dir_param+'{}fs_{}meV/'.format(round(t_window*1e15,1),round(ev_window*1e3,1)); mkdir(dir_plot)
+# I/O directories
+dir_output = 'output/'
+dir_case = dir_output+'HHLM_9481/'
+dir_param = dir_case+'{}fs/'.format(round(sigT*2.355*1e15,2))
+dir_plot = dir_param+'{}fs_{}meV/'.format(round(t_window*1e15,1),round(ev_window*1e3,1))
+
+
+# In[3]:
 
 
 # calculate crystal geometry
@@ -69,25 +79,36 @@ HHLM2 = srwlib.SRWLOptCryst(_d_sp=0.9600687344008111, _psi0r=-1.0873035035585694
                          _psi_hbr=-4.181686438547451e-06, _psi_hbi=1.6100412693351052e-07,
                          _tc=0.01, _ang_as=0)
 
+
+    
 thetaB1 = HHLM1.get_ang_inc(_e=9481.0)
 thetaB2 = HHLM2.get_ang_inc(_e=9481.0)
-ang_asym = np.deg2rad(17)
+ang_asym1 = np.deg2rad(17)
 
-b_factor = np.sin(thetaB1+ang_asym)/ np.sin(thetaB1-ang_asym)
+b_factor1 = np.sin(thetaB1+ang_asym1)/ np.sin(thetaB1-ang_asym1)
 
 def calc_scale_factor(b_factor):
-    scale_factors = np.array([2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30])
-    idx = (np.abs(scale_factors - b_factor)).argmin()
+    scale_factors = np.array([1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30])
+    if b_factor>1:
+        idx = (np.abs(scale_factors - b_factor)).argmin()
+    else:
+        idx = (np.abs(scale_factors - 1/b_factor)).argmin()
     return scale_factors[idx]
 
-x_scaling = calc_scale_factor(b_factor)
-t_stretching = range_x / np.sin(thetaB1-ang_asym) * (np.cos(thetaB1-ang_asym)-np.cos(thetaB1+ang_asym)) /3e8 * 0.8
-z_scaling = round(t_stretching/t_window)
+def calc_t_stretching(thetaB, ang_asym, range_x=range_x):
+    t_stretching = np.abs(range_x / np.sin(thetaB-ang_asym) * (np.cos(thetaB-ang_asym)-np.cos(thetaB+ang_asym)) /3e8)
+    return t_stretching
 
-print('HHLM1, HHLM2 Bragg angle: {}, {} degree\n'.format(np.rad2deg(thetaB1),np.rad2deg(thetaB2)))
-print('b factor: {}, range_x multiplication factor: {}'.format(round(b_factor, 2), x_scaling))
-print('pulse stretching: {}fs, nz scaling factor: {}'.format(round(t_stretching*1e15,2), z_scaling))
-print('nx, ny, nz: {}\n'.format([nx*x_scaling, ny, nz*z_scaling]))
+x_scaling1 = calc_scale_factor(b_factor1)
+t_stretching1 = calc_t_stretching(thetaB1, ang_asym1)
+z_scaling1 = np.max([np.round(t_stretching1/t_window),1.])
+
+print('HHLM1 Bragg angle: {}degree'.format(np.rad2deg(thetaB1)))
+print('  b factor: {}, range_x multiplication factor: {}'.format(round(b_factor1, 2), x_scaling1))
+print('  pulse stretching: {}fs, nz scaling factor: {}'.format(round(t_stretching1*1e15,2), z_scaling1))
+print('nx, ny, nz: {}\n'.format([nx*x_scaling1, ny, nz*z_scaling1]))
+
+print('HHLM2 Bragg angle: {}degree'.format(np.rad2deg(thetaB2)))
 
 deviation_angle = [thetaB1*2, (thetaB2-thetaB1)*2, thetaB1*2]
 
@@ -112,7 +133,24 @@ plt.ylabel('x (mm)')
 plt.axis('equal')
 
 print('drift between crystals (mm): {}'.format(np.asarray(drift_list)))
-print('crystal positions (m): {}'.format(pos_beam))
+print('crystal positions (m): {}\n'.format(pos_beam))
+
+
+# In[4]:
+
+
+# I/O
+def mkdir(path):
+    if not os.path.exists(path):
+        os.mkdir(path)
+
+mkdir(dir_output)
+mkdir(dir_case)
+mkdir(dir_param)
+mkdir(dir_plot)
+
+
+# In[5]:
 
 
 ## define bl HHLM
@@ -296,6 +334,9 @@ def set_optics_HHLM4(v=None, drift=.2):
 #             pass
     pp.append(v.op_fin_pp)
     return srwlib.SRWLOptC(el, pp)
+
+
+# In[6]:
 
 
 varParam = srwl_bl.srwl_uti_ext_options([
@@ -482,14 +523,13 @@ varParam = srwl_bl.srwl_uti_ext_options([
 #                                   [0][1] [2] [3][4] [5]  [6]  [7]  [8]  [9] [10] [11]
     ['op_CRL_pp', 'f',              [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL'],
     ['op_CRL_HHLM1_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL_HHLM1'],
-    ['op_HHLM1_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, x_scaling, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM1'],
+    ['op_HHLM1_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, x_scaling1, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM1'],
     ['op_HHLM1_HHLM2_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM1_HHLM2'],
     ['op_HHLM2_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM2'],
     ['op_HHLM2_HHLM3_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM2_HHLM3'],
     ['op_HHLM3_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM3'],
     ['op_HHLM3_HHLM4_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM3_HHLM4'],
-    ['op_HHLM4_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1/x_scaling, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM4'],
-    ['op_HHLM4_After_HHLM_pp', 'f', [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM4_After_HHLM'],
+    ['op_HHLM4_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1/x_scaling1, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM4'],
     ['op_fin_pp', 'f',              [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'final post-propagation (resize) parameters'],
 
     #[ 0]: Auto-Resize (1) or not (0) Before propagation
@@ -512,12 +552,17 @@ varParam = srwl_bl.srwl_uti_ext_options([
 ])
 
 
+# In[7]:
+
+
 def plot_wfr_diagnostic(_wfr, label=None, dir_plot=None, if_log=0, i=0):
+    np.seterr(divide = 'ignore')
     t0 = time()
     print('plotting {}'.format(label))
        
     ''' some calculations '''
     nx, ny, nz = get_dimension(_wfr)
+    print('nx, ny, nz: {}'.format([nx, ny, nz]))
     taxis = get_axis_t(_wfr)
     try:
         cent_t, fwhm_t = fit_pulse_duration(_wfr); tstart = cent_t - fwhm_t*5; tfin = cent_t + fwhm_t*5
@@ -534,7 +579,7 @@ def plot_wfr_diagnostic(_wfr, label=None, dir_plot=None, if_log=0, i=0):
     ''' plots '''
     plt.figure(figsize=(25,4))
     # 1. spatial projection/lineout
-    plt.subplot(1,5,1); plot_spatial_from_wf(_wfr, if_slice=1); plt.title(label+'_{}x{}pts'.format(nx, ny))
+    plt.subplot(1,5,1); plot_spatial_from_wf(_wfr, if_slice=0); plt.title(label+'_{}x{}pts'.format(nx, ny)); plt.axis('tight')
     
     # 2. wavefront tilt
     plt.subplot(1,5,2); plot_tilt_from_wf(_wfr, ori='Horizontal', type='slice', if_log=if_log)
@@ -558,7 +603,12 @@ def plot_wfr_diagnostic(_wfr, label=None, dir_plot=None, if_log=0, i=0):
     plt.savefig(dir_plot+pltname)
     plt.close('all')
     print('plot lasted {}s'.format(round(time()-t0,2)))
+    np.seterr(divide = 'warn')
     
+
+
+# In[8]:
+
 
 def main(drift_list, if_log=1):
     tstart = time()
@@ -576,16 +626,18 @@ def main(drift_list, if_log=1):
     t0 = time()
     bl1 = set_optics_CRL0(v)
     srwlpy.PropagElecField(wfr, bl1)
-    print('done in', round(time() - t0, 3), 's')
+    print('done in', round(time() - t0, 3), 's\n')
     plot_wfr_diagnostic(wfr, label='after CRL0', dir_plot=dir_plot, i=2, if_log=if_log)
     
     # resize elec field
-    print('Resizing in frequency domain: ', end='')
-    t0 = time();
-    srwlpy.ResizeElecField(wfr, 'f', [0, 1., z_scaling])
-    print('done in', round(time() - t0, 3), 's')
-    srwlpy.SetRepresElecField(wfr, 'f')
+    if z_scaling1>1:
+        print('Resizing in frequency domain: ', end='')
+        t0 = time();
+        srwlpy.ResizeElecField(wfr, 'f', [0, 1., z_scaling1])
+        print('done in', round(time() - t0, 3), 's')
+        srwlpy.SetRepresElecField(wfr, 'f')
     
+    # HHLM
     print('Propagating through HHLM1: ', end='')
     t0 = time()
     bl1 = set_optics_HHLM1(v)
@@ -615,8 +667,12 @@ def main(drift_list, if_log=1):
     plot_wfr_diagnostic(wfr, label='after HHLM4', dir_plot=dir_plot, i=6, if_log=if_log)
 
 
+# In[9]:
+
+
 if __name__ == '__main__':
     time_stamp=time()
     print(nx, ny, nz)
-    main(drift_list)
+    main(drift_list, if_log=1)
     print('\n\neverything lasted: {}s'.format(round(time()-time_stamp,2)))
+

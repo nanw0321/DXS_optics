@@ -1,0 +1,60 @@
+Warning: Python module not loaded, you already have Python loaded via conda init
+nx, ny, nz: [256, 256, 400]
+x resolution/range: 15.62/ 4000.0um
+y resolution/range: 15.62/ 4000.0um
+time resolution/range: 80.0/ 32000.0fs
+energy resolution/range: 0.12/ 50.0meV
+HHLM1 Bragg angle: 19.90987691838631degree
+  b factor: 11.83, range_x multiplication factor: 12
+  pulse stretching: 52300.88fs, nz scaling factor: 2.0
+nx, ny, nz: [3072, 256, 800.0]
+
+HHLM2 Bragg angle: 42.92647775935088degree
+  b factor: 0.24, range_x multiplication factor: 4
+  pulse stretching: 9381.0fs, nz scaling factor: 1.0
+nx, ny, nz: [1024, 256, 400.0]
+
+drift between crystals (mm): [0.18097479 0.31977349 0.18097479]
+crystal positions (m): [0, 0.18097478778649917, 0.5007482790135247, 0.6817230668000238]
+
+256 256 400
+Gaussian beam electric field calculation ... completed (lasted 0.787 s)
+Extracting intensity and saving it to a file ... completed (lasted 15.95 s)
+plotting input
+plot lasted 16.45s
+Propagating through CRL0: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 1.651 s
+
+plotting after CRL0
+plot lasted 17.12s
+Resizing in frequency domain: done in 4.178 s
+Propagating through HHLM1: done in 34.069 s
+plotting after HHLM1
+plot lasted 309.14s
+Propagating through HHLM2: done in 59.78 s
+plotting after HHLM2
+plot lasted 328.83s
+Propagating through HHLM3: done in 33.923 s
+plotting after HHLM3
+plot lasted 316.61s
+Propagating through HHLM4: done in 23.897 s
+plotting after HHLM4
+plot lasted 29.99s
+Resizing in frequency domain: done in 3.985 s
+Propagating through CC1: done in 9.339 s
+plotting after C2
+plot lasted 57.96s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 10.0 m
+done in 5.968 s
+plotting focus open
+plot lasted 51.01s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 10.0 m
+done in 5.981 s
+plotting before C3 open
+plot lasted 53.42s
+Propagating through CC2: done in 4.562 s
+plotting output open
+plot lasted 18.09s
+
+
+everything lasted: 1403.83s

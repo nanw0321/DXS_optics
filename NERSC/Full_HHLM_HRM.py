@@ -1,42 +1,62 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[ ]:
+
+
 ##### diagnostic
 from Diagnostic_functions import *
 
-# sampling parameters
-t_window = 50000e-15  # total time window [s]
-ev_window = 100e-3   # total energy window [eV]
-t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
 
-sigT = 2000e-15/2.355
+# In[ ]:
+
 
 # sampling parameters
-# t_window = 50000e-15  # total time window [s]
-# ev_window = 20000e-3   # total energy window [eV]
-# t_res = 4/ev_window *1e-15       # time sampling resolution [s]; roughly: 10fs/pt = 400meV range
+sigT = 50e-15/2.355
+d_slit = 10e-6
 
-# sigT = 10e-15/2.355
+t_res =sigT*2.355/10          # time sampling resolution [s]
+t_window = sigT*2.355*40     # total time window [s]
+ev_window = 4/t_res *1e-15   # total energy window [eV]
+
+range_x = 4e-3; range_y = 4e-3
+nx = 256; ny = 8; nz = 2*round(t_window/t_res/2)
+
+x_res = range_x/nx
+y_res = range_y/ny
+ev_res = ev_window/nz        # energy sampling resolution [eV]
 
 pulseRange = int(t_window/sigT)
-nx = 256; ny = 256; nz = 2*int(t_window/t_res/2)
-range_x = 4e-3; range_y = 4e-3
 factor = -1 # factor = 0.5
-d_slit = 10e-6
+
+print('nx, ny, nz: {}'.format([nx, ny, nz]))
+print('x resolution/range: {}/ {}um'.format(round(x_res*1e6,2), round(range_x*1e6,2)))
+print('y resolution/range: {}/ {}um'.format(round(y_res*1e6,2), round(range_y*1e6,2)))
+print('time resolution/range: {}/ {}fs'.format(round(t_res*1e15,2), round(t_window*1e15,2)))
+print('energy resolution/range: {}/ {}meV'.format(round(ev_res*1e3,2), round(ev_window*1e3,2)))
+
 
 def rCRL(fCRL, nCRL):
     # calculates the min radius of curvature of each lens
     return 7.58227e-06*fCRL/nCRL
 
+# def rCRL(fCRL, nCRL):
+#     # calculates the min radius of curvature of each lens
+#     return 2.151005735797996e-06*fCRL/nCRL
+
 fCRL0 = 290.; nCRL0 = 1
 fCRL1 = 10.; nCRL1 = 1
 fCRL2 = 10.; nCRL2 = 1
 
-# I/O
-def mkdir(path):
-    if not os.path.exists(path):
-        os.mkdir(path)
-dir_output = 'output/'; mkdir(dir_output)
-dir_case = dir_output+'Full_HHLM_HRM/'; mkdir(dir_case)
-dir_param = dir_case+'{}fs/'.format(round(sigT*2.355*1e15,2)); mkdir(dir_param)
-dir_plot = dir_param+'{}fs_{}meV/'.format(round(t_window*1e15,1),round(ev_window*1e3,1)); mkdir(dir_plot)
+# I/O directories
+dir_output = 'output/'
+dir_case = dir_output+'Full_HHLM_HRM/'
+dir_param = dir_case+'{}fs/'.format(round(sigT*2.355*1e15,2))
+dir_plot = dir_param+'{}fs_{}meV/'.format(round(t_window*1e15,1),round(ev_window*1e3,1))
+
+
+# In[ ]:
+
 
 # calculate crystal geometry
 z1 = 0      # position in lab frame [mm]
@@ -48,6 +68,7 @@ zlist = [z1, z2, z3, z4]
 posz = []
 for i in range(len(zlist)):
     posz.append(300+zlist[i]/1e3)
+
 
 # Si 220
 HHLM1 = srwlib.SRWLOptCryst(_d_sp=1.9201374688016222, _psi0r=-1.0873035035585694e-05, _psi0i=1.8438837339536554e-07,
@@ -61,10 +82,44 @@ HHLM2 = srwlib.SRWLOptCryst(_d_sp=0.9600687344008111, _psi0r=-1.0873035035585694
                          _psi_hbr=-4.181686438547451e-06, _psi_hbi=1.6100412693351052e-07,
                          _tc=0.01, _ang_as=0)
 
+
+    
 thetaB1 = HHLM1.get_ang_inc(_e=9481.0)
 thetaB2 = HHLM2.get_ang_inc(_e=9481.0)
+ang_asym1 = np.deg2rad(17)
+ang_asym2 = np.deg2rad(-29.5)
 
-print('HHLM1, HHLM2 Bragg angle: {}, {} degree'.format(np.rad2deg(thetaB1),np.rad2deg(thetaB2)))
+b_factor1 = np.sin(thetaB1+ang_asym1)/ np.sin(thetaB1-ang_asym1)
+b_factor2 = np.sin(thetaB2+ang_asym2)/ np.sin(thetaB2-ang_asym2)
+
+def calc_scale_factor(b_factor):
+    scale_factors = np.array([1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30])
+    if b_factor>1:
+        idx = (np.abs(scale_factors - b_factor)).argmin()
+    else:
+        idx = (np.abs(scale_factors - 1/b_factor)).argmin()
+    return scale_factors[idx]
+
+def calc_t_stretching(thetaB, ang_asym, range_x=range_x):
+    t_stretching = np.abs(range_x / np.sin(thetaB-ang_asym) * (np.cos(thetaB-ang_asym)-np.cos(thetaB+ang_asym)) /3e8)
+    return t_stretching
+
+x_scaling1 = calc_scale_factor(b_factor1)
+x_scaling2 = calc_scale_factor(b_factor2)
+t_stretching1 = calc_t_stretching(thetaB1, ang_asym1)
+t_stretching2 = calc_t_stretching(thetaB2, ang_asym2)
+z_scaling1 = np.max([np.round(t_stretching1/t_window),1.])
+z_scaling2 = np.max([np.round(t_stretching2/t_window),1.])
+
+print('HHLM1 Bragg angle: {}degree'.format(np.rad2deg(thetaB1)))
+print('  b factor: {}, range_x multiplication factor: {}'.format(round(b_factor1, 2), x_scaling1))
+print('  pulse stretching: {}fs, nz scaling factor: {}'.format(round(t_stretching1*1e15,2), z_scaling1))
+print('nx, ny, nz: {}\n'.format([nx*x_scaling1, ny, nz*z_scaling1]))
+
+print('HHLM2 Bragg angle: {}degree'.format(np.rad2deg(thetaB2)))
+print('  b factor: {}, range_x multiplication factor: {}'.format(round(b_factor2, 2), x_scaling2))
+print('  pulse stretching: {}fs, nz scaling factor: {}'.format(round(t_stretching2*1e15,2), z_scaling2))
+print('nx, ny, nz: {}\n'.format([nx*x_scaling2, ny, nz*z_scaling2]))
 
 deviation_angle = [thetaB1*2, (thetaB2-thetaB1)*2, thetaB1*2]
 
@@ -89,13 +144,31 @@ plt.ylabel('x (mm)')
 plt.axis('equal')
 
 print('drift between crystals (mm): {}'.format(np.asarray(drift_list)))
-print('crystal positions (m): {}'.format(pos_beam))
+print('crystal positions (m): {}\n'.format(pos_beam))
+
+
+# In[ ]:
+
+
+# I/O
+def mkdir(path):
+    if not os.path.exists(path):
+        os.mkdir(path)
+
+mkdir(dir_output)
+mkdir(dir_case)
+mkdir(dir_param)
+mkdir(dir_plot)
+
+
+# In[ ]:
+
 
 ## define bl HHLM
-def set_optics_HHLM1(v=None):
+def set_optics_CRL0(v=None):
     el = []
     pp = []
-    names = ['CRL', 'CRL_HHLM1', 'HHLM1']
+    names = ['CRL','CRL_HHLM1']
     for el_name in names:
         if el_name == 'CRL':
             # CRL: crl 290.0m
@@ -119,8 +192,15 @@ def set_optics_HHLM1(v=None):
                 _L=v.op_CRL_HHLM1_L,
             ))
             pp.append(v.op_CRL_HHLM1_pp)
-        elif el_name == 'HHLM1':
-            # HHLM1: crystal 290.1m
+    return srwlib.SRWLOptC(el, pp)
+
+def set_optics_HHLM1(v=None):
+    el = []
+    pp = []
+    names = ['HHLM1']
+    for el_name in names:
+        if el_name == 'HHLM1':
+            # HHLM1: crystal 295.0m
             crystal = srwlib.SRWLOptCryst(
                 _d_sp=v.op_HHLM1_d_sp,
                 _psi0r=v.op_HHLM1_psi0r,
@@ -142,8 +222,6 @@ def set_optics_HHLM1(v=None):
             )
             el.append(crystal)
             pp.append(v.op_HHLM1_pp)
-
-#     pp.append(v.op_fin_pp)
     return srwlib.SRWLOptC(el, pp)
 
 def set_optics_HHLM2(v=None, drift=.2):
@@ -265,7 +343,11 @@ def set_optics_HHLM4(v=None, drift=.2):
 #         elif el_name == 'After_HHLM':
 #             # After_HHLM: watch 310.1m
 #             pass
+#     pp.append(v.op_fin_pp)
     return srwlib.SRWLOptC(el, pp)
+
+
+# In[ ]:
 
 
 ## define bl HRM
@@ -501,6 +583,10 @@ def set_optics_CC2(v=None):
     pp.append(v.op_fin_pp)
     return srwlib.SRWLOptC(el, pp)
 
+
+# In[ ]:
+
+
 varParam = srwl_bl.srwl_uti_ext_options([
     ['name', 's', 'full_beamline', 'simulation name'],
 
@@ -681,7 +767,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_HHLM4_diffractionAngle', 'f', -1.57079632, 'diffractionAngle'],
     
     # HHLM4_C1: drift
-    ['op_HHLM4_C1_L', 'f', 4.31827693319997, 'length'],
+    ['op_HHLM4_C1_L', 'f', 4.318276933199976, 'length'],
 
     # C1: crystal
     ['op_C1_hfn', 's', '', 'heightProfileFile'],
@@ -721,13 +807,13 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C2_psiHBi', 'f', 1.6100412693351052e-07, 'psiHBi'],
     ['op_C2_tc', 'f', 0.01, 'crystalThickness'],
     ['op_C2_uc', 'f', 1, 'useCase'],
-    ['op_C2_ang_as', 'f', np.deg2rad(-29.5), 'asymmetryAngle'],
-    ['op_C2_nvx', 'f', 0.1589403166091094, 'nvx'],
-    ['op_C2_nvy', 'f', 1.079983033869711e-09, 'nvy'],
-    ['op_C2_nvz', 'f', -0.9872881928576863, 'nvz'],
-    ['op_C2_tvx', 'f', 0.9872881928576863, 'tvx'],
-    ['op_C2_tvy', 'f', 6.708521290092094e-09, 'tvy'],
-    ['op_C2_ang', 'f', 1.4111790941168765, 'grazingAngle'],
+    ['op_C2_ang_as', 'f', -0.5148721293383273, 'asymmetryAngle'],
+    ['op_C2_nvx', 'f', 0.301933297485, 'nvx'],
+    ['op_C2_nvy', 'f', 2.052e-09, 'nvy'],
+    ['op_C2_nvz', 'f', -0.953329053302, 'nvz'],
+    ['op_C2_tvx', 'f', 0.953329053302, 'tvx'],
+    ['op_C2_tvy', 'f', 6.478e-09, 'tvy'],
+    ['op_C2_ang', 'f', 1.2640763493592002, 'grazingAngle'],
     ['op_C2_amp_coef', 'f', 1.0, 'heightAmplification'],
     ['op_C2_energy', 'f', 9481.0, 'energy'],
     ['op_C2_diffractionAngle', 'f', -1.57079632, 'diffractionAngle'],
@@ -789,13 +875,13 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C3_psiHBi', 'f', 1.6100412693351052e-07, 'psiHBi'],
     ['op_C3_tc', 'f', 0.01, 'crystalThickness'],
     ['op_C3_uc', 'f', 1, 'useCase'],
-    ['op_C3_ang_as', 'f', np.deg2rad(29.5), 'asymmetryAngle'],
-    ['op_C3_nvx', 'f', 0.7322282430733594, 'nvx'],
-    ['op_C3_nvy', 'f', 4.975415277322606e-09, 'nvy'],
-    ['op_C3_nvz', 'f', -0.6810593219725439, 'nvz'],
-    ['op_C3_tvx', 'f', 0.6810593219725439, 'tvx'],
-    ['op_C3_tvy', 'f', 4.627727743855522e-09, 'tvy'],
-    ['op_C3_ang', 'f', 0.7492083731847909, 'grazingAngle'],
+    ['op_C3_ang_as', 'f', 0.5148721293383273, 'asymmetryAngle'],
+    ['op_C3_nvx', 'f', 0.972664746381, 'nvx'],
+    ['op_C3_nvy', 'f', 6.609e-09, 'nvy'],
+    ['op_C3_nvz', 'f', -0.232213890945, 'nvz'],
+    ['op_C3_tvx', 'f', 0.232213890945, 'tvx'],
+    ['op_C3_tvy', 'f', 1.578e-09, 'tvy'],
+    ['op_C3_ang', 'f', 0.2343532050409619, 'grazingAngle'],
     ['op_C3_amp_coef', 'f', 1.0, 'heightAmplification'],
     ['op_C3_energy', 'f', 9481.0, 'energy'],
     ['op_C3_diffractionAngle', 'f', -1.57079632, 'diffractionAngle'],
@@ -815,13 +901,13 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C4_psiHBi', 'f', 1.6100412693351052e-07, 'psiHBi'],
     ['op_C4_tc', 'f', 0.01, 'crystalThickness'],
     ['op_C4_uc', 'f', 1, 'useCase'],
-    ['op_C4_ang_as', 'f', 0., 'asymmetryAngle'],
-    ['op_C4_nvx', 'f', -0.9961927321489331, 'nvx'],
-    ['op_C4_nvy', 'f', 6.769026714795782e-09, 'nvy'],
-    ['op_C4_nvz', 'f', -0.08717821065864992, 'nvz'],
-    ['op_C4_tvx', 'f', -0.08717821065864992, 'tvx'],
-    ['op_C4_tvy', 'f', 5.923669364898284e-10, 'tvy'],
-    ['op_C4_ang', 'f', 0.08728901635673195, 'grazingAngle'],
+    ['op_C4_ang_as', 'f', 0.0, 'asymmetryAngle'],
+    ['op_C4_nvx', 'f', -0.7322282430733594, 'nvx'],
+    ['op_C4_nvy', 'f', 4.975415277322606e-09, 'nvy'],
+    ['op_C4_nvz', 'f', -0.6810593219725439, 'nvz'],
+    ['op_C4_tvx', 'f', -0.6810593219725439, 'tvx'],
+    ['op_C4_tvy', 'f', 4.627727743855522e-09, 'tvy'],
+    ['op_C4_ang', 'f', 0.7492083731847909, 'grazingAngle'],
     ['op_C4_amp_coef', 'f', 1.0, 'heightAmplification'],
     ['op_C4_energy', 'f', 9481.0, 'energy'],
     ['op_C4_diffractionAngle', 'f', 1.57079632, 'diffractionAngle'],
@@ -830,34 +916,34 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C4_After_HRM_L', 'f', 10.0, 'length'],
     
 #---Propagation parameters
-#                               [0][1] [2] [3][4] [5]  [6]  [7]  [8]  [9] [10] [11]
-    ['op_CRL_pp', 'f',          [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL'],
-    ['op_CRL_HHLM1_pp', 'f',    [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL_HHLM1'],
-    ['op_HHLM1_pp', 'f',        [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, -0.997381741513, 6.777e-09, 0.072316399909, 0.072316399909, 6.304e-09], 'HHLM1'],
-    ['op_HHLM1_HHLM2_pp', 'f',  [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'HHLM1_HHLM2'],
-    ['op_HHLM2_pp', 'f',        [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.997382667547, 6.777e-09, 0.072303626994, 0.072303626994, -6.304e-09], 'HHLM2'],
-    ['op_HHLM2_HHLM3_pp', 'f',  [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'HHLM2_HHLM3'],
-    ['op_HHLM3_pp', 'f',        [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.99738266769, 6.777e-09, 0.072303625018, 0.072303625018, -6.304e-09], 'HHLM3'],
-    ['op_HHLM3_HHLM4_pp', 'f',  [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'HHLM3_HHLM4'],
-    ['op_HHLM4_pp', 'f',        [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, -0.997381741513, 6.777e-09, 0.072316399909, 0.072316399909, 6.304e-09], 'HHLM4'],
-    ['op_HHLM4_C1_pp', 'f',     [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'HHLM4_After_HHLM'],
-    ['op_C1_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, -0.997381741513, 6.777e-09, 0.072316399909, 0.072316399909, 6.304e-09], 'C1'],
-    ['op_C1_C2_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C1_C2'],
-    ['op_C2_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.997382667547, 6.777e-09, 0.072303626994, 0.072303626994, -6.304e-09], 'C2'],
-    ['op_C2_CRL1_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C2_CRL1'],
-    ['op_CRL1_pp', 'f',         [0, 0, 1.0, 0, 0, 5.0, 4.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1'],
-    ['op_CRL1_Slit_pp', 'f',    [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL1_Slit'],
-    ['op_Slit_pp', 'f',         [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Slit'],
-    ['op_Slit_CRL2_pp', 'f',    [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'Slit_CRL2'],
-    ['op_CRL2_pp', 'f',         [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL2'],
-    ['op_CRL2_C3_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'CRL2_C3'],
-    ['op_C3_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.99738266769, 6.777e-09, 0.072303625018, 0.072303625018, -6.304e-09], 'C3'],
-    ['op_C3_C4_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C3_C4'],
-    ['op_C4_pp', 'f',           [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, -0.997381741513, 6.777e-09, 0.072316399909, 0.072316399909, 6.304e-09], 'C4'],
-    ['op_C4_After_HRM_pp', 'f', [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'C4_After_HRM'],
-    ['op_fin_pp', 'f',          [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 'final post-propagation (resize) parameters'],
+#                                   [0][1] [2] [3][4] [5]  [6]  [7]  [8]  [9] [10] [11]
+    ['op_CRL_pp', 'f',              [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL'],
+    ['op_CRL_HHLM1_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL_HHLM1'],
+    ['op_HHLM1_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, x_scaling1, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM1'],
+    ['op_HHLM1_HHLM2_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM1_HHLM2'],
+    ['op_HHLM2_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM2'],
+    ['op_HHLM2_HHLM3_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM2_HHLM3'],
+    ['op_HHLM3_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM3'],
+    ['op_HHLM3_HHLM4_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM3_HHLM4'],
+    ['op_HHLM4_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1/x_scaling1, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM4'],
+    ['op_HHLM4_C1_pp', 'f',         [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM4_C1'],
+    ['op_C1_pp', 'f',               [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C1'],
+    ['op_C1_C2_pp', 'f',            [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C1_C2'],
+    ['op_C2_pp', 'f',               [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C2'],
+    ['op_C2_CRL1_pp', 'f',          [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C2_CRL1'],
+    ['op_CRL1_pp', 'f',             [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL1'],
+    ['op_CRL1_Slit_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL1_Slit'],
+    ['op_Slit_pp', 'f',             [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'Slit'],
+    ['op_Slit_CRL2_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'Slit_CRL2'],
+    ['op_CRL2_pp', 'f',             [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL2'],
+    ['op_CRL2_C3_pp', 'f',          [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL2_C3'],
+    ['op_C3_pp', 'f',               [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C3'],
+    ['op_C3_C4_pp', 'f',            [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C3_C4'],
+    ['op_C4_pp', 'f',               [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C4'],
+    ['op_C4_After_HRM_pp', 'f',     [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C4_After_HRM'],
+    ['op_fin_pp', 'f',              [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'final post-propagation (resize) parameters'],
 
-    #[ 0]: Auto-Resize (1) or not (0) Before propagation  
+    #[ 0]: Auto-Resize (1) or not (0) Before propagation
     #[ 1]: Auto-Resize (1) or not (0) After propagation
     #[ 2]: Relative Precision for propagation with Auto-Resizing (1. is nominal)
     #[ 3]: Allow (1) or not (0) for semi-analytical treatment of the quadratic (leading) phase terms at the propagation
@@ -877,7 +963,11 @@ varParam = srwl_bl.srwl_uti_ext_options([
 ])
 
 
+# In[ ]:
+
+
 def plot_wfr_diagnostic(_wfr, label=None, dir_plot=None, if_log=0, i=0):
+    np.seterr(divide = 'ignore')
     t0 = time()
     print('plotting {}'.format(label))
        
@@ -899,7 +989,7 @@ def plot_wfr_diagnostic(_wfr, label=None, dir_plot=None, if_log=0, i=0):
     ''' plots '''
     plt.figure(figsize=(25,4))
     # 1. spatial projection/lineout
-    plt.subplot(1,5,1); plot_spatial_from_wf(_wfr, if_slice=1); plt.title(label+'_{}x{}pts'.format(nx, ny))
+    plt.subplot(1,5,1); plot_spatial_from_wf(_wfr, if_slice=0); plt.title(label+'_{}x{}pts'.format(nx, ny)); plt.axis('tight')
     
     # 2. wavefront tilt
     plt.subplot(1,5,2); plot_tilt_from_wf(_wfr, ori='Horizontal', type='slice', if_log=if_log)
@@ -915,16 +1005,22 @@ def plot_wfr_diagnostic(_wfr, label=None, dir_plot=None, if_log=0, i=0):
     plt.subplot(1,5,3); plot_tprofile_from_wf(_wfr, if_short=1)
 
     # 4. spatial spectrum
-    plt.subplot(1,5,4); plot_spatial_spectrum_from_wf(_wfr, ori='Horizontal', if_slice=1)
+    plt.subplot(1,5,4); plot_spatial_spectrum_from_wf(_wfr, ori='Horizontal', if_slice=1, if_log=if_log)
 
     # 5. spectral response
     plt.subplot(1,5,5); plot_spectrum_from_wf(_wfr, if_short=1)
 
     plt.savefig(dir_plot+pltname)
+    plt.close('all')
     print('plot lasted {}s'.format(round(time()-t0,2)))
+    np.seterr(divide = 'warn')
+    
 
 
-def main(drift_list, if_close=0, if_log=1):
+# In[ ]:
+
+
+def main(drift_list, if_log=1, if_close=0):
     tstart = time()
     # initialization
     v = srwl_bl.srwl_uti_parse_options(varParam, use_sys_argv=True)
@@ -936,52 +1032,64 @@ def main(drift_list, if_close=0, if_log=1):
     plot_wfr_diagnostic(wfr, label='input', dir_plot=dir_plot, i=1, if_log=if_log)
     srwlpy.SetRepresElecField(wfr, 'f')
     
+    print('Propagating through CRL0: ', end='')
+    t0 = time()
+    bl1 = set_optics_CRL0(v)
+    srwlpy.PropagElecField(wfr, bl1)
+    print('done in', round(time() - t0, 3), 's\n')
+    plot_wfr_diagnostic(wfr, label='after CRL0', dir_plot=dir_plot, i=2, if_log=if_log)
     
-    # pre mono
+    # resize elec field
+    if z_scaling1>1:
+        print('Resizing in frequency domain: ', end='')
+        t0 = time();
+        srwlpy.ResizeElecField(wfr, 'f', [0, 1., z_scaling1])
+        print('done in', round(time() - t0, 3), 's')
+        srwlpy.SetRepresElecField(wfr, 'f')
+    
+    # HHLM
     print('Propagating through HHLM1: ', end='')
     t0 = time()
     bl1 = set_optics_HHLM1(v)
     srwlpy.PropagElecField(wfr, bl1)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label='after HHLM1', dir_plot=dir_plot, i=2, if_log=if_log)
+    plot_wfr_diagnostic(wfr, label='after HHLM1', dir_plot=dir_plot, i=3, if_log=if_log)
     
     print('Propagating through HHLM2: ', end='')
     t0 = time()
     bl2 = set_optics_HHLM2(v, drift=drift_list[0])
     srwlpy.PropagElecField(wfr, bl2)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label='after HHLM2', dir_plot=dir_plot, i=3, if_log=if_log)
+    plot_wfr_diagnostic(wfr, label='after HHLM2', dir_plot=dir_plot, i=4, if_log=if_log)
     
     print('Propagating through HHLM3: ', end='')
     t0 = time()
     bl3 = set_optics_HHLM3(v, drift=drift_list[1])
     srwlpy.PropagElecField(wfr, bl3)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label='after HHLM3', dir_plot=dir_plot, i=4, if_log=if_log)
+    plot_wfr_diagnostic(wfr, label='after HHLM3', dir_plot=dir_plot, i=5, if_log=if_log)
     
     print('Propagating through HHLM4: ', end='')
     t0 = time()
     bl4 = set_optics_HHLM4(v, drift=drift_list[2])
     srwlpy.PropagElecField(wfr, bl4)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label='after HHLM4', dir_plot=dir_plot, i=5, if_log=if_log)
-
-
-    # # resize elec field
-    # print('Resizing in frequency domain: ', end='')
-    # t0 = time();
-    # srwlpy.ResizeElecField(wfr, 'f', [0, 1., 2.])
-    # print('done in', round(time() - t0, 3), 's')
-    # srwlpy.SetRepresElecField(wfr, 'f')
+    plot_wfr_diagnostic(wfr, label='after HHLM4', dir_plot=dir_plot, i=6, if_log=if_log)
     
-
-    # 4f mono
+    # resize elec field
+    print('Resizing in frequency domain: ', end='')
+    t0 = time()
+    srwlpy.ResizeElecField(wfr, 'f', [0, 1., z_scaling2/z_scaling1])
+    print('done in', round(time() - t0, 3), 's')
+    srwlpy.SetRepresElecField(wfr, 'f')
+    
+    # HRM
     print('Propagating through CC1: ', end='')
     t0 = time()
     bl1 = set_optics_CC1(v, drift=5.0-np.sum(drift_list))
     srwlpy.PropagElecField(wfr, bl1)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label='after C2', dir_plot=dir_plot, i=6, if_log=if_log)
+    plot_wfr_diagnostic(wfr, label='after C2', dir_plot=dir_plot, i=7, if_log=if_log)
     
     print('Propagating to focus: ', end='')
     t0 = time()
@@ -1003,33 +1111,29 @@ def main(drift_list, if_close=0, if_log=1):
         label_C3 = 'before C3 open'
         label_output = 'output open'
 
-    plot_wfr_diagnostic(wfr, label=label_focus, dir_plot=dir_plot, i=7, if_log=if_log)
+    plot_wfr_diagnostic(wfr, label=label_focus, dir_plot=dir_plot, i=8, if_log=if_log)
     
     print('Propagating to CC2: ', end='')
     t0 = time()
     bl3 = set_optics_focus_CC2(v)
     srwlpy.PropagElecField(wfr, bl3)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label=label_C3, dir_plot=dir_plot, i=8, if_log=if_log)
+    plot_wfr_diagnostic(wfr, label=label_C3, dir_plot=dir_plot, i=9, if_log=if_log)
     
     print('Propagating through CC2: ', end='')
     t0 = time()
     bl4 = set_optics_CC2(v)
     srwlpy.PropagElecField(wfr, bl4)
     print('done in', round(time() - t0, 3), 's')
-    plot_wfr_diagnostic(wfr, label=label_output, dir_plot=dir_plot, i=9, if_log=if_log)
+    plot_wfr_diagnostic(wfr, label=label_output, dir_plot=dir_plot, i=10, if_log=if_log)
+
+
+# In[ ]:
 
 
 if __name__ == '__main__':
     time_stamp=time()
     print(nx, ny, nz)
-    main(drift_list, if_close=0, if_log=1)
+    main(drift_list, if_log=1, if_close=0)
     print('\n\neverything lasted: {}s'.format(round(time()-time_stamp,2)))
 
-### For the pre-mono, increase the time window to muuuuuuch higher and see if tilt shows up
-
-### Increase bandwidth to see spectral resolution of pre-mono
-### Reduce bandwidth and increase time range a lot to see tilt from pre-mono
-
-### Offset mirrors; convex mirror in SRW?
-### Try to replace CRLs with parabolic mirrors in SRW

@@ -1,10 +1,10 @@
 #!/bin/bash -l
 #SBATCH -N 1
-#SBATCH -t 06:00:00
-#SBATCH -q regular
+#SBATCH -t 00:30:00
+#SBATCH -q debug
 #SBATCH -L SCRATCH
 #SBATCH -C haswell
-#SBATCH -o 2fs_HHLM.log
+#SBATCH -o 800fs_HHLM.log
 #SBATCH --account=lcls
 
 #export OMP_NUM_THREADS=48

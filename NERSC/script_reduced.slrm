@@ -1,0 +1,16 @@
+#!/bin/bash -l
+#SBATCH -N 1
+#SBATCH -t 00:05:00
+#SBATCH -q debug
+#SBATCH -L SCRATCH
+#SBATCH -C haswell
+#SBATCH -o 800fs_HHLM_reduced.log
+#SBATCH --account=lcls
+
+#export OMP_NUM_THREADS=48
+#export OMP_DISPLAY_ENV=true 
+#export OMP_DISPLAY_AFFINITY=true 
+
+module load python
+conda activate SRWmp
+srun -n 1 python HHLM_9481_reduced.py
