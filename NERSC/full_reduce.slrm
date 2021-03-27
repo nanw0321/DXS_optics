@@ -1,10 +1,10 @@
 #!/bin/bash -l
 #SBATCH -N 1
-#SBATCH -t 00:30:00
-#SBATCH -q debug
+#SBATCH -t 03:00:00
+#SBATCH -q regular
 #SBATCH -L SCRATCH
 #SBATCH -C haswell
-#SBATCH -o 50fs_Full_2D.log
+#SBATCH -o 20fs_Full_reduce.log
 #SBATCH --account=lcls
 
 #export OMP_NUM_THREADS=48
@@ -13,4 +13,4 @@
 
 module load python
 conda activate SRWmp
-srun -n 1 python Full_HHLM_HRM.py
+srun -n 1 python HHLM_HRM_reduce.py

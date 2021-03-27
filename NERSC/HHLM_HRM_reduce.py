@@ -12,7 +12,7 @@ from Diagnostic_functions import *
 
 
 # sampling parameters
-sigT = 5e-15/2.355
+sigT = 20e-15/2.355
 d_slit = 10e-6
 
 t_res =sigT*2.355/10          # time sampling resolution [s]
@@ -20,7 +20,8 @@ t_window = sigT*2.355*40     # total time window [s]
 ev_window = 4/t_res *1e-15   # total energy window [eV]
 
 range_x = 4e-3; range_y = 4e-3
-nx = 256; ny = 8; nz = 2*round(t_window/t_res/2)
+nx = 256; ny = 256; nz = 2*round(t_window/t_res/2)
+ny_reduced = 8
 
 x_res = range_x/nx
 y_res = range_y/ny
@@ -51,7 +52,7 @@ fCRL2 = 10.; nCRL2 = 1
 # I/O directories
 dir_output = 'output/'
 dir_case = dir_output+'Full_HHLM_HRM/'
-dir_param = dir_case+'{}fs/'.format(round(sigT*2.355*1e15,2))
+dir_param = dir_case+'{}fs_reduce/'.format(round(sigT*2.355*1e15,2))
 dir_plot = dir_param+'{}fs_{}meV/'.format(round(t_window*1e15,1),round(ev_window*1e3,1))
 
 
@@ -919,7 +920,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
 #                                   [0][1] [2] [3][4] [5]  [6]  [7]  [8]  [9] [10] [11]
     ['op_CRL_pp', 'f',              [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL'],
     ['op_CRL_HHLM1_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL_HHLM1'],
-    ['op_HHLM1_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, x_scaling1, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM1'],
+    ['op_HHLM1_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, x_scaling1, 1.0, ny_reduced/ny, 0.0, 0.0, 0.0], 'HHLM1'],
     ['op_HHLM1_HHLM2_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM1_HHLM2'],
     ['op_HHLM2_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM2'],
     ['op_HHLM2_HHLM3_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM2_HHLM3'],
@@ -931,13 +932,13 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C1_C2_pp', 'f',            [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C1_C2'],
     ['op_C2_pp', 'f',               [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C2'],
     ['op_C2_CRL1_pp', 'f',          [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C2_CRL1'],
-    ['op_CRL1_pp', 'f',             [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL1'],
+    ['op_CRL1_pp', 'f',             [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, ny/ny_reduced, 0.0, 0.0, 0.0], 'CRL1'],
     ['op_CRL1_Slit_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL1_Slit'],
     ['op_Slit_pp', 'f',             [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'Slit'],
     ['op_Slit_CRL2_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'Slit_CRL2'],
     ['op_CRL2_pp', 'f',             [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL2'],
     ['op_CRL2_C3_pp', 'f',          [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL2_C3'],
-    ['op_C3_pp', 'f',               [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C3'],
+    ['op_C3_pp', 'f',               [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, ny_reduced/ny, 0.0, 0.0, 0.0], 'C3'],
     ['op_C3_C4_pp', 'f',            [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C3_C4'],
     ['op_C4_pp', 'f',               [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C4'],
     ['op_C4_After_HRM_pp', 'f',     [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C4_After_HRM'],
@@ -1040,12 +1041,11 @@ def main(drift_list, if_log=1, if_close=0):
     plot_wfr_diagnostic(wfr, label='after CRL0', dir_plot=dir_plot, i=2, if_log=if_log)
     
     # resize elec field
-    if z_scaling1>1:
-        print('Resizing in frequency domain: ', end='')
-        t0 = time();
-        srwlpy.ResizeElecField(wfr, 'f', [0, 1., z_scaling1])
-        print('done in', round(time() - t0, 3), 's')
-        srwlpy.SetRepresElecField(wfr, 'f')
+    print('Resizing in frequency domain: ', end='')
+    t0 = time();
+    srwlpy.ResizeElecField(wfr, 'f', [0, 1., z_scaling1])
+    print('done in', round(time() - t0, 3), 's')
+    srwlpy.SetRepresElecField(wfr, 'f')
     
     # HHLM
     print('Propagating through HHLM1: ', end='')

@@ -12,7 +12,7 @@ from Diagnostic_functions import *
 
 
 # sampling parameters
-sigT = 5e-15/2.355
+sigT = 4e-15/2.355
 d_slit = 10e-6
 
 t_res =sigT*2.355/10          # time sampling resolution [s]
@@ -51,7 +51,7 @@ fCRL2 = 10.; nCRL2 = 1
 # I/O directories
 dir_output = 'output/'
 dir_case = dir_output+'Full_HHLM_HRM/'
-dir_param = dir_case+'{}fs/'.format(round(sigT*2.355*1e15,2))
+dir_param = dir_case+'{}fs_2D/'.format(round(sigT*2.355*1e15,2))
 dir_plot = dir_param+'{}fs_{}meV/'.format(round(t_window*1e15,1),round(ev_window*1e3,1))
 
 
@@ -1077,11 +1077,12 @@ def main(drift_list, if_log=1, if_close=0):
     plot_wfr_diagnostic(wfr, label='after HHLM4', dir_plot=dir_plot, i=6, if_log=if_log)
     
     # resize elec field
-    print('Resizing in frequency domain: ', end='')
-    t0 = time()
-    srwlpy.ResizeElecField(wfr, 'f', [0, 1., z_scaling2/z_scaling1])
-    print('done in', round(time() - t0, 3), 's')
-    srwlpy.SetRepresElecField(wfr, 'f')
+    if z_scaling2 > z_scaling1:
+        print('Resizing in frequency domain: ', end='')
+        t0 = time()
+        srwlpy.ResizeElecField(wfr, 'f', [0, 1., z_scaling2/z_scaling1])
+        print('done in', round(time() - t0, 3), 's')
+        srwlpy.SetRepresElecField(wfr, 'f')
     
     # HRM
     print('Propagating through CC1: ', end='')
