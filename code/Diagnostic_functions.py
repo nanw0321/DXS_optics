@@ -45,6 +45,83 @@ import matplotlib.pyplot as plt
 # #matplotlib.use('Agg')   # allows plot without X11 forwarding
 # import matplotlib.pyplot as plt
 
+####### calculations
+def calc_b_factor(thetaB, ang_asym):
+    # calculates the b factor for crystal reflections [unit]
+    b_factor = np.sin(thetaB+ang_asym)/ np.sin(thetaB-ang_asym)
+    return b_factor
+
+def calc_scale_factor(b_factor):
+    # calculates the spatial scaling factor of crystal reflections [unit]
+    scale_factors = np.array([1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30])
+    if b_factor>1:
+        idx = (np.abs(scale_factors - b_factor)).argmin()
+    else:
+        idx = (np.abs(scale_factors - 1/b_factor)).argmin()
+    return scale_factors[idx]
+
+def calc_t_stretching(thetaB, ang_asym, range_x=None):
+    # calculates the stretched beam size in time after asymmetric reflection [s]
+    t_stretching = np.abs(range_x / np.sin(thetaB-ang_asym) * (np.cos(thetaB-ang_asym)-np.cos(thetaB+ang_asym)) /3e8)
+    return t_stretching
+
+def calc_rot_mat_x(theta):
+    # CW rotation if viewed along the x axis
+    Rotation_matrix_x = np.asarray([
+        [1, 0, 0],
+        [0, np.cos(theta), -np.sin(theta)],
+        [0, np.sin(theta), np.cos(theta)]
+    ])
+    return Rotation_matrix_x
+
+def calc_rot_mat_z(theta):
+    # CW rotation if viewed along the z axis
+    Rotation_matrix_z = np.asarray([
+        [np.cos(theta), -np.sin(theta),0],
+        [np.sin(theta), np.cos(theta), 0],
+        [0, 0, 1]
+    ])
+    return Rotation_matrix_z
+
+def calc_rot_mat_btw_vecs(v1, v2):
+    # calculates the rotation matrix that turns v1 to v2
+    v1 = np.asarray(v1)
+    v2 = np.asarray(v2)
+    if np.any(v1==v2):
+        Rotation_matrix = np.eye(3)
+    else:
+        a, b = (v1 / np.linalg.norm(v1)).reshape(3), (v2 / np.linalg.norm(v2)).reshape(3)
+        v = np.cross(a, b)
+        c = np.dot(a, b)
+        s = np.linalg.norm(v)
+        kmat = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+        Rotation_matrix = np.eye(3) + kmat + kmat.dot(kmat) * ((1 - c) / (s ** 2))
+    return Rotation_matrix
+
+def calc_crystal_orientation(thetaB, ang_asym, ang_dif_pl):
+    '''calculates the crystal orientation, dif_pl defines the direction of reflected beam in the incident frame
+        ang_dif_pl: [0 to +y, pi/2 to -x, pi to -y, -pi/2 to +x], in betweeen values are allowed
+            Note: Oleg's "+x" axis is actually the "-x" axis, so pi/2 corresponds to horizontal reflection to the left
+        tv represents direction of crystal surface
+        nv represents direction of crystal surface normal
+    '''
+    ang_incidence = thetaB-ang_asym
+    nv = np.array([0, np.cos(ang_incidence), -np.sin(ang_incidence)])
+    tv = np.array([0, np.sin(ang_incidence), np.cos(ang_incidence)])
+    rot_mat = calc_rot_mat_z(ang_dif_pl)
+    nv_rot = np.dot(rot_mat, nv)
+    tv_rot = np.dot(rot_mat, tv)
+    return nv_rot, tv_rot, ang_incidence
+
+def calc_direction_output(v_in, thetaB, ang_dif_pl=0):
+    # calculates the reflected beam direction in the lab frame
+    nv, _, _ = calc_crystal_orientation(thetaB, 0, ang_dif_pl=ang_dif_pl)
+    rot_mat = calc_rot_mat_btw_vecs(np.array([0,0,1]), v_in)
+    nv_rot = np.dot(rot_mat, nv)    # crystal normal vector in the lab frame
+    v_out = v_in - 2*np.dot(v_in, nv_rot)*nv_rot
+    return v_out/np.linalg.norm(v_out)
+
+
 ####### get info from SRW wavefront
 def get_dimension(_wfr):
     # get nx, ny, nz dimensions
