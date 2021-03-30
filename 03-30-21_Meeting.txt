@@ -1,0 +1,15 @@
+SAC meeting, 3 slides. Most ppl are new and know nothing about this project so should be very basic:
+	1 Why build this mono: background, requirement, schematics, etc.
+	2 Setup + pulse plot "anime" to show basic capability
+	3 NERSC computation time/memory limit and goals next step: want to decide engineering requirements;
+		table: case & time to explain why we need NERSC
+		Future plan: thermal deformation
+
+Advanced research call for proposal:
+	Identify observables that cannot be easily detected by human
+		machine learning higher-dimensional pattern recognition
+		MD simulation glass/polymer dynamics difference under params shown in speckle patterns
+		that is: calculate ensemble of speckles
+	If successfully get support, it will be computer scientists who support my simulations
+
+	This proposal is to be written by the computing ppl at SLAC/LCLS 

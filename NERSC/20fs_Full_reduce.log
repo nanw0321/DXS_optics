@@ -18,43 +18,43 @@ drift between crystals (mm): [0.18097479 0.31977349 0.18097479]
 crystal positions (m): [0, 0.18097478778649917, 0.5007482790135247, 0.6817230668000238]
 
 256 256 400
-Gaussian beam electric field calculation ... completed (lasted 0.762 s)
-Extracting intensity and saving it to a file ... completed (lasted 15.908 s)
+Gaussian beam electric field calculation ... completed (lasted 0.752 s)
+Extracting intensity and saving it to a file ... completed (lasted 15.771 s)
 plotting input
-plot lasted 15.87s
+plot lasted 15.31s
 Propagating through CRL0: Optical Element Setup: CRL Focal Length: 290.0 m
-done in 1.623 s
+done in 1.632 s
 
 plotting after CRL0
-plot lasted 15.34s
-Resizing in frequency domain: done in 68.517 s
-Propagating through HHLM1: done in 65.588 s
+plot lasted 15.78s
+Resizing in frequency domain: done in 68.049 s
+Propagating through HHLM1: done in 64.852 s
 plotting after HHLM1
-plot lasted 331.74s
-Propagating through HHLM2: done in 106.897 s
+plot lasted 331.2s
+Propagating through HHLM2: done in 105.334 s
 plotting after HHLM2
-plot lasted 369.52s
-Propagating through HHLM3: done in 92.957 s
+plot lasted 373.2s
+Propagating through HHLM3: done in 91.596 s
 plotting after HHLM3
-plot lasted 351.74s
-Propagating through HHLM4: done in 73.573 s
+plot lasted 353.74s
+Propagating through HHLM4: done in 73.506 s
 plotting after HHLM4
-plot lasted 330.81s
-Resizing in frequency domain: done in 41.746 s
-Propagating through CC1: done in 34.327 s
+plot lasted 328.99s
+Resizing in frequency domain: done in 41.806 s
+Propagating through CC1: done in 34.58 s
 plotting after C2
-plot lasted 66.02s
+plot lasted 66.0s
 Propagating to focus: Optical Element Setup: CRL Focal Length: 10.0 m
-done in 15.283 s
+done in 310.93 s
 plotting focus open
-plot lasted 30.27s
+plot lasted 1778.14s
 Propagating to CC2: Optical Element Setup: CRL Focal Length: 10.0 m
-done in 5.837 s
+done in 225.873 s
 plotting before C3 open
-plot lasted 30.76s
-Propagating through CC2: done in 269.133 s
+plot lasted 1780.1s
+Propagating through CC2: done in 50.35 s
 plotting output open
-plot lasted 1007.47s
+plot lasted 64.36s
 
 
-everything lasted: 3342.82s
+everything lasted: 6192.97s

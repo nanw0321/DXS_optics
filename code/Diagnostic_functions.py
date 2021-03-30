@@ -98,16 +98,20 @@ def calc_rot_mat_btw_vecs(v1, v2):
         Rotation_matrix = np.eye(3) + kmat + kmat.dot(kmat) * ((1 - c) / (s ** 2))
     return Rotation_matrix
 
-def calc_crystal_orientation(thetaB, ang_asym, ang_dif_pl):
+def calc_crystal_orientation(thetaB, ang_asym, ang_dif_pl, delta=0.):
     '''calculates the crystal orientation, dif_pl defines the direction of reflected beam in the incident frame
         ang_dif_pl: [0 to +y, pi/2 to -x, pi to -y, -pi/2 to +x], in betweeen values are allowed
             Note: Oleg's "+x" axis is actually the "-x" axis, so pi/2 corresponds to horizontal reflection to the left
+        delta: crystal alignment error, >0 turns the normal vector toward the reflected beam
         tv represents direction of crystal surface
         nv represents direction of crystal surface normal
     '''
     ang_incidence = thetaB-ang_asym
     nv = np.array([0, np.cos(ang_incidence), -np.sin(ang_incidence)])
     tv = np.array([0, np.sin(ang_incidence), np.cos(ang_incidence)])
+    rot_mat = calc_rot_mat_x(delta)
+    nv = np.dot(rot_mat, nv)
+    tv = np.dot(rot_mat, tv)
     rot_mat = calc_rot_mat_z(ang_dif_pl)
     nv_rot = np.dot(rot_mat, nv)
     tv_rot = np.dot(rot_mat, tv)

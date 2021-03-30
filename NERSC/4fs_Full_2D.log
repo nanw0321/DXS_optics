@@ -1,0 +1,60 @@
+Warning: Python module not loaded, you already have Python loaded via conda init
+nx, ny, nz: [256, 8, 400]
+x resolution/range: 15.62/ 4000.0um
+y resolution/range: 500.0/ 4000.0um
+time resolution/range: 0.4/ 160.0fs
+energy resolution/range: 25.0/ 10000.0meV
+HHLM1 Bragg angle: 19.90987691838631degree
+  b factor: 11.83, range_x multiplication factor: 12
+  pulse stretching: 52300.88fs, nz scaling factor: 327.0
+nx, ny, nz: [3072, 8, 130800.0]
+
+HHLM2 Bragg angle: 42.92647775935088degree
+  b factor: 0.24, range_x multiplication factor: 4
+  pulse stretching: 9381.0fs, nz scaling factor: 59.0
+nx, ny, nz: [1024, 8, 23600.0]
+
+drift between crystals (mm): [0.18097479 0.31977349 0.18097479]
+crystal positions (m): [0, 0.18097478778649917, 0.5007482790135247, 0.6817230668000238]
+
+256 8 400
+Gaussian beam electric field calculation ... completed (lasted 0.034 s)
+Extracting intensity and saving it to a file ... completed (lasted 0.569 s)
+plotting input
+plot lasted 5.52s
+Propagating through CRL0: Optical Element Setup: CRL Focal Length: 290.0 m
+done in 0.992 s
+
+plotting after CRL0
+plot lasted 5.38s
+Resizing in frequency domain: done in 11.583 s
+Propagating through HHLM1: done in 337.715 s
+plotting after HHLM1
+plot lasted 1896.06s
+Propagating through HHLM2: done in 614.243 s
+plotting after HHLM2
+plot lasted 2012.53s
+Propagating through HHLM3: done in 517.419 s
+plotting after HHLM3
+plot lasted 2045.16s
+Propagating through HHLM4: done in 430.857 s
+plotting after HHLM4
+plot lasted 1991.59s
+Resizing in frequency domain: done in 269.931 s
+Propagating through CC1: done in 183.515 s
+plotting after C2
+plot lasted 333.48s
+Propagating to focus: Optical Element Setup: CRL Focal Length: 10.0 m
+done in 66.179 s
+plotting focus open
+plot lasted 309.78s
+Propagating to CC2: Optical Element Setup: CRL Focal Length: 10.0 m
+done in 51.537 s
+plotting before C3 open
+plot lasted 309.06s
+Propagating through CC2: done in 115.574 s
+plotting output open
+plot lasted 340.91s
+
+
+everything lasted: 11849.74s
