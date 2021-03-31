@@ -1,0 +1,16 @@
+#!/bin/bash -l
+#SBATCH -N 1
+#SBATCH -t 00:01:00
+#SBATCH -q debug
+#SBATCH -L SCRATCH
+#SBATCH -C haswell
+#SBATCH -o ww.log
+#SBATCH --account=lcls
+
+export OMP_NUM_THREADS=48
+export OMP_DISPLAY_ENV=true 
+export OMP_DISPLAY_AFFINITY=true 
+
+module load python
+conda activate SRWmp
+srun -n 1 python test.py 100 1 2 3 HHLM1 4 1e6

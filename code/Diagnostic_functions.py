@@ -27,23 +27,8 @@ import matplotlib
 # matplotlib.use('Agg')   # allows plot without X11 forwarding
 import matplotlib.pyplot as plt
 
-# import srwl_bl
-# import srwlib
-# import srwlpy
-# import srwl_uti_smp
-# import uti_io
-# import math
-
-# from time import *
-# from copy import *
-# from array import *
-# from uti_plot import *
-
-# from util_Matt import Util
-# import numpy as np
-# import matplotlib
-# #matplotlib.use('Agg')   # allows plot without X11 forwarding
-# import matplotlib.pyplot as plt
+interpolation = 'antialiased'
+# interpolation = 'none'
 
 ####### calculations
 def calc_b_factor(thetaB, ang_asym):
@@ -226,7 +211,7 @@ def get_spectrum(_wfr):
 
 
 ####### plot
-def plot_spatial_from_wf(_wfr, if_slice=0):
+def plot_spatial_from_wf(_wfr, if_slice=0, if_log=0):
     # plot wavefront projection (y vs x) or lineout (if_slice)
     nx, ny, nz = get_dimension(_wfr)
     img = get_intensity(_wfr, domain='t').sum(axis=-1)
@@ -240,9 +225,17 @@ def plot_spatial_from_wf(_wfr, if_slice=0):
             plt.xlabel(r'y ($\mu$m)')
         plt.ylabel('intensity (a.u.)')
     else:
+        if if_log == 1:
+            img = img/img.max()
+            img = img + 1e-30
+            img = np.log(img)
         plt.imshow(img,cmap='jet',
-            extent = [axis_x.min()*1e6, axis_x.max()*1e6, axis_y.max()*1e6, axis_y.min()*1e6])
+            extent = [axis_x.min()*1e6, axis_x.max()*1e6, axis_y.max()*1e6, axis_y.min()*1e6],
+            interpolation=interpolation)
         plt.colorbar()
+        if if_log == 1:
+            cmin = np.max(img)-10
+            plt.clim(cmin)
         plt.xlabel(r'x ($\mu$m)')
         plt.ylabel(r'y ($\mu$m)')
 
@@ -273,7 +266,8 @@ def plot_tilt_from_wf(_wfr, ori='Vertical', type='sum', if_log=0):
         if if_log == 1:
             tilt = np.log(tilt)
         plt.imshow(tilt, cmap='jet',
-                  extent = [axis_t.max()*1e15, axis_t.min()*1e15, axis_sp.max()*1e6, axis_sp.min()*1e6])
+                extent = [axis_t.max()*1e15, axis_t.min()*1e15, axis_sp.max()*1e6, axis_sp.min()*1e6],
+                interpolation=interpolation)
         plt.colorbar()
         if if_log == 1:
             cmin = np.max(tilt)-10
@@ -326,9 +320,12 @@ def plot_spatial_spectrum_from_wf(_wfr, ori='Vertical', if_slice=1, if_log=0):
         title = 'spatial spectrum (projection)'
     
     if if_log == 1:
+        intensity_f = intensity_f/intensity_f.max()
+        intensity_f = intensity_f + 1e-30
         intensity_f = np.log(intensity_f)
     plt.imshow(intensity_f, cmap='jet',
-               extent=[axis_sp.min(), axis_sp.max(), (axis_ev.min()-ecent)*1e3, (axis_ev.max()-ecent)*1e3])
+            extent=[axis_sp.min(), axis_sp.max(), (axis_ev.min()-ecent)*1e3, (axis_ev.max()-ecent)*1e3],
+            interpolation=interpolation)
     plt.colorbar()
     if if_log == 1:
         cmin = np.max(intensity_f)-10
@@ -345,8 +342,9 @@ def fit_pulse_position(_wfr):
     projection_y = image.sum(axis=1)
     centroid_x, sigX = Util.gaussian_stats(axis_x, projection_x)
     centroid_y, sigY = Util.gaussian_stats(axis_y, projection_y)
-
-    return centroid_x, centroid_y
+    fwhm_x = sigX*2.355
+    fwhm_y = sigY*2.355
+    return centroid_x, centroid_y, fwhm_x, fwhm_y
 
 def fit_pulse_duration(_wfr):
     # Method to calculate the temporal pulse structure
