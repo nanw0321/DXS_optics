@@ -1,0 +1,16 @@
+#!/bin/bash -l
+#SBATCH -N 1
+#SBATCH -t 01:30:00
+#SBATCH -q regular
+#SBATCH -L SCRATCH
+#SBATCH -C haswell
+#SBATCH -o 20fs_HHLM.log
+#SBATCH --account=lcls
+
+export OMP_NUM_THREADS=64
+#export OMP_DISPLAY_ENV=true 
+#export OMP_DISPLAY_AFFINITY=true 
+
+module load python
+conda activate SRWmp
+srun -n 1 python HHLM.py

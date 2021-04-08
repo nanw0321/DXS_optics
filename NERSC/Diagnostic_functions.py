@@ -27,23 +27,93 @@ import matplotlib
 # matplotlib.use('Agg')   # allows plot without X11 forwarding
 import matplotlib.pyplot as plt
 
-# import srwl_bl
-# import srwlib
-# import srwlpy
-# import srwl_uti_smp
-# import uti_io
-# import math
+interpolation = 'antialiased'
+# interpolation = 'none'
 
-# from time import *
-# from copy import *
-# from array import *
-# from uti_plot import *
+####### calculations
+def calc_b_factor(thetaB, ang_asym):
+    # calculates the b factor for crystal reflections [unit]
+    b_factor = np.sin(thetaB+ang_asym)/ np.sin(thetaB-ang_asym)
+    return b_factor
 
-# from util_Matt import Util
-# import numpy as np
-# import matplotlib
-# #matplotlib.use('Agg')   # allows plot without X11 forwarding
-# import matplotlib.pyplot as plt
+def calc_scale_factor(b_factor):
+    # calculates the spatial scaling factor of crystal reflections [unit]
+    scale_factors = np.array([1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,25,27,30])
+    if b_factor>1:
+        idx = (np.abs(scale_factors - b_factor)).argmin()
+    else:
+        idx = (np.abs(scale_factors - 1/b_factor)).argmin()
+    return scale_factors[idx]
+
+def calc_t_stretching(thetaB, ang_asym, range_x=None):
+    # calculates the stretched beam size in time after asymmetric reflection [s]
+    t_stretching = np.abs(range_x / np.sin(thetaB-ang_asym) * (np.cos(thetaB-ang_asym)-np.cos(thetaB+ang_asym)) /3e8)
+    if np.size(t_stretching) == 1: t_stretching = t_stretching
+    else:
+        for time in t_stretching:
+            if time != 0: t_stretching = time; break
+    return t_stretching
+
+def calc_rot_mat_x(theta):
+    # CW rotation if viewed along the x axis
+    Rotation_matrix_x = np.asarray([
+        [1, 0, 0],
+        [0, np.cos(theta), -np.sin(theta)],
+        [0, np.sin(theta), np.cos(theta)]
+    ])
+    return Rotation_matrix_x
+
+def calc_rot_mat_z(theta):
+    # CW rotation if viewed along the z axis
+    Rotation_matrix_z = np.asarray([
+        [np.cos(theta), -np.sin(theta),0],
+        [np.sin(theta), np.cos(theta), 0],
+        [0, 0, 1]
+    ])
+    return Rotation_matrix_z
+
+def calc_rot_mat_btw_vecs(v1, v2):
+    # calculates the rotation matrix that turns v1 to v2
+    v1 = np.asarray(v1)
+    v2 = np.asarray(v2)
+    if np.any(v1==v2):
+        Rotation_matrix = np.eye(3)
+    else:
+        a, b = (v1 / np.linalg.norm(v1)).reshape(3), (v2 / np.linalg.norm(v2)).reshape(3)
+        v = np.cross(a, b)
+        c = np.dot(a, b)
+        s = np.linalg.norm(v)
+        kmat = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+        Rotation_matrix = np.eye(3) + kmat + kmat.dot(kmat) * ((1 - c) / (s ** 2))
+    return Rotation_matrix
+
+def calc_crystal_orientation(thetaB, ang_asym, ang_dif_pl, delta=0.):
+    '''calculates the crystal orientation, dif_pl defines the direction of reflected beam in the incident frame
+        ang_dif_pl: [0 to +y, pi/2 to -x, pi to -y, -pi/2 to +x], in betweeen values are allowed
+            Note: Oleg's "+x" axis is actually the "-x" axis, so pi/2 corresponds to horizontal reflection to the left
+        delta: crystal alignment error, >0 turns the normal vector toward the reflected beam
+        tv represents direction of crystal surface
+        nv represents direction of crystal surface normal
+    '''
+    ang_incidence = thetaB-ang_asym
+    nv = np.array([0, np.cos(ang_incidence), -np.sin(ang_incidence)])
+    tv = np.array([0, np.sin(ang_incidence), np.cos(ang_incidence)])
+    rot_mat = calc_rot_mat_x(delta)
+    nv = np.dot(rot_mat, nv)
+    tv = np.dot(rot_mat, tv)
+    rot_mat = calc_rot_mat_z(ang_dif_pl)
+    nv_rot = np.dot(rot_mat, nv)
+    tv_rot = np.dot(rot_mat, tv)
+    return nv_rot, tv_rot, ang_incidence
+
+def calc_direction_output(v_in, thetaB, ang_dif_pl=0):
+    # calculates the reflected beam direction in the lab frame
+    nv, _, _ = calc_crystal_orientation(thetaB, 0, ang_dif_pl=ang_dif_pl)
+    rot_mat = calc_rot_mat_btw_vecs(np.array([0,0,1]), v_in)
+    nv_rot = np.dot(rot_mat, nv)    # crystal normal vector in the lab frame
+    v_out = v_in - 2*np.dot(v_in, nv_rot)*nv_rot
+    return v_out/np.linalg.norm(v_out)
+
 
 ####### get info from SRW wavefront
 def get_dimension(_wfr):
@@ -145,7 +215,7 @@ def get_spectrum(_wfr):
 
 
 ####### plot
-def plot_spatial_from_wf(_wfr, if_slice=0):
+def plot_spatial_from_wf(_wfr, if_slice=0, if_log=0):
     # plot wavefront projection (y vs x) or lineout (if_slice)
     nx, ny, nz = get_dimension(_wfr)
     img = get_intensity(_wfr, domain='t').sum(axis=-1)
@@ -159,9 +229,17 @@ def plot_spatial_from_wf(_wfr, if_slice=0):
             plt.xlabel(r'y ($\mu$m)')
         plt.ylabel('intensity (a.u.)')
     else:
+        if if_log == 1:
+            img = img/img.max()
+            img = img + 1e-30
+            img = np.log(img)
         plt.imshow(img,cmap='jet',
-            extent = [axis_x.min()*1e6, axis_x.max()*1e6, axis_y.max()*1e6, axis_y.min()*1e6])
+            extent = [axis_x.min()*1e6, axis_x.max()*1e6, axis_y.max()*1e6, axis_y.min()*1e6],
+            interpolation=interpolation)
         plt.colorbar()
+        if if_log == 1:
+            cmin = np.max(img)-10
+            plt.clim(cmin)
         plt.xlabel(r'x ($\mu$m)')
         plt.ylabel(r'y ($\mu$m)')
 
@@ -192,7 +270,8 @@ def plot_tilt_from_wf(_wfr, ori='Vertical', type='sum', if_log=0):
         if if_log == 1:
             tilt = np.log(tilt)
         plt.imshow(tilt, cmap='jet',
-                  extent = [axis_t.max()*1e15, axis_t.min()*1e15, axis_sp.max()*1e6, axis_sp.min()*1e6])
+                extent = [axis_t.max()*1e15, axis_t.min()*1e15, axis_sp.max()*1e6, axis_sp.min()*1e6],
+                interpolation=interpolation)
         plt.colorbar()
         if if_log == 1:
             cmin = np.max(tilt)-10
@@ -217,43 +296,41 @@ def plot_spectrum_from_wf(_wfr, if_short=1):
     plt.ylabel('intensity (a.u.)')
     plt.title('{} meV/{} pts'.format(round(ev_range,2), npts))
 
-def plot_spatial_spectrum_from_wf(_wfr, ori='Vertical', if_slice=1, if_log=0):
-    # spatial spectrum
+def plot_spatial_spectrum_from_wf(_wfr, ori='Vertical', if_slice=0, if_log=1):
+    if if_slice == 1: title = 'spatial spectrum (central slice)'
+    else: title = 'spatial spectrum (projection)'
+    
     nx, ny, nz = get_dimension(_wfr)
-    intensity_f = get_intensity(_wfr, domain='f')
-    axis_ev = get_axis_ev(_wfr)
-    ecent = axis_ev[int(axis_ev.size/2)]
     axis_x, axis_y = get_axis_sp(_wfr)
     
+    # get signal strength in time vs one of the spatial dimension
+    intensity_t = get_intensity(_wfr, domain='t')
+    if ori == 'Horizontal':
+        xlabel = 'x (um)'
+        axis_sp = axis_x * 1e6
+        if if_slice == 1: intensity_t_sp = intensity_t[int(ny/2)]
+        else: intensity_t_sp = intensity_t.sum(axis=0)    # shape [x: E]
     if ori == 'Vertical':
         xlabel = 'y (um)'
         axis_sp = axis_y * 1e6
-        if if_slice == 1:
-            intensity_f = intensity_f[:,int(nx/2),:]
-        else:
-            intensity_f = intensity_f.sum(axis=1)
-    elif ori == 'Horizontal':
-        xlabel = 'x (um)'
-        axis_sp = axis_x * 1e6
-        if if_slice == 1:
-            intensity_f = intensity_f[int(ny/2)]
-        else:
-            intensity_f = intensity_f.sum(axis=0)
-    if if_slice == 1:
-        title = 'spatial spectrum (central slice)'
-    else:
-        title = 'spatial spectrum (projection)'
+        if if_slice == 1: intensity_t_sp = intensity_t[:,int(nx/2),:]
+        else: intensity_t_sp = intensity_t.sum(axis=1)    # shape [y: E]
     
+    # FFT to get spatial spectrum
+    intensity_f_sp = np.abs(np.fft.fftshift(np.fft.fft(intensity_t_sp, axis=1), axes=1))
     if if_log == 1:
-        intensity_f = np.log(intensity_f)
-    plt.imshow(intensity_f, cmap='jet',
-               extent=[axis_sp.min(), axis_sp.max(), (axis_ev.min()-ecent)*1e3, (axis_ev.max()-ecent)*1e3])
-    plt.colorbar()
-    if if_log == 1:
-        cmin = np.max(intensity_f)-10
-        plt.clim(cmin)
-    plt.title(title); plt.xlabel(xlabel); plt.ylabel('meV around {}eV'.format(ecent))
-    plt.axis('tight')
+        intensity_f_sp = intensity_f_sp/intensity_f_sp.max()
+        intensity_f_sp = intensity_f_sp + 1e-30
+        intensity_f_sp = np.log(intensity_f_sp)
+    
+    # plot
+    axis_ev = get_axis_ev(_wfr); ecent = axis_ev[int(nz/2)]
+    plt.imshow(intensity_f_sp.T, cmap='jet',
+            extent = [axis_sp.min(), axis_sp.max(), (axis_ev.min()-ecent)*1e3, (axis_ev.max()-ecent)*1e3],
+            interpolation=interpolation); plt.colorbar()
+    plt.axis('tight'); plt.ylabel('photon energy(meV) + {}eV'.format(ecent)); plt.xlabel(xlabel)
+    if if_log == 1: cmin = np.max(intensity_f_sp)-10; plt.clim(cmin)
+
 
 ####### Fit
 def fit_pulse_position(_wfr):
@@ -264,8 +341,9 @@ def fit_pulse_position(_wfr):
     projection_y = image.sum(axis=1)
     centroid_x, sigX = Util.gaussian_stats(axis_x, projection_x)
     centroid_y, sigY = Util.gaussian_stats(axis_y, projection_y)
-
-    return centroid_x, centroid_y
+    fwhm_x = sigX*2.355
+    fwhm_y = sigY*2.355
+    return centroid_x, centroid_y, fwhm_x, fwhm_y
 
 def fit_pulse_duration(_wfr):
     # Method to calculate the temporal pulse structure

@@ -48,6 +48,10 @@ def calc_scale_factor(b_factor):
 def calc_t_stretching(thetaB, ang_asym, range_x=None):
     # calculates the stretched beam size in time after asymmetric reflection [s]
     t_stretching = np.abs(range_x / np.sin(thetaB-ang_asym) * (np.cos(thetaB-ang_asym)-np.cos(thetaB+ang_asym)) /3e8)
+    if np.size(t_stretching) == 1: t_stretching = t_stretching
+    else:
+        for time in t_stretching:
+            if time != 0: t_stretching = time; break
     return t_stretching
 
 def calc_rot_mat_x(theta):
@@ -292,46 +296,41 @@ def plot_spectrum_from_wf(_wfr, if_short=1):
     plt.ylabel('intensity (a.u.)')
     plt.title('{} meV/{} pts'.format(round(ev_range,2), npts))
 
-def plot_spatial_spectrum_from_wf(_wfr, ori='Vertical', if_slice=1, if_log=0):
-    # spatial spectrum
+def plot_spatial_spectrum_from_wf(_wfr, ori='Vertical', if_slice=0, if_log=1):
+    if if_slice == 1: title = 'spatial spectrum (central slice)'
+    else: title = 'spatial spectrum (projection)'
+    
     nx, ny, nz = get_dimension(_wfr)
-    intensity_f = get_intensity(_wfr, domain='f')
-    axis_ev = get_axis_ev(_wfr)
-    ecent = axis_ev[int(axis_ev.size/2)]
     axis_x, axis_y = get_axis_sp(_wfr)
     
+    # get signal strength in time vs one of the spatial dimension
+    intensity_t = get_intensity(_wfr, domain='t')
+    if ori == 'Horizontal':
+        xlabel = 'x (um)'
+        axis_sp = axis_x * 1e6
+        if if_slice == 1: intensity_t_sp = intensity_t[int(ny/2)]
+        else: intensity_t_sp = intensity_t.sum(axis=0)    # shape [x: E]
     if ori == 'Vertical':
         xlabel = 'y (um)'
         axis_sp = axis_y * 1e6
-        if if_slice == 1:
-            intensity_f = intensity_f[:,int(nx/2),:]
-        else:
-            intensity_f = intensity_f.sum(axis=1)
-    elif ori == 'Horizontal':
-        xlabel = 'x (um)'
-        axis_sp = axis_x * 1e6
-        if if_slice == 1:
-            intensity_f = intensity_f[int(ny/2)]
-        else:
-            intensity_f = intensity_f.sum(axis=0)
-    if if_slice == 1:
-        title = 'spatial spectrum (central slice)'
-    else:
-        title = 'spatial spectrum (projection)'
+        if if_slice == 1: intensity_t_sp = intensity_t[:,int(nx/2),:]
+        else: intensity_t_sp = intensity_t.sum(axis=1)    # shape [y: E]
     
+    # FFT to get spatial spectrum
+    intensity_f_sp = np.abs(np.fft.fftshift(np.fft.fft(intensity_t_sp, axis=1), axes=1))
     if if_log == 1:
-        intensity_f = intensity_f/intensity_f.max()
-        intensity_f = intensity_f + 1e-30
-        intensity_f = np.log(intensity_f)
-    plt.imshow(intensity_f, cmap='jet',
-            extent=[axis_sp.min(), axis_sp.max(), (axis_ev.min()-ecent)*1e3, (axis_ev.max()-ecent)*1e3],
-            interpolation=interpolation)
-    plt.colorbar()
-    if if_log == 1:
-        cmin = np.max(intensity_f)-10
-        plt.clim(cmin)
-    plt.title(title); plt.xlabel(xlabel); plt.ylabel('meV around {}eV'.format(ecent))
-    plt.axis('tight')
+        intensity_f_sp = intensity_f_sp/intensity_f_sp.max()
+        intensity_f_sp = intensity_f_sp + 1e-30
+        intensity_f_sp = np.log(intensity_f_sp)
+    
+    # plot
+    axis_ev = get_axis_ev(_wfr); ecent = axis_ev[int(nz/2)]
+    plt.imshow(intensity_f_sp.T, cmap='jet',
+            extent = [axis_sp.min(), axis_sp.max(), (axis_ev.min()-ecent)*1e3, (axis_ev.max()-ecent)*1e3],
+            interpolation=interpolation); plt.colorbar()
+    plt.axis('tight'); plt.ylabel('photon energy(meV) + {}eV'.format(ecent)); plt.xlabel(xlabel)
+    if if_log == 1: cmin = np.max(intensity_f_sp)-10; plt.clim(cmin)
+
 
 ####### Fit
 def fit_pulse_position(_wfr):

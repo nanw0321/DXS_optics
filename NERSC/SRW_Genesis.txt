@@ -1,0 +1,9 @@
+Related tools:
+https://github.com/LUME-SIMEX/openPMD-wavefront
+https://github.com/slaclab/lume-genesis
+These are the jupyter notebooks we created before to convert genesis outputs to SRW wavefronts:
+https://nbviewer.jupyter.org/github/slaclab/lume-simex-demo-1/blob/master/models/wpg/readGenesis/convert_for_srw.ipynb
+https://nbviewer.jupyter.org/github/slaclab/lume-simex-demo-1/blob/master/models/wpg/readGenesis/openPMD-wavefront%20to%20SRW.ipynb
+More scripts can be found here:
+https://github.com/slaclab/lume-simex-demo-1/tree/master/models
+If you have any questions, feel free to let me know.:smiley:
