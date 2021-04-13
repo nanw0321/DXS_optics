@@ -368,7 +368,7 @@ def set_optics_CRL1_focus(v=None):
     return srwlib.SRWLOptC(el, pp)
 
 
-def set_optics_slit(v=None, op_Slit_dx=7e-6):
+def set_optics_slit(v=None):
     el = []
     pp = []
     names = ['Slit']
@@ -378,7 +378,7 @@ def set_optics_slit(v=None, op_Slit_dx=7e-6):
             el.append(srwlib.SRWLOptA(
                 _shape=v.op_Slit_shape,
                 _ap_or_ob='a',
-                _Dx=op_Slit_Dx,
+                _Dx=v.op_Slit_Dx,
                 _Dy=v.op_Slit_Dy,
                 _x=v.op_Slit_x,
                 _y=v.op_Slit_y,
@@ -522,6 +522,9 @@ def main_HHLM(varParam_name, z_scaling=10.0, dir_plot=None, if_log=1, if_slice=1
     t0 = time(); print('Resizing in frequency domain: ', end='')
     srwlpy.ResizeElecField(wfr, 'f', [0, 1., z_scaling]); print('done in', round(time() - t0, 3), 's')
 
+    # diagnostics - input
+    diagnostics, diagnostics_names = diagnose_input(wfr)
+
     # HHLM
     label = 'before HHLM1'; print('Propagating to {}: '.format(label), end=''); i_plot+=1; t0 = time()
     bl = set_optics_CRL0_before_HHLM1(v); srwlpy.PropagElecField(wfr, bl); print('done in', round(time() - t0, 3), 's\n')
@@ -545,6 +548,15 @@ def main_HHLM(varParam_name, z_scaling=10.0, dir_plot=None, if_log=1, if_slice=1
 
     print('\n\neverything lasted: {}s'.format(round(time()-time_stamp,2)))
 
+    # diagnostics - output
+    diagnostics, diagnostics_names = diagnose_output(wfr, diagnostics=diagnostics, diagnostics_names=diagnostics_names)
+
+    # I/O
+    dir_diagnostics = dir_plot+'diagnostics/'; mkdir(dir_diagnostics)
+    save_diagnostics(dir_diagnostics, diagnostics, diagnostics_names)
+
+    print('beam diagnostics written to {}'.format(h5_name))
+
 
 #### HRM
 def main_HRM(varParam_name, z_scaling=10.0, if_close=0, dir_plot=None, if_log=1, if_slice=1, i_start=0):
@@ -564,6 +576,9 @@ def main_HRM(varParam_name, z_scaling=10.0, if_close=0, dir_plot=None, if_log=1,
 
     t0 = time(); print('Resizing in frequency domain: ', end='')
     srwlpy.ResizeElecField(wfr, 'f', [0, 1., z_scaling]); print('done in', round(time() - t0, 3), 's')
+
+    # diagnostics - input
+    diagnostics, diagnostics_names = diagnose_input(wfr)
 
     # CC1
     label = 'before C1'; print('Propagating to {}: '.format(label), end=''); i_plot+=1; t0 = time()
@@ -585,7 +600,7 @@ def main_HRM(varParam_name, z_scaling=10.0, if_close=0, dir_plot=None, if_log=1,
     if if_close == 1:
         label_append = ', closed'
         label = 'focal plane'+label_append; print('Propagating to slit: ', end=''); t0 = time()
-        bl = set_optics_slit(v, d_slit=7e-6); srwlpy.PropagElecField(wfr, bl); print('done in', round(time() - t0, 3), 's\n')
+        bl = set_optics_slit(v); srwlpy.PropagElecField(wfr, bl); print('done in', round(time() - t0, 3), 's\n')
     plot_wfr_diagnostic(wfr, label=label, dir_plot=dir_plot, i=i_plot, if_log=if_log, if_slice=if_slice, i_start=i_start)
 
     label = 'before CRL2'+label_append; print('Propagating to {}: '.format(label), end=''); i_plot+=1; t0 = time()
@@ -607,6 +622,18 @@ def main_HRM(varParam_name, z_scaling=10.0, if_close=0, dir_plot=None, if_log=1,
 
     print('\n\neverything lasted: {}s'.format(round(time()-time_stamp,2)))
 
+    # diagnostics - output
+    diagnostics, diagnostics_names = diagnose_output(wfr, diagnostics=diagnostics, diagnostics_names=diagnostics_names)
+
+    # I/O
+    if if_close == 1:
+        dir_diagnostics = dir_plot+'diagnostics_closed/'; mkdir(dir_diagnostics)
+    else:
+        dir_diagnostics = dir_plot+'diagnostics_open/'; mkdir(dir_diagnostics)
+    save_diagnostics(dir_diagnostics, diagnostics, diagnostics_names)
+
+    print('\nbeam diagnostics written to {}'.format(h5_name))
+
 
 #### HHLM+HRM
 def main_HHLM_HRM(varParam_name, z_scaling=10.0, if_close=0, dir_plot=None, if_log=1, if_slice=1, i_start=0):
@@ -626,6 +653,9 @@ def main_HHLM_HRM(varParam_name, z_scaling=10.0, if_close=0, dir_plot=None, if_l
 
     t0 = time(); print('Resizing in frequency domain: ', end='')
     srwlpy.ResizeElecField(wfr, 'f', [0, 1., z_scaling]); print('done in', round(time() - t0, 3), 's')
+
+    # diagnostics - input
+    diagnostics, diagnostics_names = diagnose_input(wfr)
 
     # HHLM
     label = 'before HHLM1'; print('Propagating to {}: '.format(label), end=''); i_plot+=1; t0 = time()
@@ -664,7 +694,7 @@ def main_HHLM_HRM(varParam_name, z_scaling=10.0, if_close=0, dir_plot=None, if_l
     if if_close == 1:
         label_append = ', closed'
         label = 'focal plane'+label_append; print('Propagating to slit: ', end=''); t0 = time()
-        bl = set_optics_slit(v, d_slit=7e-6); srwlpy.PropagElecField(wfr, bl); print('done in', round(time() - t0, 3), 's\n')
+        bl = set_optics_slit(v); srwlpy.PropagElecField(wfr, bl); print('done in', round(time() - t0, 3), 's\n')
     plot_wfr_diagnostic(wfr, label=label, dir_plot=dir_plot, i=i_plot, if_log=if_log, if_slice=if_slice, i_start=i_start)
 
     label = 'before CRL2'+label_append; print('Propagating to {}: '.format(label), end=''); i_plot+=1; t0 = time()
@@ -685,3 +715,15 @@ def main_HHLM_HRM(varParam_name, z_scaling=10.0, if_close=0, dir_plot=None, if_l
     plot_wfr_diagnostic(wfr, label=label, dir_plot=dir_plot, i=i_plot, if_log=if_log, if_slice=if_slice, i_start=i_start)
 
     print('\n\neverything lasted: {}s'.format(round(time()-time_stamp,2)))
+
+    # diagnostics - output
+    diagnostics, diagnostics_names = diagnose_output(wfr, diagnostics=diagnostics, diagnostics_names=diagnostics_names)
+
+    # I/O
+    if if_close == 1:
+        dir_diagnostics = dir_plot+'diagnostics_closed/'; mkdir(dir_diagnostics)
+    else:
+        dir_diagnostics = dir_plot+'diagnostics_open/'; mkdir(dir_diagnostics)
+    save_diagnostics(dir_diagnostics, diagnostics, diagnostics_names)
+
+    print('\nbeam diagnostics written to {}'.format(h5_name))

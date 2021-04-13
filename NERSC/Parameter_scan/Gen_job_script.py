@@ -28,9 +28,9 @@ parser.add_argument('--err_f1', type=float, required=False,
 parser.add_argument('--C', type=str, required=False,
     help='crystal name [string]')
 parser.add_argument('--err_delta', type=float, required=False,
-    help='error: crystal alignment [urad]')
+    help='error: crystal alignment [nrad]')
 parser.add_argument('--err_miscut', type=float, required=False,
-    help='error: crystal miscut [urad]')
+    help='error: crystal miscut [nrad]')
 parser.add_argument('--if_log', type=int, required=False,
     help='condition: log scale plots')
 parser.add_argument('--if_slice', type=int, required=False,
@@ -77,10 +77,10 @@ elif err_f1 != 0.: err_name += '_f1'; err_val_name += '_{}m'.format(round(err_f1
 if cname is None: cname = 'HHLM1'
 
 if err_delta is None: err_delta = 0.
-elif err_delta != 0.: err_name += '_delta_{}'.format(cname); err_val_name += '_{}urad'.format(round(err_delta,3))
+elif err_delta != 0.: err_name += '_delta_{}'.format(cname); err_val_name += '_{}nrad'.format(round(err_delta,3))
 
 if err_miscut is None: err_miscut = 0.
-elif err_miscut != 0.: err_name += '_miscut_{}'.format(cname); err_val_name += '_{}urad'.format(round(err_miscut,3))
+elif err_miscut != 0.: err_name += '_miscut_{}'.format(cname); err_val_name += '_{}nrad'.format(round(err_miscut,3))
 
 if if_log is None: if_log = 1
 if if_slice is None: if_slice = 0
@@ -103,11 +103,11 @@ d_slit = 7e-6
 
 t_res =sigT*2.355/10              # time sampling resolution [s]
 ev_window = 4/t_res *1e-15        # total energy window [eV]
-ev_res = min(ev_window/400, 1e-3) # energy sampling resolution [eV]
+ev_res = min(ev_window/800, 1e-3) # energy sampling resolution [eV]
 
 
-range_x = 4e-3; range_y = 4e-3
-nx = 512; ny = 8; nz = 2*round(ev_window/ev_res/2)
+range_x = 5e-3; range_y = 5e-3
+nx = 1024; ny = 8; nz = 2*round(ev_window/ev_res/2)
 
 x_res = range_x/nx
 y_res = range_y/ny
@@ -208,7 +208,7 @@ print('HHLM scaling\n',
 b_factor_HRM = calc_b_factor(thetaB_list_HRM,ang_asym_list_HRM).max()
 x_scaling_HRM = calc_scale_factor(b_factor_HRM)
 t_stretching_HRM = calc_t_stretching(thetaB_list_HRM,ang_asym_list_HRM, range_x=range_x).max()
-z_scaling_HRM = np.max([np.round(t_stretching_HRM/t_window),1.])
+z_scaling_HRM = np.max([np.round(2*t_stretching_HRM/t_window),1.])
 
 print('HRM scaling\n',
       'b factor: {}\n'.format(round(b_factor_HRM,2)),
@@ -266,7 +266,7 @@ if err_delta!= 0:
             thetaB = thetaB_list_HHLM[i]
             ang_asym = ang_asym_list_HHLM[i]
             ang_dif_pl = ang_dif_pl_list_HHLM[i]
-            nv, tv, ang_in = calc_crystal_orientation(thetaB, ang_asym, ang_dif_pl, delta=err_delta)
+            nv, tv, ang_in = calc_crystal_orientation(thetaB, ang_asym, ang_dif_pl, delta=err_delta/1e9)
             nv_list_HHLM[i] = nv
             tv_list_HHLM[i] = tv
             ang_in_HHLM[i] = ang_in
@@ -275,7 +275,7 @@ if err_delta!= 0:
             thetaB = thetaB_list_HRM[i]
             ang_asym = ang_asym_list_HRM[i]
             ang_dif_pl = ang_dif_pl_list_HRM[i]
-            nv, tv, ang_in = calc_crystal_orientation(thetaB, ang_asym, ang_dif_pl, delta=err_delta)
+            nv, tv, ang_in = calc_crystal_orientation(thetaB, ang_asym, ang_dif_pl, delta=err_delta/1e9)
             nv_list_HRM[i] = nv
             tv_list_HRM[i] = tv
             ang_in_HRM[i] = ang_in
@@ -284,7 +284,7 @@ if err_delta!= 0:
 if err_miscut != 0:
     for i in range(len(name_HHLM)):
         if cname == name_HHLM[i]:
-            ang_asym_list_HHLM[i] += err_miscut
+            ang_asym_list_HHLM[i] += err_miscut/1e9
             thetaB = thetaB_list_HHLM[i]
             ang_asym = ang_asym_list_HHLM[i]
             ang_dif_pl = ang_dif_pl_list_HHLM[i]
@@ -294,7 +294,7 @@ if err_miscut != 0:
             ang_in_HHLM[i] = ang_in
     for i in range(len(name_HRM)):
         if cname == name_HRM[i]:
-            ang_asym_list_HRM[i] += err_miscut
+            ang_asym_list_HRM[i] += err_miscut/1e9
             thetaB = thetaB_list_HRM[i]
             ang_asym = ang_asym_list_HRM[i]
             ang_dif_pl = ang_dif_pl_list_HRM[i]
@@ -652,7 +652,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_HHLM4_C1_pp', 'f',         [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM4_C1'],
     ['op_C1_pp', 'f',               [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C1'],
     ['op_C1_C2_pp', 'f',            [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C1_C2'],
-    ['op_C2_pp', 'f',               [0, 0, 1.0, 0, 0, 4*x_scaling_HRM, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C2'],
+    ['op_C2_pp', 'f',               [0, 0, 1.0, 0, 0, 8*x_scaling_HRM, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C2'],
     ['op_C2_CRL1_pp', 'f',          [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C2_CRL1'],
     ['op_CRL1_pp', 'f',             [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL1'],
     ['op_CRL1_Slit_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL1_Slit'],
@@ -729,7 +729,7 @@ if bl_name == 'HHLM_HRM':
                                     job_num, z_scaling, if_close, dir_plot, if_log, if_slice, i_start)
 
 ## gen script
-script_name = 'script{}.py'.format(job_num)
+script_name = 'script{}_{}.py'.format(job_num, if_close)
 
 with open(script_name, 'w') as fh:
     fh.writelines("from Module_diagnostic_functions import *\n")
@@ -740,27 +740,27 @@ with open(script_name, 'w') as fh:
 print('    python script generation completed')
 
 ## gen job
-job_name = 'job{}.slrm'.format(job_num)
+job_name = 'job{}_{}.slrm'.format(job_num, if_close)
 dir_log = 'logs/'; mkdir(dir_log)
 
 with open(job_name, 'w') as fh:
     fh.writelines("#!/bin/bash -l\n")
     fh.writelines("#SBATCH -N 1\n")
     fh.writelines("#SBATCH -t 00:30:00\n")
-    fh.writelines("#SBATCH -q debug\n")
+    fh.writelines("#SBATCH -q regular\n")
     fh.writelines("#SBATCH -L SCRATCH\n")
     fh.writelines("#SBATCH -C haswell\n")
-    fh.writelines("#SBATCH -o {}{}fs_{}{}.log\n".format(dir_log, var_t, bl_name, err_name+err_val_name))
+    fh.writelines("#SBATCH -o {}{}fs_{}{}_{}.log\n".format(dir_log, var_t, bl_name, err_name+err_val_name,if_close))
     fh.writelines("#SBATCH --account=lcls\n")
     fh.writelines("export OMP_NUM_THREADS=64\n")
     fh.writelines("#export OMP_DISPLAY_ENV=true \n")
     fh.writelines("#export OMP_DISPLAY_AFFINITY=true \n")
     fh.writelines("module load python\n")
     fh.writelines("conda activate SRWmp\n")
-    fh.writelines("srun -n 1 python script{}.py\n".format(job_num))
+    fh.writelines("srun -n 1 python {}\n".format(script_name))
 
 print('    SLURM job script generation completed')
 
 ## submit job
-# os.system("sbatch {}".format(job_name)); print('job {} submitted'.format(job_num))
+os.system("sbatch {}".format(job_name)); print('job {}_{} submitted'.format(job_num, if_close))
 

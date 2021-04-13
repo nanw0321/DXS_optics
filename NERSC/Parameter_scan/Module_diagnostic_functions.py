@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # from __future__ import absolute_import, division, print_function #Py 2.*/3.* compatibility
 
-import os
+import os, h5py
 try:
     __IPYTHON__
     import sys
@@ -421,8 +421,8 @@ def plot_wfr_diagnostic(_wfr, label=None, dir_plot=None, if_slice=1, if_log=0, i
         plt.figure(figsize=(24,6))
         # space
         plt.subplot(1,3,1); plot_spatial_from_wf(_wfr, if_slice=if_slice, if_log=if_log)
-#         plt.title(title_space); plt.axis('tight'); plt.xlim([-(range_x * x_scaling_HHLM/2)*1e6, (range_x * x_scaling_HHLM/2)*1e6])
-#         plt.title(title_space); plt.axis('tight'); plt.xlim([-range_x/2*1e6, range_x/2*1e6])
+        # plt.title(title_space); plt.axis('tight'); plt.xlim([-(range_x * x_scaling_HHLM/2)*1e6, (range_x * x_scaling_HHLM/2)*1e6])
+        # plt.title(title_space); plt.axis('tight'); plt.xlim([-range_x/2*1e6, range_x/2*1e6])
         plt.title(title_space); plt.axis('tight'); plt.xlim([xstart, xfin])
         if if_slice != 1: plt.ylim([-range_y/2*1e6, range_y/2*1e6])
 
@@ -435,12 +435,12 @@ def plot_wfr_diagnostic(_wfr, label=None, dir_plot=None, if_slice=1, if_log=0, i
         plt.title(title_energy); plt.xlim([xstart, xfin]); plt.ylim([Estart, Efin])
 
         plt.savefig(dir_plot+pltname)
-#         plt.close('all')
+        # plt.close('all')
         np.seterr(divide = 'warn')
         print('plot lasted {}s\n'.format(round(time()-t0,2)))
 
 
-####### Fit
+####### fit
 def fit_pulse_position(_wfr):
     # Method to calculate the beam position
     axis_x, axis_y = get_axis_sp(_wfr)       # get spatial axis
@@ -457,6 +457,7 @@ def fit_pulse_position(_wfr):
         centroid_y = 0.; fwhm_y = axis_y.max()/2.355
     fwhm_x = sigX*2.355
     fwhm_y = sigY*2.355
+
     return centroid_x, centroid_y, fwhm_x, fwhm_y
 
 def fit_pulse_duration(_wfr):
@@ -467,7 +468,10 @@ def fit_pulse_duration(_wfr):
     y_data = np.roll(int0, shift)
 
     # get Gaussian stats
-    centroid, sigT = Util.gaussian_stats(axis_t, y_data)
+    try:
+        centroid, sigT = Util.gaussian_stats(axis_t, y_data)
+    except:
+        centroid = 0.; sigT = axis_t.max()/2.355
     fwhm = int(sigT * 2.355)
 
     return centroid, fwhm
@@ -513,7 +517,10 @@ def fit_pulse_bandwidth(_wfr):
     axis_ev = axis_ev[aw]; int0 = int0[aw]
 
     # get gaussian stats
-    centroid, sigE = Util.gaussian_stats(axis_ev, int0)
+    try:
+        centroid, sigE = Util.gaussian_stats(axis_ev, int0)
+    except:
+        centroid = 0.; sigE = axis_ev.max()/2.355
     fwhm = sigE * 2.355
 
     return centroid, fwhm
@@ -527,13 +534,85 @@ def fit_throughput(_wfr0, _wfr1):
 
     return throughput
 
-def fit_central_energy(_wfr):
-    # Method to calculate the central energy of a pulse
-    aw, axis_ev, int0 = get_spectrum(_wfr)
-    axis_ev = axis_ev[aw]; int0 = int0[aw]
 
-    # get gaussian stats
-    centroid, sigE = Util.gaussian_stats(axis_ev, int0)
-    fwhm = sigE * 2.355
 
-    return centroid
+####### diagnostics
+def diagnose_input(_wfr, diagnostics=None, diagnostics_names=None):
+    # get beam diagnostic info: spectrum
+    print('fitting for beam diagnostics'); t0 = time()
+    if diagnostics == None: diagnostics = []; diagnostics_names = []
+
+    # spectrum
+    try:
+        _, axis_ev_in, int_ev_in = get_spectrum(_wfr)
+    except:
+        axis_ev_in = 'Fit failed'
+        int_ev_in = 'Fit failed'
+    diagnostics.append(axis_ev_in); diagnostics.append(int_ev_in)
+    diagnostics_names.append('axis_ev_in[eV]'); diagnostics_names.append('int_ev_in[a.u.]')
+
+    print('done in', round(time() - t0, 3), 's\n')
+    for i, values in enumerate(diagnostics):
+        if values == 'Fit failed':
+            print('    '+diagnostics_names[i]+': {}'.format(values))
+
+    return diagnostics, diagnostics_names
+
+def diagnose_output(_wfr, diagnostics=None, diagnostics_names=None):
+    # get beam diagnostic info
+    print('fitting for beam diagnostics'); t0 = time()
+    if diagnostics == None: diagnostics = []; diagnostics_names = []
+
+    # spectrum
+    try:
+        _, axis_ev_out, int_ev_out = get_spectrum(_wfr)
+    except:
+        axis_ev_out = 'Fit failed'
+        int_ev_out = 'Fit failed'
+    diagnostics.append(axis_ev_out); diagnostics.append(int_ev_out)
+    diagnostics_names.append('axis_ev_out[eV]'); diagnostics_names.append('int_ev_out[a.u.]')
+
+    # central energy and bandwidth
+    try:
+        cent_E_out, bw_out = fit_pulse_bandwidth(_wfr)
+    except:
+        cent_E_out = 'Fit failed'
+        bw_out = 'Fit failed'
+    diagnostics.append(cent_E_out); diagnostics.append(bw_out)
+    diagnostics_names.append('cent_E_out[eV]'); diagnostics_names.append('bw_out[eV]')
+
+    # pulse duration
+    try:
+        cent_t_out, dur_out = fit_pulse_duration(_wfr)
+    except:
+        dur_out = 'Fit failed'
+    diagnostics.append(dur_out)
+    diagnostics_names.append('dur_out[fs]')
+
+    # pulse-front tilt
+    try:
+        ptilt_x_out = fit_pulsefront_tilt(_wfr, dim='x')
+    except:
+        ptilt_x_out = 'Fit failed'
+    diagnostics.append(ptilt_x_out)
+    diagnostics_names.append('ptilt_x_out[fs_um]')
+
+    print('done in', round(time() - t0, 3), 's\n')
+    for i, values in enumerate(diagnostics):
+        if values == 'Fit failed':
+            print('    '+diagnostics_names[i]+': {}'.format(values))
+
+    return diagnostics, diagnostics_names
+
+# def save_diagnostics(h5_name, job_num, diagnostics, diagnostics_names):
+#     with h5py.File(h5_name, 'w') as f:
+#         grp = f.create_group('job_{}'.format(job_num))
+#         for i, values in enumerate(diagnostics):
+#             if np.size(values) == 1: values = [values]
+#             grp.create_dataset(diagnostics_names[i], data = values)
+
+def save_diagnostics(dir_name, diagnostics, diagnostics_names):
+    for i, values in enumerate(diagnostics):
+        file_name = dir_name +'{}_'.format(i)+ diagnostics_names[i]+'.npy'
+        with open(file_name, 'wb') as f:
+            np.save(f, values)
