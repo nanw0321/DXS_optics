@@ -320,7 +320,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['gbm_z', 'f', 0.0, 'average longitudinal coordinate of waist [m]'],
     ['gbm_xp', 'f', 0.0, 'average horizontal angle at waist [rad]'],
     ['gbm_yp', 'f', 0.0, 'average verical angle at waist [rad]'],
-    ['gbm_ave', 'f', E+err_E, 'average photon energy [eV]'],
+    ['gbm_ave', 'f', E+err_E/1e3, 'average photon energy [eV]'],
     ['gbm_pen', 'f', 0.001, 'energy per pulse [J]'],
     ['gbm_rep', 'f', 1, 'rep. rate [Hz]'],
     ['gbm_pol', 'f', 2, 'polarization 1- lin. hor., 2- lin. vert., 3- lin. 45 deg., 4- lin.135 deg., 5- circ. right, 6- circ. left'],
@@ -746,7 +746,7 @@ dir_log = 'logs/'; mkdir(dir_log)
 with open(job_name, 'w') as fh:
     fh.writelines("#!/bin/bash -l\n")
     fh.writelines("#SBATCH -N 1\n")
-    fh.writelines("#SBATCH -t 00:30:00\n")
+    fh.writelines("#SBATCH -t 01:30:00\n")
     fh.writelines("#SBATCH -q regular\n")
     fh.writelines("#SBATCH -L SCRATCH\n")
     fh.writelines("#SBATCH -C haswell\n")
