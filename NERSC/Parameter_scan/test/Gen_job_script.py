@@ -103,7 +103,7 @@ d_slit = 7e-6
 
 t_res =sigT*2.355/10              # time sampling resolution [s]
 ev_window = 4/t_res *1e-15        # total energy window [eV]
-ev_res = min(ev_window/800, 1e-3) # energy sampling resolution [eV]
+ev_res = min(ev_window/100, 1e-3) # energy sampling resolution [eV]
 
 
 range_x = 5e-3; range_y = 5e-3
@@ -712,7 +712,6 @@ print('    varParam generation completed')
 
 ## script variables
 if if_close == 0: i_start = 0
-i_start = 100
 
 if bl_name == 'HHLM':
     z_scaling = z_scaling_HHLM
@@ -721,13 +720,11 @@ if bl_name == 'HHLM':
 if bl_name == 'HRM':
     z_scaling = z_scaling_HRM
     if if_close == 1: i_start = 5
-    i_start = 100
     main_str = "main_HRM('varParam{}.pkl', z_scaling={}, if_close={}, dir_plot='{}', if_log={}, if_slice={}, i_start={})".format(
                                     job_num, z_scaling, if_close, dir_plot, if_log, if_slice, i_start)
 if bl_name == 'HHLM_HRM':
     z_scaling = z_scaling_HHLM
     if if_close == 1: i_start = 9
-    i_start = 100
     main_str = "main_HHLM_HRM('varParam{}.pkl', z_scaling={}, if_close={}, dir_plot='{}', if_log={}, if_slice={}, i_start={})".format(
                                     job_num, z_scaling, if_close, dir_plot, if_log, if_slice, i_start)
 
@@ -749,7 +746,7 @@ dir_log = 'logs/'; mkdir(dir_log)
 with open(job_name, 'w') as fh:
     fh.writelines("#!/bin/bash -l\n")
     fh.writelines("#SBATCH -N 1\n")
-    fh.writelines("#SBATCH -t 00:10:00\n")
+    fh.writelines("#SBATCH -t 01:30:00\n")
     fh.writelines("#SBATCH -q regular\n")
     fh.writelines("#SBATCH -L SCRATCH\n")
     fh.writelines("#SBATCH -C haswell\n")
@@ -765,5 +762,5 @@ with open(job_name, 'w') as fh:
 print('    SLURM job script generation completed')
 
 ## submit job
-os.system("sbatch {}".format(job_name)); print('job {}_{} submitted'.format(job_num, if_close))
+# os.system("sbatch {}".format(job_name)); print('job {}_{} submitted'.format(job_num, if_close))
 
