@@ -472,7 +472,8 @@ def fit_pulse_duration(_wfr):
         centroid, sigT = Util.gaussian_stats(axis_t, y_data)
     except:
         centroid = 0.; sigT = axis_t.max()/2.355
-    fwhm = int(sigT * 2.355)
+    # fwhm = int(sigT * 2.355)
+    fwhm = sigT*2.355
 
     return centroid, fwhm
 
