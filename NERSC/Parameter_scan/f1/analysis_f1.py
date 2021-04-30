@@ -57,7 +57,7 @@ for job_num, err_f1 in enumerate(err_f1_list):
 err_f1_list *= 1e3    # [mm]
 xlabel = 'error f1 (mm)'
 fig, axes = plt.subplots(nrows=1, ncols=5, sharex=True, figsize=(27,5))
-plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
+# plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
 
 # 1. pulse duration
 duration = np.array(diagnostics_open[0::len(diagnostic_names_open)])
@@ -98,7 +98,7 @@ ax4 = axes[3]
 im = ax4.pcolormesh(err_f1_list, axis_ev, throughput.T, cmap='jet')
 plt.colorbar(im, ax=ax4)
 ax4.set_xlabel(xlabel)
-ax4.set_ylabel('meV around {}eV'.format(cent_E))
+ax4.set_ylabel('meV around {}eV'.format(round(cent_E,2)))
 ax4.set_title('spectral response')
 
 # 5. central energy
@@ -106,7 +106,7 @@ Ec = np.array(diagnostics_close[4::len(diagnostic_names_close)])
 ax5 = axes[4]
 ax5.plot(err_f1_list, (Ec-cent_E)*1e3)
 ax5.set_xlabel(xlabel)
-ax5.set_ylabel('meV around {}eV'.format(cent_E))
+ax5.set_ylabel('meV around {}eV'.format(round(cent_E,2)))
 ax5.set_title('central energy')
 
 plt.savefig('scan{}.png'.format(err_name))
