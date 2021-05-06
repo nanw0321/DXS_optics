@@ -472,8 +472,7 @@ def fit_pulse_duration(_wfr):
         centroid, sigT = Util.gaussian_stats(axis_t, y_data)
     except:
         centroid = 0.; sigT = axis_t.max()/2.355
-    # fwhm = int(sigT * 2.355)
-    fwhm = sigT*2.355
+    fwhm = int(sigT * 2.355)
 
     return centroid, fwhm
 
@@ -581,7 +580,6 @@ def diagnose_output(_wfr, diagnostics=None, diagnostics_names=None):
         bw_out = 'Fit failed'
     diagnostics.append(cent_E_out); diagnostics.append(bw_out)
     diagnostics_names.append('cent_E_out[eV]'); diagnostics_names.append('bw_out[eV]')
-    print('cent_E_out[eV]',cent_E_out,'bw_out[eV]',bw_out)
 
     # pulse duration
     try:
@@ -590,7 +588,6 @@ def diagnose_output(_wfr, diagnostics=None, diagnostics_names=None):
         dur_out = 'Fit failed'
     diagnostics.append(dur_out)
     diagnostics_names.append('dur_out[fs]')
-    print('dur_out[fs]',dur_out)
 
     # pulse-front tilt
     try:
@@ -599,7 +596,6 @@ def diagnose_output(_wfr, diagnostics=None, diagnostics_names=None):
         ptilt_x_out = 'Fit failed'
     diagnostics.append(ptilt_x_out)
     diagnostics_names.append('ptilt_x_out[fs_um]')
-    print('ptilt_x_out[fs_um]',ptilt_x_out)
 
     print('done in', round(time() - t0, 3), 's\n')
     for i, values in enumerate(diagnostics):

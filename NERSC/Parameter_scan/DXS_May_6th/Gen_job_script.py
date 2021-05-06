@@ -103,11 +103,11 @@ d_slit = 7e-6
 
 t_res =sigT*2.355/10              # time sampling resolution [s]
 ev_window = 4/t_res *1e-15        # total energy window [eV]
-ev_res = min(ev_window/100, 1e-3) # energy sampling resolution [eV]
+ev_res = min(ev_window/800, 1e-3) # energy sampling resolution [eV]
 
 
 range_x = 5e-3; range_y = 5e-3
-nx = 1024; ny = 8; nz = 2*round(ev_window/ev_res/2)
+nx = 512; ny = 8; nz = 2*round(ev_window/ev_res/2)
 
 x_res = range_x/nx
 y_res = range_y/ny
@@ -652,7 +652,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_HHLM4_C1_pp', 'f',         [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM4_C1'],
     ['op_C1_pp', 'f',               [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C1'],
     ['op_C1_C2_pp', 'f',            [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C1_C2'],
-    ['op_C2_pp', 'f',               [0, 0, 1.0, 0, 0, 8*x_scaling_HRM, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C2'],
+    ['op_C2_pp', 'f',               [0, 0, 1.0, 0, 0, 4*x_scaling_HRM, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C2'],
     ['op_C2_CRL1_pp', 'f',          [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C2_CRL1'],
     ['op_CRL1_pp', 'f',             [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL1'],
     ['op_CRL1_Slit_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL1_Slit'],
@@ -712,6 +712,7 @@ print('    varParam generation completed')
 
 ## script variables
 if if_close == 0: i_start = 0
+i_start = 100
 
 if bl_name == 'HHLM':
     z_scaling = z_scaling_HHLM
@@ -720,11 +721,13 @@ if bl_name == 'HHLM':
 if bl_name == 'HRM':
     z_scaling = z_scaling_HRM
     if if_close == 1: i_start = 5
+    i_start = 100
     main_str = "main_HRM('varParam{}.pkl', z_scaling={}, if_close={}, dir_plot='{}', if_log={}, if_slice={}, i_start={})".format(
                                     job_num, z_scaling, if_close, dir_plot, if_log, if_slice, i_start)
 if bl_name == 'HHLM_HRM':
     z_scaling = z_scaling_HHLM
     if if_close == 1: i_start = 9
+    i_start = 100
     main_str = "main_HHLM_HRM('varParam{}.pkl', z_scaling={}, if_close={}, dir_plot='{}', if_log={}, if_slice={}, i_start={})".format(
                                     job_num, z_scaling, if_close, dir_plot, if_log, if_slice, i_start)
 
@@ -746,8 +749,8 @@ dir_log = 'logs/'; mkdir(dir_log)
 with open(job_name, 'w') as fh:
     fh.writelines("#!/bin/bash -l\n")
     fh.writelines("#SBATCH -N 1\n")
-    fh.writelines("#SBATCH -t 01:30:00\n")
-    fh.writelines("#SBATCH -q regular\n")
+    fh.writelines("#SBATCH -t 00:30:00\n")
+    fh.writelines("#SBATCH -q debug\n")
     fh.writelines("#SBATCH -L SCRATCH\n")
     fh.writelines("#SBATCH -C haswell\n")
     fh.writelines("#SBATCH -o {}{}fs_{}{}_{}.log\n".format(dir_log, var_t, bl_name, err_name+err_val_name,if_close))
@@ -762,5 +765,5 @@ with open(job_name, 'w') as fh:
 print('    SLURM job script generation completed')
 
 ## submit job
-# os.system("sbatch {}".format(job_name)); print('job {}_{} submitted'.format(job_num, if_close))
+os.system("sbatch {}".format(job_name)); print('job {}_{} submitted'.format(job_num, if_close))
 
