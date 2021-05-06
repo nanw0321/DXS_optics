@@ -6,8 +6,9 @@ matplotlib.use('Agg')   # allows plot without X11 forwarding
 
 var_t = 100.
 bl_name = 'HRM'
-err_name = '_delta_C2'
-err_delta_list = np.linspace(-1000, 1000, 50)
+err_name = '_delta_C1'
+# err_delta_list = np.linspace(-1000, 1000, 50)
+err_delta_list = np.linspace(-1e5, 1e5, 50)
 
 ##### sampling parameters
 sigT = var_t * 1e-15/2.355
@@ -69,7 +70,7 @@ for job_num, err_delta in enumerate(err_delta_list):
 
 # plot
 x = np.array(x) # [mrad]
-xlabel = 'error delta {} (mrad)'.format(err_name[-2:])
+xlabel = 'error delta {} (urad)'.format(err_name[-2:])
 fig, axes = plt.subplots(nrows=1, ncols=5, sharex=True, figsize=(27,5))
 # plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
 
