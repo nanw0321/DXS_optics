@@ -720,7 +720,7 @@ print('    varParam generation completed')
 
 ## script variables
 if if_close == 0: i_start = 0
-i_start = 100
+# i_start = 100
 
 if bl_name == 'HHLM':
     z_scaling = z_scaling_HHLM

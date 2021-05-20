@@ -1,0 +1,12 @@
+Show mirror performance with closed slit to demonstrate resolution.
+
+Show slope error approach/heatload
+
+In a week follow the outline and see what's needed for the report write-up
+
+telescope enlarged; simulate whole beamline
+
+Todo:
+	simulate whole beamline with perfect mirrors
+	introduce slope errors
+
