@@ -7,6 +7,7 @@ In a week follow the outline and see what's needed for the report write-up
 telescope enlarged; simulate whole beamline
 
 Todo:
-	simulate whole beamline with perfect mirrors
+	simulate whole beamline with perfect mirrors & WC slit
 	introduce slope errors
+
 
