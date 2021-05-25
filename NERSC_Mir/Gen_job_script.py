@@ -546,12 +546,12 @@ varParam = srwl_bl.srwl_uti_ext_options([
     # MIR1: ellipsoidMirror
     ['op_MIR1_hfn', 's', 'None', 'heightProfileFile'],
     ['op_MIR1_dim', 's', 'x', 'orientation'],
-    ['op_MIR1_p', 'f', 1000000000000.0, 'firstFocusLength'],
-    ['op_MIR1_q', 'f', 10.0, 'focalLength'],
+    ['op_MIR1_p', 'f', 1e5, 'firstFocusLength'],
+    ['op_MIR1_q', 'f', fCRL_list[1], 'focalLength'],
     ['op_MIR1_ang', 'f', 0.0036, 'grazingAngle'],
     ['op_MIR1_amp_coef', 'f', 1.0, 'heightAmplification'],
-    ['op_MIR1_size_tang', 'f', 0.01, 'tangentialSize'],
-    ['op_MIR1_size_sag', 'f', 0.01, 'sagittalSize'],
+    ['op_MIR1_size_tang', 'f', 5e-3/np.sin(0.0036), 'tangentialSize'],
+    ['op_MIR1_size_sag', 'f', 5e-3, 'sagittalSize'],
     ['op_MIR1_nvx', 'f', 0.9999935200069984, 'normalVectorX'],
     ['op_MIR1_nvy', 'f', 0.0, 'normalVectorY'],
     ['op_MIR1_nvz', 'f', -0.0035999922240050387, 'normalVectorZ'],
@@ -576,12 +576,12 @@ varParam = srwl_bl.srwl_uti_ext_options([
     # MIR2: ellipsoidMirror
     ['op_MIR2_hfn', 's', '', 'heightProfileFile'],
     ['op_MIR2_dim', 's', 'x', 'orientation'],
-    ['op_MIR2_p', 'f', 10.0, 'firstFocusLength'],
-    ['op_MIR2_q', 'f', 1000000000000.0, 'focalLength'],
+    ['op_MIR2_p', 'f', fCRL_list[2], 'firstFocusLength'],
+    ['op_MIR2_q', 'f', 1e5, 'focalLength'],
     ['op_MIR2_ang', 'f', 0.0036, 'grazingAngle'],
     ['op_MIR2_amp_coef', 'f', 1.0, 'heightAmplification'],
-    ['op_MIR2_size_tang', 'f', 0.01, 'tangentialSize'],
-    ['op_MIR2_size_sag', 'f', 0.01, 'sagittalSize'],
+    ['op_MIR2_size_tang', 'f', 5e-3/np.sin(0.0036), 'tangentialSize'],
+    ['op_MIR2_size_sag', 'f', 5e-3, 'sagittalSize'],
     ['op_MIR2_nvx', 'f', 0.9999935200069984, 'normalVectorX'],
     ['op_MIR2_nvy', 'f', 0.0, 'normalVectorY'],
     ['op_MIR2_nvz', 'f', -0.0035999922240050387, 'normalVectorZ'],
@@ -651,6 +651,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_CRL_HHLM1_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL_HHLM1'],
     ['op_CRL_C1_pp', 'f',           [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'CRL_C1'],
     ['op_HHLM1_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, x_scaling_HHLM, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM1'],
+    # ['op_HHLM1_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM1'],
     ['op_HHLM1_HHLM2_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM1_HHLM2'],
     ['op_HHLM2_pp', 'f',            [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM2'],
     ['op_HHLM2_HHLM3_pp', 'f',      [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM2_HHLM3'],
@@ -661,6 +662,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_C1_pp', 'f',               [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C1'],
     ['op_C1_C2_pp', 'f',            [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C1_C2'],
     ['op_C2_pp', 'f',               [0, 0, 1.0, 0, 0, 8*x_scaling_HRM, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C2'],
+    # ['op_C2_pp', 'f',               [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C2'],
     ['op_C2_MIR1_pp', 'f',          [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C2_MIR1'],
     ['op_MIR1_pp', 'f',             [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'MIR1'],
     ['op_MIR1_Slit_pp', 'f',        [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'MIR1_Slit'],
@@ -729,13 +731,11 @@ if bl_name == 'HHLM':
 if bl_name == 'HRM':
     z_scaling = z_scaling_HRM
     if if_close == 1: i_start = 5
-    i_start = 100
     main_str = "main_HRM('varParam{}.pkl', z_scaling={}, if_close={}, dir_plot='{}', if_log={}, if_slice={}, i_start={})".format(
                                     job_num, z_scaling, if_close, dir_plot, if_log, if_slice, i_start)
 if bl_name == 'HHLM_HRM':
     z_scaling = z_scaling_HHLM
     if if_close == 1: i_start = 9
-    i_start = 100
     main_str = "main_HHLM_HRM('varParam{}.pkl', z_scaling={}, if_close={}, dir_plot='{}', if_log={}, if_slice={}, i_start={})".format(
                                     job_num, z_scaling, if_close, dir_plot, if_log, if_slice, i_start)
 
@@ -757,8 +757,10 @@ dir_log = 'logs/'; mkdir(dir_log)
 with open(job_name, 'w') as fh:
     fh.writelines("#!/bin/bash -l\n")
     fh.writelines("#SBATCH -N 1\n")
-    fh.writelines("#SBATCH -t 00:30:00\n")
-    fh.writelines("#SBATCH -q debug\n")
+    fh.writelines("#SBATCH -t 03:00:00\n")
+    fh.writelines("#SBATCH -q regular\n")
+    # fh.writelines("#SBATCH -t 00:30:00\n")
+    # fh.writelines("#SBATCH -q debug\n")
     fh.writelines("#SBATCH -L SCRATCH\n")
     fh.writelines("#SBATCH -C haswell\n")
     fh.writelines("#SBATCH -o {}{}fs_{}{}_{}.log\n".format(dir_log, var_t, bl_name, err_name+err_val_name,if_close))

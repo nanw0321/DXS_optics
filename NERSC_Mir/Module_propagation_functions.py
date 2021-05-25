@@ -657,7 +657,7 @@ def main_HHLM_HRM(varParam_name, z_scaling=10.0, if_close=0, dir_plot=None, if_l
     srwlpy.ResizeElecField(wfr, 'f', [0, 1., z_scaling]); print('done in', round(time() - t0, 3), 's')
 
     # diagnostics - input
-    diagnostics, diagnostics_names = diagnose_input(wfr)
+    # diagnostics, diagnostics_names = diagnose_input(wfr)
 
     # HHLM
     label = 'before HHLM1'; print('Propagating to {}: '.format(label), end=''); i_plot+=1; t0 = time()
@@ -719,13 +719,13 @@ def main_HHLM_HRM(varParam_name, z_scaling=10.0, if_close=0, dir_plot=None, if_l
     print('\n\neverything lasted: {}s'.format(round(time()-time_stamp,2)))
 
     # diagnostics - output
-    diagnostics, diagnostics_names = diagnose_output(wfr, diagnostics=diagnostics, diagnostics_names=diagnostics_names)
+    # diagnostics, diagnostics_names = diagnose_output(wfr, diagnostics=diagnostics, diagnostics_names=diagnostics_names)
 
     # I/O
-    if if_close == 1:
-        dir_diagnostics = dir_plot+'diagnostics_closed/'; mkdir(dir_diagnostics)
-    else:
-        dir_diagnostics = dir_plot+'diagnostics_open/'; mkdir(dir_diagnostics)
-    save_diagnostics(dir_diagnostics, diagnostics, diagnostics_names)
+    # if if_close == 1:
+    #     dir_diagnostics = dir_plot+'diagnostics_closed/'; mkdir(dir_diagnostics)
+    # else:
+    #     dir_diagnostics = dir_plot+'diagnostics_open/'; mkdir(dir_diagnostics)
+    # save_diagnostics(dir_diagnostics, diagnostics, diagnostics_names)
 
-    print('\nbeam diagnostics written to {}'.format(dir_diagnostics))
+    # print('\nbeam diagnostics written to {}'.format(dir_diagnostics))
