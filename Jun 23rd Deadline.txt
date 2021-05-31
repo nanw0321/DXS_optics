@@ -9,5 +9,18 @@ telescope enlarged; simulate whole beamline
 Todo:
 	simulate whole beamline with perfect mirrors & WC slit
 	introduce slope errors
+	Then heatbump simulation with Matt's code
+
+	Lynn's heatload error profile one by one on all optics; then work on compensation
 
 
+Goal: 
+	want the committee to see our device is "real".
+		Like closed slit/ half open/ fully open slit
+		Results for different bandwidth
+		For SRW, just do the 4f simulation since the HHLM+HRM is too memory heavy
+
+
+Issues now:
+	using offset mirrors to collimate the source, the virtual source is 5-20 km away. C2 brings the virtual source closer. For some extreme cases, the virtual source distance is as close as 100m for the elliptical mirrors. So instead of having elliptical mirrors, we would switch to bendable parabolic mirrors.
+	

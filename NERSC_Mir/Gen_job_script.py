@@ -103,7 +103,7 @@ d_slit = 7e-6
 
 t_res =sigT*2.355/10              # time sampling resolution [s]
 ev_window = 4/t_res *1e-15        # total energy window [eV]
-ev_res = min(ev_window/800, 1e-3) # energy sampling resolution [eV]
+ev_res = min(ev_window/400, 1e-3) # energy sampling resolution [eV]
 
 
 range_x = 5e-3; range_y = 5e-3
@@ -661,7 +661,7 @@ varParam = srwl_bl.srwl_uti_ext_options([
     ['op_HHLM4_C1_pp', 'f',         [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'HHLM4_C1'],
     ['op_C1_pp', 'f',               [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C1'],
     ['op_C1_C2_pp', 'f',            [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C1_C2'],
-    ['op_C2_pp', 'f',               [0, 0, 1.0, 0, 0, 8*x_scaling_HRM, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C2'],
+    ['op_C2_pp', 'f',               [0, 0, 1.0, 0, 0, 4*x_scaling_HRM, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C2'],
     # ['op_C2_pp', 'f',               [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C2'],
     ['op_C2_MIR1_pp', 'f',          [0, 0, 1.0, 1, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'C2_MIR1'],
     ['op_MIR1_pp', 'f',             [0, 0, 1.0, 0, 0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0], 'MIR1'],
