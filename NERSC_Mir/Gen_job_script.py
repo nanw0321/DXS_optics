@@ -757,7 +757,7 @@ dir_log = 'logs/'; mkdir(dir_log)
 with open(job_name, 'w') as fh:
     fh.writelines("#!/bin/bash -l\n")
     fh.writelines("#SBATCH -N 1\n")
-    fh.writelines("#SBATCH -t 03:00:00\n")
+    fh.writelines("#SBATCH -t 01:30:00\n")
     fh.writelines("#SBATCH -q regular\n")
     # fh.writelines("#SBATCH -t 00:30:00\n")
     # fh.writelines("#SBATCH -q debug\n")
