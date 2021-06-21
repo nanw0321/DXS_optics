@@ -8,7 +8,7 @@ from Module_diagnostic_functions import *
 ##### load wavefront
 dir_wfr = '/global/cfs/cdirs/lcls/dxs_sase/'
 DFL = dir_wfr+'stats_9.00_0.out.dfl'
-name_wfr = dir_wfr+'wavefront.h5'
+name_wfr = 'wavefront.h5'
 
 # Genesis parameters. These need to be known to populate the openPMD-wavefront metadata
 
