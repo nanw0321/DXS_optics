@@ -118,6 +118,24 @@ def print_oe_pos(oe):
     print('{}, x:{}, y:{}, z:{}'.format(oe.name, oe.global_x, oe.global_y, oe.z))
     return oe.global_x, oe.global_y, oe.z
 
+def get_width(pulse, image_name):
+    # minima and maxima of the field of view (in microns) for imshow extent
+    minx = np.round(np.min(pulse.x[image_name]) * 1e6)
+    maxx = np.round(np.max(pulse.x[image_name]) * 1e6)
+    miny = np.round(np.min(pulse.y[image_name]) * 1e6)
+    maxy = np.round(np.max(pulse.y[image_name]) * 1e6)
+
+    # calculate the profile
+    profile = np.sum(np.abs(pulse.energy_stacks[image_name])**2, axis=2)
+    x_lineout = np.sum(profile, axis=0)
+    y_lineout = np.sum(profile, axis=1)
+
+    cx, cy, wx, wy, fwx_guess, fwy_guess = pulse.beam_analysis(pulse.x[image_name],pulse.y[image_name],
+                                                                       x_lineout, y_lineout)
+
+    return cx, cy, wx, wy, fwx_guess, fwy_guess
+
+
 def get_pulse(pulse, image_name, x_pos=0, y_pos=0, shift=None):
     minx = np.round(np.min(pulse.x[image_name]) * 1e6)
     maxx = np.round(np.max(pulse.x[image_name]) * 1e6)
