@@ -135,7 +135,6 @@ def get_width(pulse, image_name):
 
     return cx, cy, wx, wy, fwx_guess, fwy_guess
 
-
 def get_pulse(pulse, image_name, x_pos=0, y_pos=0, shift=None):
     minx = np.round(np.min(pulse.x[image_name]) * 1e6)
     maxx = np.round(np.max(pulse.x[image_name]) * 1e6)
