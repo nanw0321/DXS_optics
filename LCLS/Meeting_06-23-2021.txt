@@ -1,0 +1,10 @@
+Things to add to the slides:
+	1. Schematic with Telescope and HHLM 
+	2. Proof that SRW and Matt's code have the same results.
+	3. Simulation results for the full beamline (Telescope + HHLM + HRM) using Matt's code.
+	4. And continue our previous simulations with the shapeErrors.
+
+Next, what if we have flexibility in the 4f mirror as well, it would be expensive but how much does it help us?
+	1. since the effective source distance after asymmetric reflection is shorter than symmetric, maybe we can change Mir1_p and Mir2_q together and see if the bandwidth is converging/diverging. Our expectation now is that the bandwidth would improve.
+	2. Once we find the optimal spot, we can change the asymmetry angle to ~10 degree and scan Mir1_p and Mir2_q again to see how far the optimal point moves.
+	3. Since we cannot correct for the shapeError by simply bending m2_p, what if we bend the mirrors in the 4f as well? 

@@ -1,0 +1,52 @@
+Progress:
+	1. Telescope seems to be working
+	2. Finished loading Genesis
+	3. Matt's code
+
+To-do:
+	Now we have the perfect results for the whole setup, we can show an image for perfect setup
+	1. shape error on HRM1, look at the result without changing anything, and compare to perfect condition, document the changes.
+	2. Change the bending of the offset mirrors (telescope) until we get the shape error in C1 is corrected. *** Tweak the 2nd mirror and record how much we need to bend
+	3. repeat step 1,2 for C2, HHLM1, 2 to see which crystal gives us the worst effect (weakest point)
+	5. add realistic slope-error for all of them and try to compensate using T2.
+
+	6. SASE
+	7. Phase corrector between HHLM and HRM.
+
+
+Progress:
+	1. perfect case finished
+	2. can see shape error effects
+	3. looping m2_p to correct for shapeError on C1
+
+Roadblocks:
+	1. beam power/ deformation relations so that correct shapeError is applied at each crystal
+		Use the same shapeError for all crystals to see how much does the same 
+	2. will get power assumption at each crystal.
+
+
+Pick the highest power for each crystal and simulate the shapeError's effect.
+
+
+Scan M2_p when there is no shapeError as well so the blue and orange lines kind of track each other. The blue curve now will demonstrate where the new effective source distance is, and the orange will show that we can still compensate for that at a new sweet spot.
+
+Then scan the closed slit case and see if we can still compensate.
+
+Increase the shapeError by more than one order of magnitude and see if the results differ for open and closed slit.
+The slit width can be calculated with Hasan's formula, use that value instead.
+
+def slit(inbeam, lmbd, asym):
+	# inbeam is the beamsize (2x FWHM) after Crystal 2
+	# lmbd is wavelength of photon
+	# returns mono focus size in um at the Fourier plane
+	slt = 2*np.log(2)*asym*lmbd*foc/np.pi/inbeam
+	return 2.11 * slt *1e9    # 2x FWHM with some error (~factor of 5%)
+
+Also, check if the bandwidth increases by a factor of ~2 when slit size is increased by a factor of 2.
+
+
+
+To-do
+	Check if option 1,2 HHLM2 would tolerate 16W.
+	reduce the beam power by a factor of 2 and try option 3 C2 alone and all error.
+	Put our results to a slide and explain to people what we have.

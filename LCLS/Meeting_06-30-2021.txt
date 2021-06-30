@@ -1,0 +1,16 @@
+Record the profiles of HHLM and the calculated output diagnostics side by side in a slide.
+	before: zig-zag, new: 2DCM
+
+email Matt for help with phase shifter optics.
+
+How much power we can dump on HHLM.
+
+Two options:
+	1. correct with phase corrector
+	2. reduce asymmetry
+		the extreme case would be fully symmetric reflection in the HHLM but the output bandwidth would be very high for the 4f. There might be a balanced point where the output has a power low enough for the 4f but at the same time the power on HHLM is low enough as well.
+
+		keep the incident bandwidth the same and change the asymmtry angle to see where we can tolerate.
+
+		for zig-zag reduce the asymmetry by half and see if correctable increace back half way
+		for 2DCM do similar things.

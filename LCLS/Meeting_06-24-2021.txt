@@ -1,0 +1,17 @@
+This morning Hasan had a review report with some people from APS etc.
+
+In the last review in December, they want to see the simulation of everything.
+	- message: we benchmarked Matt's code with SRW and chose the Matt's code to continue.
+	- The next review is the comming fall or early next year.
+
+
+To save time, we can limit the scans to m2_p = 150-200 and double the sampling resolution.
+
+To-do:
+	1. everything perfect, find the optimal bending of mirror 2
+	2. closed slit with shapeError one at a time
+	3. For those that we cannot compensate, reduce the shapeError by 0.5, if still cannot, reduce by 1/3 until we can see the correction.
+	4. For those that we can compensate, increase the shapeError by 2, 3 times etc...
+
+	The step 3&4 should give us a comfortable range of power for each HHLM crystal to operate in.
+

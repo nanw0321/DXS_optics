@@ -1,0 +1,21 @@
+Simulate a new set of HHLM crystals that Hasan sent me. Add shapeErrors for all crystals there, then simulate.
+
+To-do:
+	Lin's profiles don't agree with the table (peak to peak)
+	The slit size is too small right now (0.84 um), increase the slit width to 3um.
+	Reduce the shapeErrors linearly on all optics until we get reasonable bandwidth out.
+
+	plot the beam profile along the beamline for the cases that can be corrected to see if the corrections are real.
+
+Something else:
+	1. if tweaking the 4f mirrors would help
+	2. Correct the shapeErrors with the telescope mirrors, then go to the value that's half way between the perfect and corrected m2_p value, then correct for the error with the 4f mirrors.
+	3. Implement a phase corrector.
+
+
+Power/area (beam intensity), we want to have some rule of thumbs to determine whether the shapeError is correctable. Some factors that come into play:
+	1. If the bandwidth of the crystal is narrow, it would absorb more power.
+	2. Incident beam power
+	3. Incident beam dimension
+	
+Once the phase correctors are implemented, can try to go half way to the optimal point and try to correct the rest of the shapeError using the phase corrector. For the phase corrector, propagate the monochromatic beam through the open slit optics and calculate how much phase shift is needed.
