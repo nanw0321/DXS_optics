@@ -49,6 +49,16 @@ def load_crystal_data(num, dir_profile):
     
     return dy_symmetrize, xx2, zz2
 
+def find_zero(x, y):
+    # if linearly decrease:
+    if y[:5].mean() >= y[-5:].mean():
+        index = np.where(y>=0)[0][-1]
+    else:
+        index = np.where(y<=0)[0][-1]
+    slope = (y[index+1] - y[index])/(x[index+1] - x[index])
+    result = x[index] - y[index]/slope
+    print('left {}, right {}, result {}'.format(x[index], x[index+1], result))
+    return result
 
 ''' define beamline '''
 def define_Telescope(E0, m1_p=185.0, m2_p=175.5):
@@ -87,22 +97,22 @@ def define_HHLM_2DCM(
     ## HHLM
     asym1 = np.deg2rad(alphaAsym1)
     asym2 = np.deg2rad(alphaAsym2)
-    hhlm1 = optics.Crystal('HHLM1', hkl=[1,1,1], length=l_crystal[0], width=w_crystal[0],
+    hhlm1 = optics.Crystal('HHLM1', hkl=hkl1, length=l_crystal[0], width=w_crystal[0],
                            z=305+z_s, alphaAsym=-asym1, E0=E0, orientation=0, pol='s',
                            shapeError=shapeErrors[0])
     im_after_HHLM1 = optics.PPM('im_after_HHLM1', FOV=20e-3,N=256,z=hhlm1.z+.01)
 
-    hhlm2 = optics.Crystal('HHLM2', hkl=[1,1,1], length=l_crystal[3], width=w_crystal[3],
+    hhlm2 = optics.Crystal('HHLM2', hkl=hkl1, length=l_crystal[3], width=w_crystal[3],
                            z=hhlm1.z+139e-3*HHLM_distance_factor, alphaAsym=asym1, E0=E0, orientation=2, pol='s',
                            shapeError=shapeErrors[3])
     im_after_HHLM2 = optics.PPM('im_after_HHLM2', FOV=20e-3,N=256,z=hhlm2.z+.01)
 
-    hhlm3 = optics.Crystal('HHLM3', hkl=[1,1,1], length=l_crystal[1], width=w_crystal[1],
+    hhlm3 = optics.Crystal('HHLM3', hkl=hkl2, length=l_crystal[1], width=w_crystal[1],
                            z=hhlm1.z+361e-3*HHLM_distance_factor, alphaAsym=-asym2, E0=E0, orientation=2, pol='s',
                            shapeError=shapeErrors[1])
     im_after_HHLM3 = optics.PPM('im_after_HHLM3', FOV=20e-3,N=256,z=hhlm3.z+.01)
 
-    hhlm4 = optics.Crystal('HHLM4', hkl=[1,1,1], length=l_crystal[2], width=w_crystal[2],
+    hhlm4 = optics.Crystal('HHLM4', hkl=hkl2, length=l_crystal[2], width=w_crystal[2],
                            z=hhlm1.z+.5*HHLM_distance_factor, alphaAsym=asym2, E0=E0, orientation=0, pol='s',
                            shapeError=shapeErrors[2])
     im_after_HHLM4 = optics.PPM('im_after_HHLM4', FOV=20e-3,N=256,z=hhlm4.z+.01)
@@ -132,22 +142,22 @@ def define_HHLM_Zigzag(
     ## HHLM
     asym1 = np.deg2rad(alphaAsym1)
     asym2 = np.deg2rad(alphaAsym2)
-    hhlm1 = optics.Crystal('HHLM1', hkl=[1,1,1], length=l_crystal[0], width=w_crystal[0],
+    hhlm1 = optics.Crystal('HHLM1', hkl=hkl1, length=l_crystal[0], width=w_crystal[0],
                            z=305+z_s, alphaAsym=-asym1, E0=E0, orientation=0, pol='s',
                            shapeError=shapeErrors[0])
     im_after_HHLM1 = optics.PPM('im_after_HHLM1', FOV=30e-3,N=256,z=hhlm1.z+.01)
 
-    hhlm2 = optics.Crystal('HHLM2', hkl=[4,4,0], length=l_crystal[1], width=w_crystal[1],
+    hhlm2 = optics.Crystal('HHLM2', hkl=hkl2, length=l_crystal[1], width=w_crystal[1],
                            z=hhlm1.z+139e-3*HHLM_distance_factor, alphaAsym=-asym2, E0=E0,orientation=2, pol='s',
                            shapeError=shapeErrors[1])
     im_after_HHLM2 = optics.PPM('im_after_HHLM2', FOV=30e-3,N=256,z=hhlm2.z+.01)
 
-    hhlm3 = optics.Crystal('HHLM3', hkl=[4,4,0], length=l_crystal[2], width=w_crystal[2],
+    hhlm3 = optics.Crystal('HHLM3', hkl=hkl2, length=l_crystal[2], width=w_crystal[2],
                            z=hhlm1.z+361e-3*HHLM_distance_factor, alphaAsym=asym2, E0=E0,orientation=0, pol='s',
                            shapeError=shapeErrors[2])
     im_after_HHLM3 = optics.PPM('im_after_HHLM3', FOV=30e-3,N=256,z=hhlm3.z+.01)
 
-    hhlm4 = optics.Crystal('HHLM4', hkl=[1,1,1], length=l_crystal[3], width=w_crystal[3],
+    hhlm4 = optics.Crystal('HHLM4', hkl=hkl1, length=l_crystal[3], width=w_crystal[3],
                            z=hhlm1.z+.5*HHLM_distance_factor, alphaAsym=asym1, E0=E0,orientation=2, pol='s',
                            shapeError=shapeErrors[3])
     im_after_HHLM4 = optics.PPM('im_after_HHLM4', FOV=20e-3,N=256,z=hhlm4.z+.01)
