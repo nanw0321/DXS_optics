@@ -76,7 +76,7 @@ def define_Telescope(E0, m1_p=185.0, m2_p=175.5):
     return Telescope_devices
 
 def define_HHLM_2DCM(
-    E0, HHLM_distance_factor=1.0,
+    E0, HHLM_offset=20e-3, pair_distance=200e-3,
     hkl1 = [1,1,1], alphaAsym1 = 9.0,
     hkl2 = [1,1,1], alphaAsym2 = 0.0,
     shapeErrors=[None for i in range(6)],
@@ -86,6 +86,8 @@ def define_HHLM_2DCM(
     '''
     defines the HHLM optics for the 2DCM setup (1-1-2-2)
     E0: photon energy [eV]
+    HHLM_offset: beam offset between crystal 1 and 2
+    pair_distance: distance between crytal 2 and 3
     hkl: crystal reflection surface indices for pair 1 and pair 2
     alphaAsym: asymmetry angle [degree], negative value means beam footprint increases after reflection
     shapeErrors: crytal shapeError as loaded from Lin's profiles
@@ -100,29 +102,30 @@ def define_HHLM_2DCM(
     hhlm1 = optics.Crystal('HHLM1', hkl=hkl1, length=l_crystal[0], width=w_crystal[0],
                            z=305+z_s, alphaAsym=-asym1, E0=E0, orientation=0, pol='s',
                            shapeError=shapeErrors[0])
-    im_after_HHLM1 = optics.PPM('im_after_HHLM1', FOV=20e-3,N=256,z=hhlm1.z+.01)
 
     hhlm2 = optics.Crystal('HHLM2', hkl=hkl1, length=l_crystal[3], width=w_crystal[3],
-                           z=hhlm1.z+139e-3*HHLM_distance_factor, alphaAsym=asym1, E0=E0, orientation=2, pol='s',
+                           z=hhlm1.z+HHLM_offset/np.tan(2*hhlm1.bragg), alphaAsym=asym1, E0=E0, orientation=2, pol='s',
                            shapeError=shapeErrors[3])
-    im_after_HHLM2 = optics.PPM('im_after_HHLM2', FOV=20e-3,N=256,z=hhlm2.z+.01)
 
     hhlm3 = optics.Crystal('HHLM3', hkl=hkl2, length=l_crystal[1], width=w_crystal[1],
-                           z=hhlm1.z+361e-3*HHLM_distance_factor, alphaAsym=-asym2, E0=E0, orientation=2, pol='s',
+                           z=hhlm2.z+pair_distance, alphaAsym=-asym2, E0=E0, orientation=2, pol='s',
                            shapeError=shapeErrors[1])
-    im_after_HHLM3 = optics.PPM('im_after_HHLM3', FOV=20e-3,N=256,z=hhlm3.z+.01)
 
     hhlm4 = optics.Crystal('HHLM4', hkl=hkl2, length=l_crystal[2], width=w_crystal[2],
-                           z=hhlm1.z+.5*HHLM_distance_factor, alphaAsym=asym2, E0=E0, orientation=0, pol='s',
+                           z=hhlm3.z+HHLM_offset/np.tan(2*hhlm3.bragg), alphaAsym=asym2, E0=E0, orientation=0, pol='s',
                            shapeError=shapeErrors[2])
-    im_after_HHLM4 = optics.PPM('im_after_HHLM4', FOV=20e-3,N=256,z=hhlm4.z+.01)
+
+    im_after_HHLM1 = optics.PPM('im_after_HHLM1', FOV=20e-3,N=256,z=hhlm1.z+np.sign(hhlm2.z-hhlm1.z)*1e-3)
+    im_after_HHLM2 = optics.PPM('im_after_HHLM2', FOV=20e-3,N=256,z=hhlm2.z+np.sign(hhlm3.z-hhlm2.z)*1e-3)
+    im_after_HHLM3 = optics.PPM('im_after_HHLM3', FOV=20e-3,N=256,z=hhlm3.z+np.sign(hhlm4.z-hhlm3.z)*1e-3)
+    im_after_HHLM4 = optics.PPM('im_after_HHLM4', FOV=20e-3,N=256,z=hhlm4.z+1e-3)
 
     HHLM_devices = [hhlm1, im_after_HHLM1, hhlm2, im_after_HHLM2, hhlm3, im_after_HHLM3, hhlm4, im_after_HHLM4]
 
     return HHLM_devices
 
 def define_HHLM_Zigzag(
-    E0, HHLM_distance_factor=1.0,
+    E0, HHLM_offset=20e-3, pair_distance=200e-3,
     hkl1 = [1,1,1], alphaAsym1 = 9.0,
     hkl2 = [4,4,0], alphaAsym2 = 0.0,
     shapeErrors=[None for i in range(6)],
@@ -131,6 +134,8 @@ def define_HHLM_Zigzag(
     '''
     defines the HHLM optics for the zigzag setup (1-2-2-1)
     E0: photon energy [eV]
+    HHLM_offset: beam offset between crystal 1 and 2
+    pair_distance: distance between crytal 2 and 3
     hkl: crystal reflection surface indices for pair 1 and pair 2
     alphaAsym: asymmetry angle [degree], negative value means beam footprint increases after reflection
     shapeErrors: crytal shapeError as loaded from Lin's profiles
@@ -145,22 +150,23 @@ def define_HHLM_Zigzag(
     hhlm1 = optics.Crystal('HHLM1', hkl=hkl1, length=l_crystal[0], width=w_crystal[0],
                            z=305+z_s, alphaAsym=-asym1, E0=E0, orientation=0, pol='s',
                            shapeError=shapeErrors[0])
-    im_after_HHLM1 = optics.PPM('im_after_HHLM1', FOV=30e-3,N=256,z=hhlm1.z+.01)
 
     hhlm2 = optics.Crystal('HHLM2', hkl=hkl2, length=l_crystal[1], width=w_crystal[1],
-                           z=hhlm1.z+139e-3*HHLM_distance_factor, alphaAsym=-asym2, E0=E0,orientation=2, pol='s',
+                           z=hhlm1.z+HHLM_offset/np.tan(2*hhlm1.bragg), alphaAsym=-asym2, E0=E0,orientation=2, pol='s',
                            shapeError=shapeErrors[1])
-    im_after_HHLM2 = optics.PPM('im_after_HHLM2', FOV=30e-3,N=256,z=hhlm2.z+.01)
 
     hhlm3 = optics.Crystal('HHLM3', hkl=hkl2, length=l_crystal[2], width=w_crystal[2],
-                           z=hhlm1.z+361e-3*HHLM_distance_factor, alphaAsym=asym2, E0=E0,orientation=0, pol='s',
+                           z=hhlm2.z+pair_distance, alphaAsym=asym2, E0=E0,orientation=0, pol='s',
                            shapeError=shapeErrors[2])
-    im_after_HHLM3 = optics.PPM('im_after_HHLM3', FOV=30e-3,N=256,z=hhlm3.z+.01)
 
     hhlm4 = optics.Crystal('HHLM4', hkl=hkl1, length=l_crystal[3], width=w_crystal[3],
-                           z=hhlm1.z+.5*HHLM_distance_factor, alphaAsym=asym1, E0=E0,orientation=2, pol='s',
+                           z=hhlm3.z+HHLM_offset/np.tan(2*hhlm3.bragg), alphaAsym=asym1, E0=E0,orientation=2, pol='s',
                            shapeError=shapeErrors[3])
-    im_after_HHLM4 = optics.PPM('im_after_HHLM4', FOV=20e-3,N=256,z=hhlm4.z+.01)
+    
+    im_after_HHLM1 = optics.PPM('im_after_HHLM1', FOV=20e-3,N=256,z=hhlm1.z+np.sign(hhlm2.z-hhlm1.z)*1e-3)
+    im_after_HHLM2 = optics.PPM('im_after_HHLM2', FOV=20e-3,N=256,z=hhlm2.z+np.sign(hhlm3.z-hhlm2.z)*1e-3)
+    im_after_HHLM3 = optics.PPM('im_after_HHLM3', FOV=20e-3,N=256,z=hhlm3.z+np.sign(hhlm4.z-hhlm3.z)*1e-3)
+    im_after_HHLM4 = optics.PPM('im_after_HHLM4', FOV=20e-3,N=256,z=hhlm4.z+1e-3)
 
     HHLM_devices = [hhlm1, im_after_HHLM1, hhlm2, im_after_HHLM2, hhlm3, im_after_HHLM3, hhlm4, im_after_HHLM4]
 
@@ -171,6 +177,18 @@ def define_HRM(E0, f1=10., f2=10., slit_width=3e-6,
                shapeErrors=[None for i in range(6)],
                l_crystal=[1e-1 for i in range(6)],
                w_crystal = [5e-3 for i in range(6)]):
+    '''
+    defines the HRM optics
+    E0: photon energy [eV]
+    f1: crystal-lens/mirror distance [m]
+    f2: lens/mirror focal distance [m]
+    slit_width: width of slit for monochromatization [m]
+    hkl: crystal reflection surface indices for pair 1 and pair 2
+    alphaAsym: asymmetry angle [degree], negative value means beam footprint increases after reflection
+    shapeErrors: crytal shapeError as loaded from Lin's profiles
+
+    returns optics
+    '''
     z_s = 650
     
     ## HRM
@@ -178,33 +196,36 @@ def define_HRM(E0, f1=10., f2=10., slit_width=3e-6,
     crystal1 = optics.Crystal('C1', hkl=hkl, length=l_crystal[4], width=w_crystal[4],
                               z=z_s+310, E0=E0, alphaAsym=0, orientation=0, pol='s',
                               shapeError=shapeErrors[4])
-    im_after_C1 = optics.PPM('im_after_C1', z=crystal1.z+.01, FOV=5e-3, N=256)
 
     crystal2 = optics.Crystal('C2', hkl=hkl, length=l_crystal[5], width=w_crystal[5],
                               z=crystal1.z+.05, E0=E0,alphaAsym=asym3, orientation=2, pol='s',
                               shapeError=shapeErrors[5])
-    im_after_C2 = optics.PPM('im_after_C2', z=crystal2.z+.01, FOV=5e-3, N=256)
     
-    im_before_MIR1 = optics.PPM('im_before_MIR1', z=crystal2.z + f1 - .1, FOV=2e-3, N=256)
     mir1 = optics.CurvedMirror('mir1', z=crystal2.z+f1, p=1e5, q=f2, length=1.0, width=5e-3, alpha=3.6e-3, orientation=0)
-    im_after_MIR1 = optics.PPM('im_after_MIR1', z=mir1.z+.1, FOV=5e-3, N=256)
-
+    
     # slit at focus
     slit = optics.Slit('Slit', z=mir1.z+f2, x_width=slit_width, y_width=2e-3)
     print('slit width: {} um'.format(slit.x_width*1e6))
-    im_focus = optics.PPM('im_focus', z=mir1.z+f2 + 1e-3, FOV=50e-6, N=256)
-
-    im_before_MIR2 = optics.PPM('im_before_MIR2', z=mir1.z+2*f2 -.1, FOV=2e-3, N=256)
+    
     mir2 = optics.CurvedMirror('mir2', z=mir1.z+2*f2, p=f2, q=1e5, length=1.0, width=5e-3, alpha=3.6e-3, orientation=2)
-    im_after_MIR2 = optics.PPM('im_after_MIR2', z=mir2.z+.1, FOV=2e-3, N=256)
     
     crystal3 = optics.Crystal('C3', hkl=hkl, length=1e-1, width=5e-3,
                               z=mir2.z+f1, E0=E0,alphaAsym=-asym3, orientation=2, pol='s')
-    im_after_C3 = optics.PPM('im_after_C3', z=crystal3.z+.01, FOV=5e-3, N=256)
+    
+    d34 = crystal2.z - crystal1.z + (mir2.z - mir1.z)*np.tan(2*mir1.alpha)/np.tan(2*crystal3.bragg)
 
     crystal4 = optics.Crystal('C4', hkl=hkl, length=1e-1, width=5e-3,
-                              z=crystal3.z+.05, E0=E0,alphaAsym=0, orientation=0, pol='s')
-    im_out = optics.PPM('im_out', z=crystal4.z+.1, FOV=5e-3, N=256)
+                              z=crystal3.z+d34, E0=E0,alphaAsym=0, orientation=0, pol='s')
+    
+    im_after_C1    = optics.PPM('im_after_C1',    z=crystal1.z+1e-3, FOV=5e-3, N=256)
+    im_after_C2    = optics.PPM('im_after_C2',    z=crystal2.z+1e-3, FOV=5e-3, N=256)
+    im_before_MIR1 = optics.PPM('im_before_MIR1', z=mir1.z-1e-3,     FOV=5e-3, N=256)
+    im_after_MIR1  = optics.PPM('im_after_MIR1',  z=mir1.z+1e-3,     FOV=5e-3, N=256)
+    im_focus       = optics.PPM('im_focus',       z=slit.z+1e-3,     FOV=50e-6, N=256)
+    im_before_MIR2 = optics.PPM('im_before_MIR2', z=mir2.z-1e-3,     FOV=5e-3, N=256)
+    im_after_MIR2  = optics.PPM('im_after_MIR2',  z=mir2.z+1e-3,     FOV=5e-3, N=256)
+    im_after_C3    = optics.PPM('im_after_C3',    z=crystal3.z+1e-3, FOV=5e-3, N=256)
+    im_out         = optics.PPM('im_out',         z=crystal4.z+1e-3, FOV=5e-3, N=256)
     
     HRM_devices = [crystal1,im_after_C1, crystal2,im_after_C2, im_before_MIR1,mir1,im_after_MIR1, slit,im_focus,
                    im_before_MIR2,mir2,im_after_MIR2, crystal3,im_after_C3, crystal4,im_out]
