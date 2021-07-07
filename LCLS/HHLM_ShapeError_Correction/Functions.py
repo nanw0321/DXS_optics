@@ -51,7 +51,7 @@ def load_crystal_data(num, dir_profile):
 
 def find_zero(x, y):
     # if linearly decrease:
-    if y[:5].mean() >= y[-5:].mean():
+    if y[:5].median() >= y[-5:].median():
         index = np.where(y>=0)[0][-1]
     else:
         index = np.where(y<=0)[0][-1]
