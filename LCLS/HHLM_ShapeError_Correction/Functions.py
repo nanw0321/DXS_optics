@@ -103,15 +103,15 @@ def define_HHLM_2DCM(
                            z=305+z_s, alphaAsym=-asym1, E0=E0, orientation=0, pol='s',
                            shapeError=shapeErrors[0])
 
-    hhlm2 = optics.Crystal('HHLM2', hkl=hkl1, length=l_crystal[3], width=w_crystal[3],
+    hhlm2 = optics.Crystal('HHLM2', hkl=hkl1, length=l_crystal[1], width=w_crystal[1],
                            z=hhlm1.z+HHLM_offset/np.tan(2*hhlm1.bragg), alphaAsym=asym1, E0=E0, orientation=2, pol='s',
                            shapeError=shapeErrors[3])
 
-    hhlm3 = optics.Crystal('HHLM3', hkl=hkl2, length=l_crystal[1], width=w_crystal[1],
+    hhlm3 = optics.Crystal('HHLM3', hkl=hkl2, length=l_crystal[2], width=w_crystal[2],
                            z=hhlm2.z+pair_distance, alphaAsym=-asym2, E0=E0, orientation=2, pol='s',
                            shapeError=shapeErrors[1])
 
-    hhlm4 = optics.Crystal('HHLM4', hkl=hkl2, length=l_crystal[2], width=w_crystal[2],
+    hhlm4 = optics.Crystal('HHLM4', hkl=hkl2, length=l_crystal[3], width=w_crystal[3],
                            z=hhlm3.z+HHLM_offset/np.tan(2*hhlm3.bragg), alphaAsym=asym2, E0=E0, orientation=0, pol='s',
                            shapeError=shapeErrors[2])
 
