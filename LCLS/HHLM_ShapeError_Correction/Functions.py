@@ -49,12 +49,20 @@ def load_crystal_data(num, dir_profile):
     
     return dy_symmetrize, xx2, zz2
 
-def find_zero(x, y):
+def find_zero(x, y, direction=None, i_i=0, i_f=-1):
+    x = x[i_i:i_f]
+    y = y[i_i:i_f]
     # if linearly decrease:
-    if y[:5].median() >= y[-5:].median():
-        index = np.where(y>=0)[0][-1]
+    if np.median(y[:5]) >= np.median(y[-5:]):
+        indices = np.where(y>=0)[0]
     else:
-        index = np.where(y<=0)[0][-1]
+        indices = np.where(y<=0)[0]
+    if direction == 'increase':
+        indices = np.where(y<=0)[0]
+    elif direction == 'decrease':
+        indices = np.where(y>=0)[0]
+    index = indices[-1]
+
     slope = (y[index+1] - y[index])/(x[index+1] - x[index])
     result = x[index] - y[index]/slope
     print('left {}, right {}, result {}'.format(x[index], x[index+1], result))
@@ -105,15 +113,15 @@ def define_HHLM_2DCM(
 
     hhlm2 = optics.Crystal('HHLM2', hkl=hkl1, length=l_crystal[1], width=w_crystal[1],
                            z=hhlm1.z+HHLM_offset/np.tan(2*hhlm1.bragg), alphaAsym=asym1, E0=E0, orientation=2, pol='s',
-                           shapeError=shapeErrors[3])
+                           shapeError=shapeErrors[1])
 
     hhlm3 = optics.Crystal('HHLM3', hkl=hkl2, length=l_crystal[2], width=w_crystal[2],
                            z=hhlm2.z+pair_distance, alphaAsym=-asym2, E0=E0, orientation=2, pol='s',
-                           shapeError=shapeErrors[1])
+                           shapeError=shapeErrors[2])
 
     hhlm4 = optics.Crystal('HHLM4', hkl=hkl2, length=l_crystal[3], width=w_crystal[3],
                            z=hhlm3.z+HHLM_offset/np.tan(2*hhlm3.bragg), alphaAsym=asym2, E0=E0, orientation=0, pol='s',
-                           shapeError=shapeErrors[2])
+                           shapeError=shapeErrors[3])
 
     im_after_HHLM1 = optics.PPM('im_after_HHLM1', FOV=20e-3,N=256,z=hhlm1.z+np.sign(hhlm2.z-hhlm1.z)*1e-3)
     im_after_HHLM2 = optics.PPM('im_after_HHLM2', FOV=20e-3,N=256,z=hhlm2.z+np.sign(hhlm3.z-hhlm2.z)*1e-3)
