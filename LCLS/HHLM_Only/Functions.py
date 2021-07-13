@@ -1,6 +1,7 @@
 import time, h5py, os, sys
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy.interpolate as interpolate
 from lcls_beamline_toolbox.xraybeamline2d import beam1d as beam, optics1d as optics, beamline1d as beamline
 from lcls_beamline_toolbox.xraybeamline2d.util import Util
 
@@ -18,70 +19,226 @@ def blockPrint():
 def enablePrint():
     sys.stdout = sys.__stdout__
 
+def load_crystal_data(num, dir_profile):
+    coords = np.loadtxt(dir_profile+'Nlist_%d.txt' %num, skiprows=12)
+    data = np.loadtxt(dir_profile+'Uy_list_%d.txt' % num, skiprows=0)
+
+    x = coords[:,1]
+    y = coords[:,2]
+    z = coords[:,3]
+    dy = data[:,1]
+    print(data.shape)
+    # plt.figure()
+    # plt.plot(x)
+    # plt.figure()
+    # plt.plot(z)
+
+    xx = np.linspace(np.min(x), np.max(x), 1024)
+    zz = np.linspace(np.min(z), np.max(z), 1024)
+    xx,zz = np.meshgrid(xx,zz)
+
+    # f = interpolate.interp2d(z,x,dy)
+    dy2 = interpolate.griddata((x,z),dy,(xx,zz), fill_value=0)
+
+    dy_symmetrize = np.concatenate((dy2,np.flipud(dy2)),axis=0)
+    dy_symmetrize = np.concatenate((dy_symmetrize,np.fliplr(dy_symmetrize)),axis=1)
+
+    xx2 = np.linspace(np.min(x), -np.min(x), 2048)
+    zz2 = np.linspace(np.min(z), -np.min(z), 2048)
+    xx2,zz2 = np.meshgrid(xx2,zz2)
+    
+    return dy_symmetrize, xx2, zz2
+
+def find_zero(x, y, direction=None, i_i=0, i_f=-1):
+    x = x[i_i:i_f]
+    y = y[i_i:i_f]
+    # if linearly decrease:
+    if np.median(y[:5]) >= np.median(y[-5:]):
+        indices = np.where(y>=0)[0]
+    else:
+        indices = np.where(y<=0)[0]
+    if direction == 'increase':
+        indices = np.where(y<=0)[0]
+    elif direction == 'decrease':
+        indices = np.where(y>=0)[0]
+    index = indices[-1]
+
+    slope = (y[index+1] - y[index])/(x[index+1] - x[index])
+    result = x[index] - y[index]/slope
+    print('left {}, right {}, result {}'.format(x[index], x[index+1], result))
+    return result
+
 ''' define beamline '''
-def define_devices(
-    f1, f2, slit_width = 1e-3, hkl = [4,4,0], alphaAsym = 0., E0=18e3, f0 = 290., d23=7.):
-
-    # viewing point - upstream of monochromator
-    im_input = optics.PPM('im_input', z=870, FOV=5e-3, N=256)
-    crl0 = optics.CRL('crl0', z=920, E0=E0, f=f0, diameter=2e-3)
-
-    # first crystal: symmetric reflection
-    crystal1 = optics.Crystal('c1', hkl=hkl, length=10e-2, width=20e-3, z=930, E0=E0,
-                              alphaAsym=0, orientation=0, pol='s', delta=0.e-6)
-    # viewing point - after C1
-    im_after_C1 = optics.PPM('im_after_C1', z=crystal1.z+.01, FOV=5e-3, N=256)
-
-    # second crystal: asymmetric reflection, orientation flipped relative to crystal1
-    crystal2 = optics.Crystal('c2', hkl=hkl, length=10e-2, width=20e-3, z=crystal1.z+.2, E0=E0,alphaAsym=alphaAsym, 
-                              orientation=2,pol='s', delta=0e-6)
-    # viewing point - after C2
-    im_after_C2 = optics.PPM('im_after_C2', z=crystal2.z+.01, FOV=5e-3, N=256)
+def define_Telescope(E0, m1_p=185.0, m2_p=175.5):
+    z_s = 650
     
-    # printing crystal incidence and reflection angles for confirmation
-    print('crystal 2 incidence angle: {:.2f} degrees'.format(crystal2.alpha*180/np.pi))
-    print('crystal 2 exit angle: {:.2f} degrees'.format(crystal2.beta0*180/np.pi))
+    ## Telescope
+    m1 = optics.CurvedMirror('M1', p=m1_p, q=-58, length=1, z=185+z_s, alpha=2.65e-3)
+    im_after_T1 = optics.PPM('im_after_T1', z=m1.z+.01, FOV=5e-3, N=256)
+    
+    m2 = optics.CurvedMirror('M2', p=m2_p, q=1e5, length=1, z=300+z_s, alpha=2.65e-3, orientation=2)
+    im_after_T2 = optics.PPM('im_after_T2', z=m2.z+.01, FOV=5e-3, N=256)
 
-    # viewing point - before MIR1
-    im_before_MIR1 = optics.PPM('im_before_MIR1', z=crystal2.z + f1 - .1, FOV=2e-3, N=256)
+    Telescope_devices = [m1, im_after_T1, m2, im_after_T2]
 
-    # elliptical mirror with ~10 meter focal length
-    mir1 = optics.CurvedMirror('mir1', z=crystal2.z+f1, p=1e5, q=f2, length=1.0, width=5e-3, alpha=3.6e-3, orientation=2)
+    return Telescope_devices
 
-    # viewing point - after MIR1
-    im_after_MIR1 = optics.PPM('im_after_MIR1', z=mir1.z+.1, FOV=5e-3, N=256)
+def define_HHLM_2DCM(
+    E0, HHLM_offset=20e-3, pair_distance=200e-3,
+    hkl1 = [1,1,1], alphaAsym1 = 9.0,
+    hkl2 = [1,1,1], alphaAsym2 = 0.0,
+    shapeErrors=[None for i in range(6)],
+    l_crystal=[1e-1 for i in range(6)],
+    w_crystal = [5e-3 for i in range(6)]):
+    
+    '''
+    defines the HHLM optics for the 2DCM setup (1-1-2-2)
+    E0: photon energy [eV]
+    HHLM_offset: beam offset between crystal 1 and 2
+    pair_distance: distance between crytal 2 and 3
+    hkl: crystal reflection surface indices for pair 1 and pair 2
+    alphaAsym: asymmetry angle [degree], negative value means beam footprint increases after reflection
+    shapeErrors: crytal shapeError as loaded from Lin's profiles
 
+    returns optics
+    '''
+    z_s = 650
+    
+    ## HHLM
+    asym1 = np.deg2rad(alphaAsym1)
+    asym2 = np.deg2rad(alphaAsym2)
+    hhlm1 = optics.Crystal('HHLM1', hkl=hkl1, length=l_crystal[0], width=w_crystal[0],
+                           z=305+z_s, alphaAsym=-asym1, E0=E0, orientation=0, pol='s',
+                           shapeError=shapeErrors[0])
+
+    hhlm2 = optics.Crystal('HHLM2', hkl=hkl1, length=l_crystal[1], width=w_crystal[1],
+                           z=hhlm1.z+HHLM_offset/np.tan(2*hhlm1.bragg), alphaAsym=asym1, E0=E0, orientation=2, pol='s',
+                           shapeError=shapeErrors[1])
+
+    hhlm3 = optics.Crystal('HHLM3', hkl=hkl2, length=l_crystal[2], width=w_crystal[2],
+                           z=hhlm2.z+pair_distance, alphaAsym=-asym2, E0=E0, orientation=2, pol='s',
+                           shapeError=shapeErrors[2])
+
+    hhlm4 = optics.Crystal('HHLM4', hkl=hkl2, length=l_crystal[3], width=w_crystal[3],
+                           z=hhlm3.z+HHLM_offset/np.tan(2*hhlm3.bragg), alphaAsym=asym2, E0=E0, orientation=0, pol='s',
+                           shapeError=shapeErrors[3])
+
+    im_after_HHLM1 = optics.PPM('im_after_HHLM1', FOV=20e-3,N=256,z=hhlm1.z+np.sign(hhlm2.z-hhlm1.z)*1e-3)
+    im_after_HHLM2 = optics.PPM('im_after_HHLM2', FOV=20e-3,N=256,z=hhlm2.z+np.sign(hhlm3.z-hhlm2.z)*1e-3)
+    im_after_HHLM3 = optics.PPM('im_after_HHLM3', FOV=20e-3,N=256,z=hhlm3.z+np.sign(hhlm4.z-hhlm3.z)*1e-3)
+    im_after_HHLM4 = optics.PPM('im_after_HHLM4', FOV=20e-3,N=256,z=hhlm4.z+1e-3)
+
+    HHLM_devices = [hhlm1, im_after_HHLM1, hhlm2, im_after_HHLM2, hhlm3, im_after_HHLM3, hhlm4, im_after_HHLM4]
+
+    return HHLM_devices
+
+def define_HHLM_Zigzag(
+    E0, HHLM_offset=20e-3, pair_distance=200e-3,
+    hkl1 = [1,1,1], alphaAsym1 = 9.0,
+    hkl2 = [4,4,0], alphaAsym2 = 0.0,
+    shapeErrors=[None for i in range(6)],
+    l_crystal=[1e-1 for i in range(6)],
+    w_crystal = [5e-3 for i in range(6)]):
+    '''
+    defines the HHLM optics for the zigzag setup (1-2-2-1)
+    E0: photon energy [eV]
+    HHLM_offset: beam offset between crystal 1 and 2
+    pair_distance: distance between crytal 2 and 3
+    hkl: crystal reflection surface indices for pair 1 and pair 2
+    alphaAsym: asymmetry angle [degree], negative value means beam footprint increases after reflection
+    shapeErrors: crytal shapeError as loaded from Lin's profiles
+
+    returns optics
+    '''
+    z_s = 650
+
+    ## HHLM
+    asym1 = np.deg2rad(alphaAsym1)
+    asym2 = np.deg2rad(alphaAsym2)
+    hhlm1 = optics.Crystal('HHLM1', hkl=hkl1, length=l_crystal[0], width=w_crystal[0],
+                           z=305+z_s, alphaAsym=-asym1, E0=E0, orientation=0, pol='s',
+                           shapeError=shapeErrors[0])
+
+    hhlm2 = optics.Crystal('HHLM2', hkl=hkl2, length=l_crystal[1], width=w_crystal[1],
+                           z=hhlm1.z+HHLM_offset/np.tan(2*hhlm1.bragg), alphaAsym=-asym2, E0=E0,orientation=2, pol='s',
+                           shapeError=shapeErrors[1])
+
+    hhlm3 = optics.Crystal('HHLM3', hkl=hkl2, length=l_crystal[2], width=w_crystal[2],
+                           z=hhlm2.z+pair_distance, alphaAsym=asym2, E0=E0,orientation=0, pol='s',
+                           shapeError=shapeErrors[2])
+
+    hhlm4 = optics.Crystal('HHLM4', hkl=hkl1, length=l_crystal[3], width=w_crystal[3],
+                           z=hhlm3.z+HHLM_offset/np.tan(2*hhlm3.bragg), alphaAsym=asym1, E0=E0,orientation=2, pol='s',
+                           shapeError=shapeErrors[3])
+    
+    im_after_HHLM1 = optics.PPM('im_after_HHLM1', FOV=20e-3,N=256,z=hhlm1.z+np.sign(hhlm2.z-hhlm1.z)*1e-3)
+    im_after_HHLM2 = optics.PPM('im_after_HHLM2', FOV=20e-3,N=256,z=hhlm2.z+np.sign(hhlm3.z-hhlm2.z)*1e-3)
+    im_after_HHLM3 = optics.PPM('im_after_HHLM3', FOV=20e-3,N=256,z=hhlm3.z+np.sign(hhlm4.z-hhlm3.z)*1e-3)
+    im_after_HHLM4 = optics.PPM('im_after_HHLM4', FOV=20e-3,N=256,z=hhlm4.z+1e-3)
+
+    HHLM_devices = [hhlm1, im_after_HHLM1, hhlm2, im_after_HHLM2, hhlm3, im_after_HHLM3, hhlm4, im_after_HHLM4]
+
+    return HHLM_devices
+
+def define_HRM(E0, f1=10., f2=10., slit_width=3e-6,
+               hkl=[4,4,0],alphaAsym=15.0,
+               shapeErrors=[None for i in range(6)],
+               l_crystal=[1e-1 for i in range(6)],
+               w_crystal = [5e-3 for i in range(6)]):
+    '''
+    defines the HRM optics
+    E0: photon energy [eV]
+    f1: crystal-lens/mirror distance [m]
+    f2: lens/mirror focal distance [m]
+    slit_width: width of slit for monochromatization [m]
+    hkl: crystal reflection surface indices for pair 1 and pair 2
+    alphaAsym: asymmetry angle [degree], negative value means beam footprint increases after reflection
+    shapeErrors: crytal shapeError as loaded from Lin's profiles
+
+    returns optics
+    '''
+    z_s = 650
+    
+    ## HRM
+    asym3 = np.deg2rad(alphaAsym)
+    crystal1 = optics.Crystal('C1', hkl=hkl, length=l_crystal[4], width=w_crystal[4],
+                              z=z_s+310, E0=E0, alphaAsym=0, orientation=0, pol='s',
+                              shapeError=shapeErrors[4])
+
+    crystal2 = optics.Crystal('C2', hkl=hkl, length=l_crystal[5], width=w_crystal[5],
+                              z=crystal1.z+.05, E0=E0,alphaAsym=asym3, orientation=2, pol='s',
+                              shapeError=shapeErrors[5])
+    
+    mir1 = optics.CurvedMirror('mir1', z=crystal2.z+f1, p=1e5, q=f2, length=1.0, width=5e-3, alpha=3.6e-3, orientation=0)
+    
     # slit at focus
-    slit = optics.Slit('slit', z=mir1.z+f2, x_width=slit_width, y_width=2e-3)
-
-    # viewing point at focus
-    im_focus = optics.PPM('im_focus', z=mir1.z+f2 + 1e-3, FOV=5e-3, N=256)
-
-    # viewing point - before MIR2
-    im_before_MIR2 = optics.PPM('im_before_MIR2', z=mir1.z+2*f2 -.1, FOV=2e-3, N=256)
-    # elliptical mirror with ~10 meter focal length, for collimation
-    mir2 = optics.CurvedMirror('mir2', z=mir1.z+2*f2, p=f2, q=1e5, length=1.0, width=5e-3, alpha=3.6e-3, orientation=0)
-    # viewing point - after MIR2
-    im_after_MIR2 = optics.PPM('im_after_MIR2', z=mir1.z+2*f2 +.1, FOV=2e-3, N=256)
+    slit = optics.Slit('Slit', z=mir1.z+f2, x_width=slit_width, y_width=2e-3)
+    print('slit width: {} um'.format(slit.x_width*1e6))
     
-    # third crystal, symmetric reflection, same orientation as crystal2
-    crystal3 = optics.Crystal('c3', hkl=hkl, length=10e-2, width=10e-3, z=mir2.z+d23, E0=E0,alphaAsym=0, orientation=2,
-                             asym_type='emergence',pol='s')
-    # viewing point - after C3
-    im_after_C3 = optics.PPM('im_after_C3', z=crystal3.z+.01, FOV=5e-3, N=256)
+    mir2 = optics.CurvedMirror('mir2', z=mir1.z+2*f2, p=f2, q=1e5, length=1.0, width=5e-3, alpha=3.6e-3, orientation=2)
+    
+    crystal3 = optics.Crystal('C3', hkl=hkl, length=1e-1, width=5e-3,
+                              z=mir2.z+f1, E0=E0,alphaAsym=-asym3, orientation=2, pol='s')
+    
+    d34 = crystal2.z - crystal1.z + (mir2.z - mir1.z)*np.tan(2*mir1.alpha)/np.tan(2*crystal3.bragg)
 
-    # fourth crystal, asymmetric reflection, same orientation as crystal1
-    crystal4 = optics.Crystal('c4', hkl=hkl, length=10e-2, width=10e-3, z=mir2.z+d23 + (f1-d23)*np.cos(crystal1.beta0*2), E0=E0,alphaAsym=-alphaAsym, 
-                              asym_type='emergence', orientation=0,pol='s')
-
-    # viewing point - output
-    im_out = optics.PPM('im_out', z=crystal4.z+.1, FOV=5e-3, N=256)
-
-    # list of devices to propagate through
-    devices = [crl0,im_input, crystal1,im_after_C1, crystal2,im_after_C2, im_before_MIR1,mir1,im_after_MIR1, slit,im_focus,
-               im_before_MIR2,mir2,im_after_MIR2, crystal3,im_after_C3, crystal4,im_out]
-
-    return devices
+    crystal4 = optics.Crystal('C4', hkl=hkl, length=1e-1, width=5e-3,
+                              z=crystal3.z+d34, E0=E0,alphaAsym=0, orientation=0, pol='s')
+    
+    im_after_C1    = optics.PPM('im_after_C1',    z=crystal1.z+1e-3, FOV=5e-3, N=256)
+    im_after_C2    = optics.PPM('im_after_C2',    z=crystal2.z+1e-3, FOV=5e-3, N=256)
+    im_before_MIR1 = optics.PPM('im_before_MIR1', z=mir1.z-1e-3,     FOV=5e-3, N=256)
+    im_after_MIR1  = optics.PPM('im_after_MIR1',  z=mir1.z+1e-3,     FOV=5e-3, N=256)
+    im_focus       = optics.PPM('im_focus',       z=slit.z+1e-3,     FOV=100e-6, N=256)
+    im_before_MIR2 = optics.PPM('im_before_MIR2', z=mir2.z-1e-3,     FOV=5e-3, N=256)
+    im_after_MIR2  = optics.PPM('im_after_MIR2',  z=mir2.z+1e-3,     FOV=5e-3, N=256)
+    im_after_C3    = optics.PPM('im_after_C3',    z=crystal3.z+1e-3, FOV=5e-3, N=256)
+    im_out         = optics.PPM('im_out',         z=crystal4.z+1e-3, FOV=5e-3, N=256)
+    
+    HRM_devices = [crystal1,im_after_C1, crystal2,im_after_C2, im_before_MIR1,mir1,im_after_MIR1, slit,im_focus,
+                   im_before_MIR2,mir2,im_after_MIR2, crystal3,im_after_C3, crystal4,im_out]
+    
+    return HRM_devices
 
 def change_delta(devices, delta, crystal):
     for device in devices:
@@ -109,9 +266,9 @@ def add_shapeError(devices, shapeError, crystal):
                                         shapeError = shapeError)
 
 def lens_energyError(devices, E):
-	for i, device in enumerate(devices):
-		if device.name[:3] == 'crl':
-			devices[i] = optics.CRL('mir1', z=device.z, E0=E, f=device.f, diameter=device.diameter)
+    for i, device in enumerate(devices):
+        if device.name[:3] == 'crl':
+            devices[i] = optics.CRL('mir1', z=device.z, E0=E, f=device.f, diameter=device.diameter)
 
 ''' get info '''
 def print_oe_pos(oe):

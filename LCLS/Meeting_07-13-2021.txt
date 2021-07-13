@@ -1,0 +1,7 @@
+To-do:
+	220 with ~ 3 degree out angle.
+	Scan shapeError ~0.7, 8, 9 to see where the boundary is in terms of the power limitation.
+
+	try to see if adding individual phase differences is different from all shapeErrors on at the same time
+
+	Check the spatial chirp after HHLM4 for all cases using HHLM_only codes
