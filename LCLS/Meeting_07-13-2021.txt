@@ -5,3 +5,7 @@ To-do:
 	try to see if adding individual phase differences is different from all shapeErrors on at the same time
 
 	Check the spatial chirp after HHLM4 for all cases using HHLM_only codes
+
+
+self-seeded
+	different photon energies
