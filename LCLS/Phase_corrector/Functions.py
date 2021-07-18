@@ -19,9 +19,9 @@ def blockPrint():
 def enablePrint():
     sys.stdout = sys.__stdout__
 
-def load_crystal_data(num, dir_profile):
-    coords = np.loadtxt(dir_profile+'Nlist_%d.txt' %num, skiprows=12)
-    data = np.loadtxt(dir_profile+'Uy_list_%d.txt' % num, skiprows=0)
+def load_crystal_data(dir_profile, crystal_name, option):
+    coords = np.loadtxt(dir_profile+'Nlist_{}_{}.txt'.format(option, crystal_name), skiprows=12)
+    data = np.loadtxt(dir_profile+'Uy_list_{}_{}.txt'.format(option, crystal_name), skiprows=0)
 
     x = coords[:,1]
     y = coords[:,2]
@@ -49,6 +49,15 @@ def load_crystal_data(num, dir_profile):
     
     return dy_symmetrize, xx2, zz2
 
+def calc_slit_width(inbeam, lmbd, foc):
+    # inbeam is the beamsize (2x FWHM) after Crystal 2
+    # lmbd is wavelength of photon
+    # asym is asymmetry angle of Crystal 2
+    # foc is Mir1/Lens1 focal distance
+    # returns mono focus size in [m] at the Fourier plane
+    slt = 2*np.log(2)*lmbd*foc/np.pi/inbeam
+    return 2.11 * slt    # 2x FWHM with some error (~factor of 5%)
+
 def find_zero(x, y, direction=None, i_i=0, i_f=-1):
     x = x[i_i:i_f]
     y = y[i_i:i_f]
@@ -69,15 +78,15 @@ def find_zero(x, y, direction=None, i_i=0, i_f=-1):
     return result
 
 ''' define beamline '''
-def define_Telescope(E0, m1_p=185.0, m2_p=175.5):
+def define_Telescope(E0, m1_p=185.0, m1_q=-58.0, m2_p=175.5):
     z_s = 650
     
     ## Telescope
-    m1 = optics.CurvedMirror('M1', p=m1_p, q=-58, length=1, z=185+z_s, alpha=2.65e-3)
-    im_after_T1 = optics.PPM('im_after_T1', z=m1.z+.01, FOV=5e-3, N=256)
+    m1 = optics.CurvedMirror('M1', p=m1_p, q=-m1_q, length=1, z=185+z_s, alpha=2.65e-3)
+    im_after_T1 = optics.PPM('im_after_T1', z=m1.z+.01, FOV=5e-3, N=512)
     
     m2 = optics.CurvedMirror('M2', p=m2_p, q=1e5, length=1, z=300+z_s, alpha=2.65e-3, orientation=2)
-    im_after_T2 = optics.PPM('im_after_T2', z=m2.z+.01, FOV=5e-3, N=256)
+    im_after_T2 = optics.PPM('im_after_T2', z=m2.z+.01, FOV=5e-3, N=512)
 
     Telescope_devices = [m1, im_after_T1, m2, im_after_T2]
 
@@ -123,10 +132,10 @@ def define_HHLM_2DCM(
                            z=hhlm3.z+HHLM_offset/np.tan(2*hhlm3.bragg), alphaAsym=asym2, E0=E0, orientation=0, pol='s',
                            shapeError=shapeErrors[3])
 
-    im_after_HHLM1 = optics.PPM('im_after_HHLM1', FOV=20e-3,N=256,z=hhlm1.z+np.sign(hhlm2.z-hhlm1.z)*1e-3)
-    im_after_HHLM2 = optics.PPM('im_after_HHLM2', FOV=20e-3,N=256,z=hhlm2.z+np.sign(hhlm3.z-hhlm2.z)*1e-3)
-    im_after_HHLM3 = optics.PPM('im_after_HHLM3', FOV=20e-3,N=256,z=hhlm3.z+np.sign(hhlm4.z-hhlm3.z)*1e-3)
-    im_after_HHLM4 = optics.PPM('im_after_HHLM4', FOV=20e-3,N=256,z=hhlm4.z+1e-3)
+    im_after_HHLM1 = optics.PPM('im_after_HHLM1', FOV=2.5e-2,N=512,z=hhlm1.z+np.sign(hhlm2.z-hhlm1.z)*1e-3)
+    im_after_HHLM2 = optics.PPM('im_after_HHLM2', FOV=2.5e-2,N=512,z=hhlm2.z+np.sign(hhlm3.z-hhlm2.z)*1e-3)
+    im_after_HHLM3 = optics.PPM('im_after_HHLM3', FOV=2.5e-2,N=512,z=hhlm3.z+np.sign(hhlm4.z-hhlm3.z)*1e-3)
+    im_after_HHLM4 = optics.PPM('im_after_HHLM4', FOV=2.5e-2,N=512,z=hhlm4.z+1e-3)
 
     HHLM_devices = [hhlm1, im_after_HHLM1, hhlm2, im_after_HHLM2, hhlm3, im_after_HHLM3, hhlm4, im_after_HHLM4]
 
@@ -171,10 +180,10 @@ def define_HHLM_Zigzag(
                            z=hhlm3.z+HHLM_offset/np.tan(2*hhlm3.bragg), alphaAsym=asym1, E0=E0,orientation=2, pol='s',
                            shapeError=shapeErrors[3])
     
-    im_after_HHLM1 = optics.PPM('im_after_HHLM1', FOV=20e-3,N=256,z=hhlm1.z+np.sign(hhlm2.z-hhlm1.z)*1e-3)
-    im_after_HHLM2 = optics.PPM('im_after_HHLM2', FOV=20e-3,N=256,z=hhlm2.z+np.sign(hhlm3.z-hhlm2.z)*1e-3)
-    im_after_HHLM3 = optics.PPM('im_after_HHLM3', FOV=20e-3,N=256,z=hhlm3.z+np.sign(hhlm4.z-hhlm3.z)*1e-3)
-    im_after_HHLM4 = optics.PPM('im_after_HHLM4', FOV=20e-3,N=256,z=hhlm4.z+1e-3)
+    im_after_HHLM1 = optics.PPM('im_after_HHLM1', FOV=2.5e-2,N=512,z=hhlm1.z+np.sign(hhlm2.z-hhlm1.z)*1e-3)
+    im_after_HHLM2 = optics.PPM('im_after_HHLM2', FOV=2.5e-2,N=512,z=hhlm2.z+np.sign(hhlm3.z-hhlm2.z)*1e-3)
+    im_after_HHLM3 = optics.PPM('im_after_HHLM3', FOV=2.5e-2,N=512,z=hhlm3.z+np.sign(hhlm4.z-hhlm3.z)*1e-3)
+    im_after_HHLM4 = optics.PPM('im_after_HHLM4', FOV=2.5e-2,N=512,z=hhlm4.z+1e-3)
 
     HHLM_devices = [hhlm1, im_after_HHLM1, hhlm2, im_after_HHLM2, hhlm3, im_after_HHLM3, hhlm4, im_after_HHLM4]
 
@@ -225,15 +234,15 @@ def define_HRM(E0, f1=10., f2=10., slit_width=3e-6,
     crystal4 = optics.Crystal('C4', hkl=hkl, length=1e-1, width=5e-3,
                               z=crystal3.z+d34, E0=E0,alphaAsym=0, orientation=0, pol='s')
     
-    im_after_C1    = optics.PPM('im_after_C1',    z=crystal1.z+1e-3, FOV=5e-3, N=256)
-    im_after_C2    = optics.PPM('im_after_C2',    z=crystal2.z+1e-3, FOV=5e-3, N=256)
-    im_before_MIR1 = optics.PPM('im_before_MIR1', z=mir1.z-1e-3,     FOV=5e-3, N=256)
-    im_after_MIR1  = optics.PPM('im_after_MIR1',  z=mir1.z+1e-3,     FOV=5e-3, N=256)
-    im_focus       = optics.PPM('im_focus',       z=slit.z+1e-3,     FOV=50e-6, N=256)
-    im_before_MIR2 = optics.PPM('im_before_MIR2', z=mir2.z-1e-3,     FOV=5e-3, N=256)
-    im_after_MIR2  = optics.PPM('im_after_MIR2',  z=mir2.z+1e-3,     FOV=5e-3, N=256)
-    im_after_C3    = optics.PPM('im_after_C3',    z=crystal3.z+1e-3, FOV=5e-3, N=256)
-    im_out         = optics.PPM('im_out',         z=crystal4.z+1e-3, FOV=5e-3, N=256)
+    im_after_C1    = optics.PPM('im_after_C1',    z=crystal1.z+1e-3, FOV=5e-3, N=512)
+    im_after_C2    = optics.PPM('im_after_C2',    z=crystal2.z+1e-3, FOV=5e-3, N=512)
+    im_before_MIR1 = optics.PPM('im_before_MIR1', z=mir1.z-1e-3,     FOV=5e-3, N=512)
+    im_after_MIR1  = optics.PPM('im_after_MIR1',  z=mir1.z+1e-3,     FOV=5e-3, N=512)
+    im_focus       = optics.PPM('im_focus',       z=slit.z+1e-3,     FOV=50e-6, N=512)
+    im_before_MIR2 = optics.PPM('im_before_MIR2', z=mir2.z-1e-3,     FOV=5e-3, N=512)
+    im_after_MIR2  = optics.PPM('im_after_MIR2',  z=mir2.z+1e-3,     FOV=5e-3, N=512)
+    im_after_C3    = optics.PPM('im_after_C3',    z=crystal3.z+1e-3, FOV=5e-3, N=512)
+    im_out         = optics.PPM('im_out',         z=crystal4.z+1e-3, FOV=5e-3, N=512)
     
     HRM_devices = [crystal1,im_after_C1, crystal2,im_after_C2, im_before_MIR1,mir1,im_after_MIR1, slit,im_focus,
                    im_before_MIR2,mir2,im_after_MIR2, crystal3,im_after_C3, crystal4,im_out]
