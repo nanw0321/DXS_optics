@@ -58,9 +58,10 @@ def calc_slit_width(inbeam, lmbd, foc):
     slt = 2*np.log(2)*lmbd*foc/np.pi/inbeam
     return 2.11 * slt    # 2x FWHM with some error (~factor of 5%)
 
-def find_zero(x, y, direction=None, i_i=0, i_f=-1):
-    x = x[i_i:i_f]
-    y = y[i_i:i_f]
+def find_zero(x, y, direction=None, x_i=0, x_f=1e5):
+    y = y[np.intersect1d(np.where(x>=x_i), np.where(x<=x_f))]
+    x = x[np.intersect1d(np.where(x>=x_i), np.where(x<=x_f))]
+
     # if linearly decrease:
     if np.median(y[:5]) >= np.median(y[-5:]):
         indices = np.where(y>=0)[0]
@@ -78,11 +79,11 @@ def find_zero(x, y, direction=None, i_i=0, i_f=-1):
     return result
 
 ''' define beamline '''
-def define_Telescope(E0, m1_p=185.0, m1_q=-58.0, m2_p=175.5):
+def define_Telescope(E0, m1_p=185.0, m1_q=-58.0, m2_p=173.0):
     z_s = 650
     
     ## Telescope
-    m1 = optics.CurvedMirror('M1', p=m1_p, q=-m1_q, length=1, z=185+z_s, alpha=2.65e-3)
+    m1 = optics.CurvedMirror('M1', p=m1_p, q=m1_q, length=1, z=m1_p+z_s, alpha=2.65e-3)
     im_after_T1 = optics.PPM('im_after_T1', z=m1.z+.01, FOV=5e-3, N=512)
     
     m2 = optics.CurvedMirror('M2', p=m2_p, q=1e5, length=1, z=300+z_s, alpha=2.65e-3, orientation=2)
