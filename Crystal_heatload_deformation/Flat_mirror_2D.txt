@@ -1,1 +1,0 @@
-Add error to perfect 2D lens, 15 degree reflection. Add perfect lens afterwards, plot beam profile a few distances around focal plane.

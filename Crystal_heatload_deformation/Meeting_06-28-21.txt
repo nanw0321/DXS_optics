@@ -1,3 +1,0 @@
-Want 5 2D plots.
-	Removing 2nd order term, then in&out of focus, 1W, 3W, 10W, 20W, 40W
-	
