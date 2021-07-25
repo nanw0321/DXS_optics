@@ -79,14 +79,28 @@ def find_zero(x, y, direction=None, x_i=0, x_f=1e5):
     return result
 
 ''' define beamline '''
-def define_Telescope(E0, m1_p=185.0, m1_q=-58.0, m2_p=173.0):
+def define_Telescope(E0, m1_p=185.0, m1_q=-58.0, m2_p=None, m2_q=None):
+    '''
+    defines the Telescope optics
+    E0: photon energy [eV]
+    m1_p: mirror 1 source distance [m]
+    m1_q: mirror 1 image distance [m], negative value indicates diverging mirror
+    m2_p: mirror 2 source distance [m]
+    m2_q: mirror 2 image distance [m]
+
+    returns optics
+    '''
     z_s = 650
     
     ## Telescope
     m1 = optics.CurvedMirror('M1', p=m1_p, q=m1_q, length=1, z=m1_p+z_s, alpha=2.65e-3)
-    im_after_T1 = optics.PPM('im_after_T1', z=m1.z+.01, FOV=5e-3, N=512)
+    if m2_p is None:
+        m2_p = 300 - m1_p - m1_q +2.0     # make the source distance 2m longer so the output diverges slightly
+    if m2_q is None:
+        m2_q = 1e5    # fix the image distance to be 100km so the output is almost parallel
+    m2 = optics.CurvedMirror('M2', p=m2_p, q=m2_q, length=1, z=300+z_s, alpha=2.65e-3, orientation=2)
     
-    m2 = optics.CurvedMirror('M2', p=m2_p, q=1e5, length=1, z=300+z_s, alpha=2.65e-3, orientation=2)
+    im_after_T1 = optics.PPM('im_after_T1', z=m1.z+.01, FOV=5e-3, N=512)
     im_after_T2 = optics.PPM('im_after_T2', z=m2.z+.01, FOV=5e-3, N=512)
 
     Telescope_devices = [m1, im_after_T1, m2, im_after_T2]
@@ -135,8 +149,8 @@ def define_HHLM_2DCM(
 
     im_after_HHLM1 = optics.PPM('im_after_HHLM1', FOV=2.5e-2,N=512,z=hhlm1.z+np.sign(hhlm2.z-hhlm1.z)*1e-3)
     im_after_HHLM2 = optics.PPM('im_after_HHLM2', FOV=2.5e-2,N=512,z=hhlm2.z+np.sign(hhlm3.z-hhlm2.z)*1e-3)
-    im_after_HHLM3 = optics.PPM('im_after_HHLM3', FOV=2.5e-2,N=512,z=hhlm3.z+np.sign(hhlm4.z-hhlm3.z)*1e-3)
-    im_after_HHLM4 = optics.PPM('im_after_HHLM4', FOV=2.5e-2,N=512,z=hhlm4.z+1e-3)
+    im_after_HHLM3 = optics.PPM('im_after_HHLM3', FOV=5e-3,N=512,z=hhlm3.z+np.sign(hhlm4.z-hhlm3.z)*1e-3)
+    im_after_HHLM4 = optics.PPM('im_after_HHLM4', FOV=5e-3,N=512,z=hhlm4.z+1e-3)
 
     HHLM_devices = [hhlm1, im_after_HHLM1, hhlm2, im_after_HHLM2, hhlm3, im_after_HHLM3, hhlm4, im_after_HHLM4]
 
@@ -183,8 +197,8 @@ def define_HHLM_Zigzag(
     
     im_after_HHLM1 = optics.PPM('im_after_HHLM1', FOV=2.5e-2,N=512,z=hhlm1.z+np.sign(hhlm2.z-hhlm1.z)*1e-3)
     im_after_HHLM2 = optics.PPM('im_after_HHLM2', FOV=2.5e-2,N=512,z=hhlm2.z+np.sign(hhlm3.z-hhlm2.z)*1e-3)
-    im_after_HHLM3 = optics.PPM('im_after_HHLM3', FOV=2.5e-2,N=512,z=hhlm3.z+np.sign(hhlm4.z-hhlm3.z)*1e-3)
-    im_after_HHLM4 = optics.PPM('im_after_HHLM4', FOV=2.5e-2,N=512,z=hhlm4.z+1e-3)
+    im_after_HHLM3 = optics.PPM('im_after_HHLM3', FOV=5e-3,N=512,z=hhlm3.z+np.sign(hhlm4.z-hhlm3.z)*1e-3)
+    im_after_HHLM4 = optics.PPM('im_after_HHLM4', FOV=5e-3,N=512,z=hhlm4.z+1e-3)
 
     HHLM_devices = [hhlm1, im_after_HHLM1, hhlm2, im_after_HHLM2, hhlm3, im_after_HHLM3, hhlm4, im_after_HHLM4]
 
@@ -239,7 +253,7 @@ def define_HRM(E0, f1=10., f2=10., slit_width=3e-6,
     im_after_C2    = optics.PPM('im_after_C2',    z=crystal2.z+1e-3, FOV=5e-3, N=512)
     im_before_MIR1 = optics.PPM('im_before_MIR1', z=mir1.z-1e-3,     FOV=5e-3, N=512)
     im_after_MIR1  = optics.PPM('im_after_MIR1',  z=mir1.z+1e-3,     FOV=5e-3, N=512)
-    im_focus       = optics.PPM('im_focus',       z=slit.z+1e-3,     FOV=50e-6, N=512)
+    im_focus       = optics.PPM('im_focus',       z=slit.z+1e-3,     FOV=5e-3, N=512)
     im_before_MIR2 = optics.PPM('im_before_MIR2', z=mir2.z-1e-3,     FOV=5e-3, N=512)
     im_after_MIR2  = optics.PPM('im_after_MIR2',  z=mir2.z+1e-3,     FOV=5e-3, N=512)
     im_after_C3    = optics.PPM('im_after_C3',    z=crystal3.z+1e-3, FOV=5e-3, N=512)
