@@ -400,3 +400,35 @@ def get_spectrum(pulse, image_name, x_pos=0, y_pos=0, integrated=False):
     
     # [eV], normalized intensity [simulated], [Gaussian Fit]
     return pulse.energy - pulse.E0, y_data/np.max(y_data), gauss_plot
+
+
+''' plot '''
+def plot_phase_comparison(ppm_p, ppm_e, ppm_c, x_range, y_range, image_name=None):
+    # crop roi based on beam width
+    index_x = np.where((ppm_p.x **2) < (x_range ** 2))[0]
+    index_y = np.where((ppm_p.y **2) < (y_range ** 2))[0]
+    axis_x = np.linspace(-x_range, x_range, index_x[-1] - index_x[0] + 1)*1e3
+    axis_y = np.linspace(-y_range, y_range, index_y[-1] - index_y[0] + 1)*1e3
+
+    # 1D
+    phase_p_x = ppm_p.x_phase[index_x[0]:index_x[-1]+1]
+    phase_p_y = ppm_p.y_phase[index_y[0]:index_y[-1]+1]
+    phase_e_x = ppm_e.x_phase[index_x[0]:index_x[-1]+1]
+    phase_e_y = ppm_e.y_phase[index_y[0]:index_y[-1]+1]
+    phase_c_x = ppm_c.x_phase[index_x[0]:index_x[-1]+1]
+    phase_c_y = ppm_c.y_phase[index_y[0]:index_y[-1]+1]
+
+    plt.figure(figsize=(30,20))
+    plt.subplot(2,2,1)
+    plt.plot(axis_x, phase_p_x - np.median(phase_p_x), label='w/o')
+    plt.plot(axis_x, phase_e_x - np.median(phase_e_x), label='w/')
+    plt.plot(axis_x, phase_c_x - np.median(phase_c_x), label='corrected')
+    plt.title('phase x, {}'.format(image_name)); plt.xlabel('x (mm)')
+    plt.legend()
+
+    plt.subplot(2,2,2)
+    plt.plot(axis_y, phase_p_y - np.median(phase_p_y), label='w/o')
+    plt.plot(axis_y, phase_e_y - np.median(phase_e_y), label='w/')
+    plt.plot(axis_y, phase_c_y - np.median(phase_c_y), label='corrected')
+    plt.title('phase y'); plt.xlabel('y (mm)')
+    plt.legend()

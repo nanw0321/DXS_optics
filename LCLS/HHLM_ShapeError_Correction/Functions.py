@@ -79,14 +79,28 @@ def find_zero(x, y, direction=None, x_i=0, x_f=1e5):
     return result
 
 ''' define beamline '''
-def define_Telescope(E0, m1_p=185.0, m1_q=-58.0, m2_p=173.0):
+def define_Telescope(E0, m1_p=185.0, m1_q=-58.0, m2_p=None, m2_q=None):
+    '''
+    defines the Telescope optics
+    E0: photon energy [eV]
+    m1_p: mirror 1 source distance [m]
+    m1_q: mirror 1 image distance [m], negative value indicates diverging mirror
+    m2_p: mirror 2 source distance [m]
+    m2_q: mirror 2 image distance [m]
+
+    returns optics
+    '''
     z_s = 650
     
     ## Telescope
     m1 = optics.CurvedMirror('M1', p=m1_p, q=m1_q, length=1, z=m1_p+z_s, alpha=2.65e-3)
-    im_after_T1 = optics.PPM('im_after_T1', z=m1.z+.01, FOV=5e-3, N=512)
+    if m2_p is None:
+        m2_p = 300 - m1_p - m1_q +2.0     # make the source distance 2m longer so the output diverges slightly
+    if m2_q is None:
+        m2_q = 1e5    # fix the image distance to be 100km so the output is almost parallel
+    m2 = optics.CurvedMirror('M2', p=m2_p, q=m2_q, length=1, z=300+z_s, alpha=2.65e-3, orientation=2)
     
-    m2 = optics.CurvedMirror('M2', p=m2_p, q=1e5, length=1, z=300+z_s, alpha=2.65e-3, orientation=2)
+    im_after_T1 = optics.PPM('im_after_T1', z=m1.z+.01, FOV=5e-3, N=512)
     im_after_T2 = optics.PPM('im_after_T2', z=m2.z+.01, FOV=5e-3, N=512)
 
     Telescope_devices = [m1, im_after_T1, m2, im_after_T2]
@@ -386,3 +400,35 @@ def get_spectrum(pulse, image_name, x_pos=0, y_pos=0, integrated=False):
     
     # [eV], normalized intensity [simulated], [Gaussian Fit]
     return pulse.energy - pulse.E0, y_data/np.max(y_data), gauss_plot
+
+
+''' plot '''
+def plot_phase_comparison(ppm_p, ppm_e, ppm_c, x_range, y_range, image_name=None):
+    # crop roi based on beam width
+    index_x = np.where((ppm_p.x **2) < (x_range ** 2))[0]
+    index_y = np.where((ppm_p.y **2) < (y_range ** 2))[0]
+    axis_x = np.linspace(-x_range, x_range, index_x[-1] - index_x[0] + 1)*1e3
+    axis_y = np.linspace(-y_range, y_range, index_y[-1] - index_y[0] + 1)*1e3
+
+    # 1D
+    phase_p_x = ppm_p.x_phase[index_x[0]:index_x[-1]+1]
+    phase_p_y = ppm_p.y_phase[index_y[0]:index_y[-1]+1]
+    phase_e_x = ppm_e.x_phase[index_x[0]:index_x[-1]+1]
+    phase_e_y = ppm_e.y_phase[index_y[0]:index_y[-1]+1]
+    phase_c_x = ppm_c.x_phase[index_x[0]:index_x[-1]+1]
+    phase_c_y = ppm_c.y_phase[index_y[0]:index_y[-1]+1]
+
+    plt.figure(figsize=(30,20))
+    plt.subplot(2,2,1)
+    plt.plot(axis_x, phase_p_x - np.median(phase_p_x), label='w/o')
+    plt.plot(axis_x, phase_e_x - np.median(phase_e_x), label='w/')
+    plt.plot(axis_x, phase_c_x - np.median(phase_c_x), label='corrected')
+    plt.title('phase x, {}'.format(image_name)); plt.xlabel('x (mm)')
+    plt.legend()
+
+    plt.subplot(2,2,2)
+    plt.plot(axis_y, phase_p_y - np.median(phase_p_y), label='w/o')
+    plt.plot(axis_y, phase_e_y - np.median(phase_e_y), label='w/')
+    plt.plot(axis_y, phase_c_y - np.median(phase_c_y), label='corrected')
+    plt.title('phase y'); plt.xlabel('y (mm)')
+    plt.legend()
