@@ -90,12 +90,13 @@ def define_Telescope(E0, m1_p=185.0, m1_q=-58.0, m2_p=None, m2_q=None):
 
     returns optics
     '''
+
     z_s = 650
     
     ## Telescope
     m1 = optics.CurvedMirror('M1', p=m1_p, q=m1_q, length=1, z=m1_p+z_s, alpha=2.65e-3)
     if m2_p is None:
-        m2_p = 300 - m1_p - m1_q +2.0     # make the source distance 2m longer so the output diverges slightly
+        m2_p = 300 - m1_p - m1_q
     if m2_q is None:
         m2_q = 1e5    # fix the image distance to be 100km so the output is almost parallel
     m2 = optics.CurvedMirror('M2', p=m2_p, q=m2_q, length=1, z=300+z_s, alpha=2.65e-3, orientation=2)
