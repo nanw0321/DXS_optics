@@ -1,3 +1,7 @@
 80%-100% power on all crystals and try mirror bending & phase corrector for the residual.
 
 In real applications, the beam power comes and goes, if beam power suddenly drops from 40 to 35W, and we were using 40W correction parameters, how different would the pulse be?
+
+
+Do the simulations for 9481eV.
+Go back to Zig-zag and try the same simulation to see if the "corrected" is really corrected.
