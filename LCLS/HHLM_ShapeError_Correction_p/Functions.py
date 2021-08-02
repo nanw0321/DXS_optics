@@ -254,7 +254,7 @@ def define_HRM(E0, f1=10., f2=10., slit_width=3e-6,
     im_after_C2    = optics.PPM('im_after_C2',    z=crystal2.z+1e-3, FOV=5e-3, N=512)
     im_before_MIR1 = optics.PPM('im_before_MIR1', z=mir1.z-1e-3,     FOV=5e-3, N=512)
     im_after_MIR1  = optics.PPM('im_after_MIR1',  z=mir1.z+1e-3,     FOV=5e-3, N=512)
-    im_focus       = optics.PPM('im_focus',       z=slit.z+1e-3,     FOV=5e-3, N=512)
+    im_focus       = optics.PPM('im_focus',       z=slit.z+1e-3,     FOV=20e-6, N=512)
     im_before_MIR2 = optics.PPM('im_before_MIR2', z=mir2.z-1e-3,     FOV=5e-3, N=512)
     im_after_MIR2  = optics.PPM('im_after_MIR2',  z=mir2.z+1e-3,     FOV=5e-3, N=512)
     im_after_C3    = optics.PPM('im_after_C3',    z=crystal3.z+1e-3, FOV=5e-3, N=512)
