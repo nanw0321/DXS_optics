@@ -1,3 +1,11 @@
 Change the 2DCM-111-220 asymmetry angle 9.0-16.9 so that HRM1 takes about 2.73W @ 80% beam power (so that 2DCM performs identically to the Zigzag).
 
 Debug the weird mono-phase shapes using the 2DCM setup, if it works now, then there's something wrong with how I simulated the phase for the zigzag case.
+
+
+
+To-do:
+	time domain profiles maybe?
+	List of configurations based on current simulation results for several other energies.
+	Move im_plate to after HRM-C4 and see if it works better.
+
