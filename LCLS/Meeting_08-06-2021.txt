@@ -1,0 +1,10 @@
+Quadratic phase if too large beam size differs and run into grid edges.
+
+To-do:
+Phase - 2nd order Legendre poly
+	push the simulation to limit for mirror bending + phase corrector case in 10% steps.
+	See where does the focal plane spatial spectrum deviates far from the perfect case.
+
+
+Other cases?
+	maybe redistribution of crystal power among HHLM2/3 and HRM1.
