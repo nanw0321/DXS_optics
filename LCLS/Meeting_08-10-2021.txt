@@ -1,0 +1,5 @@
+To-do:
+	fit phase difference to 2nd order polynomials and subtract the result.
+
+*sanity check: manually add phase difference at input to the perfect case to see how it affects the beam profiles.
+
