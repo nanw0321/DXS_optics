@@ -5,3 +5,7 @@ Add 1D spatial slice
 One more iteration of phase corrector + bending
 
 If works better, go up to 40%
+
+
+To-do:
+	20-80% log Pseudo-voigt spectrum
