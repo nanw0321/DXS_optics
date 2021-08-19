@@ -187,9 +187,12 @@ def define_HHLM_Zigzag(
     hhlm2 = optics.Crystal('HHLM2', hkl=hkl2, length=l_crystal[1], width=w_crystal[1],
                            z=hhlm1.z+HHLM_offset/np.tan(2*hhlm1.bragg), alphaAsym=-asym2, E0=E0,orientation=2, pol='s',
                            shapeError=shapeErrors[1])
-
+    if hhlm2.bragg < np.pi/4: 
+        hhlm3_z = hhlm2.z+pair_distance
+    else: 
+        hhlm3_z = hhlm2.z-pair_distance
     hhlm3 = optics.Crystal('HHLM3', hkl=hkl2, length=l_crystal[2], width=w_crystal[2],
-                           z=hhlm2.z+pair_distance, alphaAsym=asym2, E0=E0,orientation=0, pol='s',
+                           z=hhlm3_z, alphaAsym=asym2, E0=E0,orientation=0, pol='s',
                            shapeError=shapeErrors[2])
 
     hhlm4 = optics.Crystal('HHLM4', hkl=hkl1, length=l_crystal[3], width=w_crystal[3],
@@ -229,9 +232,12 @@ def define_HRM(E0, f1=10., f2=10., slit_width=3e-6,
     crystal1 = optics.Crystal('C1', hkl=hkl, length=l_crystal[4], width=w_crystal[4],
                               z=z_s+310, E0=E0, alphaAsym=0, orientation=0, pol='s',
                               shapeError=shapeErrors[4])
-
+    if crystal1.bragg < np.pi/4: 
+        crystal2_z = crystal1.z+.05
+    else: 
+        crystal2_z = crystal1.z-.05
     crystal2 = optics.Crystal('C2', hkl=hkl, length=l_crystal[5], width=w_crystal[5],
-                              z=crystal1.z+.05, E0=E0,alphaAsym=asym3, orientation=2, pol='s',
+                              z=crystal2_z, E0=E0,alphaAsym=asym3, orientation=2, pol='s',
                               shapeError=shapeErrors[5])
     
     mir1 = optics.CurvedMirror('mir1', z=crystal2.z+f1, p=1e5, q=f2, length=1.0, width=5e-3, alpha=3.6e-3, orientation=0)
@@ -244,7 +250,6 @@ def define_HRM(E0, f1=10., f2=10., slit_width=3e-6,
     
     crystal3 = optics.Crystal('C3', hkl=hkl, length=1e-1, width=5e-3,
                               z=mir2.z+f1, E0=E0,alphaAsym=-asym3, orientation=2, pol='s')
-    
     d34 = crystal2.z - crystal1.z + (mir2.z - mir1.z)*np.tan(2*mir1.alpha)/np.tan(2*crystal3.bragg)
 
     crystal4 = optics.Crystal('C4', hkl=hkl, length=1e-1, width=5e-3,

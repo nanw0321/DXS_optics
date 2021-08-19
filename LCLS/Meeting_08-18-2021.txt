@@ -1,0 +1,6 @@
+To-do:
+	1. reverse crystal positions if Bragg angle >45 degree.
+	2. m2_p and m1_q should theoretically change together, but shift the source back 26m to see if optimized is too different from calculated.
+		If not, just use the predicted value as "perfect" and call it a day.
+	
+	3. double check m2_q when this is done. The previous issue might have been caused by the 26 meter offset in the source position.
