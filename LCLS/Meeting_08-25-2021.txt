@@ -1,0 +1,8 @@
+To-do:
+	Study on magnification (beam size on 2nd mirror), this gives us some idea on the trade off between tail and resolution.
+		pick a few beam sizes for the heat bump (now 2FWHM, try 4, 6, 8 etc..)
+	Once finished, add heat bumps and see behavior.
+
+	new HRM choices?
+
+	try calculate phase diff at HRM out

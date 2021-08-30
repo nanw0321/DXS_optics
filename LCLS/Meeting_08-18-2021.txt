@@ -4,3 +4,8 @@ To-do:
 		If not, just use the predicted value as "perfect" and call it a day.
 	
 	3. double check m2_q when this is done. The previous issue might have been caused by the 26 meter offset in the source position.
+
+
+To-do:
+	1. make the perfect case really perfect and see what the output spectrum looks like (ideally 10^-9 at 20meV).
+	2. if not recovered, check zig-zag and see if it's caused by 2DCM

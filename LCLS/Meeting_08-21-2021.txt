@@ -1,0 +1,14 @@
+spectrum tail goes way up with mirror length reduced to 1m. Ask Matt.
+
+try to resimulate 11keV to get rid of aliasing.
+
+Diff photon energies behave differently, like 3/6 degree asymmetry on C1 ...
+
+
+
+To-do:
+	1. crystal selection for HRM - Mon morning
+	2. tolerance scan with shapeErrors applied and corrected.
+		+- 100 nrad
+		+- 1 um
+		+- etc...
