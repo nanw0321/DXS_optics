@@ -6,3 +6,11 @@ To-do:
 	new HRM choices?
 
 	try calculate phase diff at HRM out
+
+To-do:
+	make HHLM3 power lower ~ the same scale as HHLM1
+	calculate phase difference at HRM output, then maybe the HRM can take slightly higher power?
+	limit of HRM?
+		1. increase the asymmetry, spread out heatload more and narrower bandwidth acceptance; check ~20 degree
+
+	40-50% beam size full simulation
