@@ -14,3 +14,8 @@ To-do:
 		1. increase the asymmetry, spread out heatload more and narrower bandwidth acceptance; check ~20 degree
 
 	40-50% beam size full simulation
+
+to-do:
+	add all shapeError, do all corrections (BCB), then change beam power (shapeError) by 10% and don't do any further correction, what would happen? This simulates how much beam degrades when it fluctuates.
+
+when we need lower tail, we can reduce beam size, but this leads to higher power density on the crystals so we would need to reduce beam power as well. 
