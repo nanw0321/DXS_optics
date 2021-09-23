@@ -1,0 +1,18 @@
+Future: 3hr workshop for a very large coherence volume
+
+To-do: 
+	3x crystal footprint
+	alignment
+	
+assume 40W coming in, and power shifts
+
+Increase the point resolution in bending-power fluctuation simulation.
+
+To-do:
+	2xFWHM corresponds to 2.5mm at mirror.
+	Can loosen this to 3xFWHM ~ 2.5mm.
+
+	3deg incidence angle on crystals. So crystal- beam size is relatively fixed. engineers are trying to increase crystal footprints from 50mm to 60mm and need to decide if we want 2xFWHM or 3xFWHM.
+
+	Tail trade-off: if 2.5mm = 2xFWHM, we have narrower bandwidth but higher tails; if 2.5mm = 3xFWHM, we have broader bandwidth but lower tails.
+

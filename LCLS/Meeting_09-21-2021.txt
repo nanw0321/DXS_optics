@@ -1,0 +1,11 @@
+Individual crystal shape errors with 3x profile and compare with before.
+
+B vs BCB power jitter tolerance looks like the way we have is probably because bending only has a larger focusing range which makes it more tolerant to changes in beam power. The power jitter simulation is more about if we "permanently" lose a good portion of the beam (or get a good portion back), how much do we need to change the alignment. For quasi-state 10-15 min; quasi-steady state 1-2 min; time to thermally stabilize crystal 10-15 min.
+
+Lin confirmed that crystals are ok with second scale power changes. We can calibrate the temperature change of the crystals; the engineers will add provisional temperature control. The surface temperature of the crystals can be observed/measured and can be used to deduce the internal structure of the crystals, then we could add some feedback temperature loop to control the crystal thermal profiles.
+
+Can use attenuators upstream or drop the rep rate to get the crystals having a neglidgible power load, and use that as the reference point. The simplest approach would be if we align the crystals and directly look at the output, if when we heat up the crystal and the output changes then we know there's something changed in the shapeError. Or we can use the wavefront sensors, although we cannot identify the contribution from each crystal individually.
+
+Rayleigh length at focus: ~20mm; very challenging to make things smaller. Slit opening 10% of the required value as our position. 3 diff channel cut crystals w/ Bragg btw 75-85 deg for high energy res with diff incident photon energy. 
+
+End of Oct. HHLM CDR and 4f CDF.
