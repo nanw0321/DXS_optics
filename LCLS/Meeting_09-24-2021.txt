@@ -1,0 +1,3 @@
+1. Keep all optics long enough but at the same time truncate the beam at 2xFWHM and see what happens.
+2. Let less beam profile pass through ~+-0.9xFWHM and etc. by setting the aperture of the 1st mirror to that range.
+3. Repeat 2. for other sizes as well and see what size is the optimal condition.
