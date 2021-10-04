@@ -45,6 +45,7 @@ dir_case = dir_out + '{}eV_{}_{}-{}_{}-{}_{}mm/'.format(E0, HHLM_type,
                                           hkl2[0]*100+hkl2[1]*10+hkl2[2], alphaAsym2,
                                           HHLM_offset*1e3); make_dir(dir_case)
 
+
 ''' HRM mirror parameters '''
 f1 = 10.0
 f2 = 10.0
@@ -53,7 +54,6 @@ f2 = 10.0
 ''' shapeErrors '''
 dir_profile = '../DXS_Xtals_FEA4WFS_3x/n_fwhm_6/{}/'.format(HHLM_type)
 nFWHMx_profile = 3; nFWHMy_profile = 2
-crystal_powers_case = np.array([29.9399,0.8317,13.1927,0.2418,0.0886,0.2848])    # crystal power for 9keV 2DCM-111-440 SASE
 
 if HHLM_type == 'Zigzag':
     crystal_profile_powers = np.array([
@@ -69,5 +69,17 @@ elif HHLM_type == '2DCM':
 
 ''' phase corrector '''
 FOV1 = 5e-3; N1 = 512
-FOV2 = 5e-3; N2 = 8192
+FOV2 = 5e-3; N2 = 1024
 plate_position = 'HHLM'
+
+
+''' case specific parameters (variables) '''
+nFWHMx = 3
+nFWHMy = 1
+name_size = '{}FWHMx_{}FWHMy'.format(nFWHMx, nFWHMy)
+
+m2_p_perfect = 167.84807686607576
+m2_p_bending = 2725.7090355414666
+
+crystal_powers_case = np.array([29.8626,0.7631,13.3021,0.3261,0.0889,0.05])    # crystal power for 9keV 2DCM-111_9.0-440_38.3-440_15.0 SASE
+

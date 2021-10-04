@@ -282,7 +282,7 @@ def calc_phase_diff(E0, z_s=650, beam_params=None,
                extent=[-plate_length*1e3/2, plate_length*1e3/2, plate_width*1e3/2, -plate_width*1e3/2])
     plt.colorbar(); plt.title('phase difference'); plt.xlabel('x (mm)'); plt.ylabel('y (mm)'); plt.axis('tight')
     
-    return phase_diff_2d, x_plate, y_plate
+    return phase_diff_2d, x_plate, y_plate, plate_length, plate_width
 
 
 ''' calculate phase plate thickness '''
@@ -296,10 +296,11 @@ def calc_plate_thickness(E0, phase_diff_2d, x_plate, y_plate,
     phaseMap -= phaseMap.min()
     
     # 2nd order polynomial fit
-    ny, nx = phaseMap.shape
-    fit_x = x_plate[index_x[0]:index_x[-1]+1]
-    fit_y = y_plate[index_y[0]:index_y[-1]+1]
-    soln = polyfit2d(fit_y, fit_x, phaseMap, kx=2, ky=2, order=2)
+    ny, nx = phase_diff_2d.shape
+    fit_x = np.linspace(-1, 1, nx)
+    fit_y = np.linspace(-1, 1, ny)
+    soln = polyfit2d(fit_x[index_x[0]:index_x[-1]+1], fit_y[index_y[0]:index_y[-1]+1],
+                     phaseMap.T, kx=2, ky=2, order=2)
     
     xx, yy = np.meshgrid(x_plate, y_plate)
     fitted_surf = np.polynomial.polynomial.polyval2d(xx, yy, soln[0].reshape(3,3))

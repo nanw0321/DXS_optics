@@ -1,0 +1,15 @@
+1. Base all crystal profiles on the 6x simulation result and cut accordingly to maintain uniformity across different simulation cases.
+
+2. Simplify the beamline generation functions so that the actual code looks clean.
+
+3. Logically rearrange/regroup some of the code blocks to make changing parameters easier.
+
+
+
+Details:
+	1. the footprint of each optics need to be defined in their generation functions. this allows easier adjustments to the size of the optics.
+
+	2. the geometrical orientation of each optics need to also be included in the generation function, or use the same change-orientation functions that I used before. this is relatively low priority and don't need to be implemented right away since we are not close to simulating alignment tolerances yet.
+
+	3. the modules where beamlines are defined and where parameters are generated take too much space. This significantly decreases the readability of the scripts. Maybe it's a good idea to group each simulation condition by folders and let the scripts in the same folder share the same parameters to save space. this is rather high priority as it may help deduce some of the simulation problems that we saw so far.
+

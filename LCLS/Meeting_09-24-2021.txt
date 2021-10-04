@@ -1,3 +1,8 @@
 1. Keep all optics long enough but at the same time truncate the beam at 2xFWHM and see what happens.
 2. Let less beam profile pass through ~+-0.9xFWHM and etc. by setting the aperture of the 1st mirror to that range.
 3. Repeat 2. for other sizes as well and see what size is the optimal condition.
+
+
+4. double check by observing the beam size after the 2nd mirror for example and see if the tail of the beam is actually cut.
+5. check bending only spectrum tails to see how the new crystal profiles compare against the old ones. This simulation doesn't include the effect of the phase corrector so it is a more direct comparison and should reveal more details.
+

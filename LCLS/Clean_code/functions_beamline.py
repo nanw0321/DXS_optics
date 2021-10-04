@@ -203,7 +203,7 @@ def define_HRM(E0, z_s=650.0,
 
 ''' define overall beamline '''
 def define_beamline_normal(E0, z_s=650, m_alpha=2.65e-3, m2_z=300.0,
-                           m1_p=185.0, m1_q=-25.6, m2_p=141.6, m2_q=1e5,
+                           m1_p=None, m1_q=None, m2_p=None, m2_q=None,
                            aperture_size=1.0,
 
                            HHLM_type='2DCM',
@@ -265,6 +265,216 @@ def define_beamline_normal(E0, z_s=650, m_alpha=2.65e-3, m2_z=300.0,
         im_plate = optics.PPM('im_plate', FOV=FOV2, N=N1, z=HHLM_devices[-1].z + 1e-3)
         im_plate2 = optics.PPM('im_plate2', FOV=FOV2, N=N2, z=HRM_devices[-1].z + 1e-3)
         all_devices = [im_input] + Telescope_devices + HHLM_devices + [im_plate] + HRM_devices + [im_plate2, im_output]
+    
+    mono_beamline = beamline.Beamline(all_devices, ordered=True)
+    return all_devices, mono_beamline
+
+
+''' phase plate '''
+class PhasePlate:
+    """
+    Attributes
+    ----------
+    name: str
+        Name of the device (e.g. CRL1)
+    plateThickness: float
+        Thickness profile of the phase plate. (meters)
+    x_plate: float
+        Phase plate size in x. (meters)
+    y_plate: float
+        Phase plate size in y. (meters)
+    E0: float or None
+        photon energy in eV for calculating the corresponding phase difference of a given thickness
+    material: str
+        Phase plate material. Currently only Be is implemented but may add CVD diamond in the future.
+        Looks up downloaded data from CXRO.
+    dx: float
+        Phase plate de-centering along beam's x-axis.
+    dy: float
+        Phase plate de-centering along beam's y-axis.
+    z: float
+        z location of phase plate along beamline.
+    energy: (N,) ndarray
+        List of photon energies from CXRO file (eV).
+    delta: (N,) ndarray
+        Real part of index of refraction. n = 1 - delta + 1j * beta
+    beta: (N,) ndarray
+        Imaginary part of index of refraction. n = 1 - delta + 1j * beta
+    """
+    
+    def __init__(self, name, plateThickness=None, x_plate=None, y_plate=None, E0=None, material='Be', z=0, dx=0, dy=0):
+        """
+        Method to create a PhasePlate object.
+        :param name: str
+            Name of the device (e.g. Phase1)
+        :param plateThickness: float
+            Thickness profile of the phase plate. (meters)
+        :x_plate: float
+            Phase plate size in x. (meters)
+        :y_plate: float
+            Phase plate size in y. (meters)
+        :param E0: float
+            photon energy for calculating radius of curvature for a given focal length (eV)
+        :param material: str
+            Lens material. Currently only Be is implemented but may add CVD diamond in the future.
+            Looks up downloaded data from CXRO.
+        :param z: float
+            z location of lenses along beamline.
+        :param dx, dy: float
+            PhasePlate de-centering along beam's x,y-axis.
+        :param orientation: int
+            Whether or not this is a horizontal or vertical lens (0 for horizontal, 1 for vertical).
+        """
+        
+        # set some attributes
+        self.name = name
+        self.plateThickness = plateThickness
+        self.x_plate = x_plate
+        self.y_plate = y_plate
+        self.E0 = E0
+        self.material = material
+        self.dx = dx
+        self.dy = dy
+        self.z = z
+        self.global_x = 0
+        self.global_y = 0
+        self.azimuth = 0
+        self.elevation = 0
+        self.xhat = None
+        self.yhat = None
+        self.zhat = None
+
+        # get file name of CXRO data
+        filename = os.path.join('../../LCLS/lcls_beamline_toolbox-beta/lcls_beamline_toolbox/xraybeamline2d/cxro_data/Be.csv')
+
+        # load in CXRO data
+        cxro_data = np.genfromtxt(filename, delimiter=',')
+        self.energy = cxro_data[:, 0]
+        self.delta = cxro_data[:, 1]
+        self.beta = cxro_data[:, 2]
+
+    def multiply(self, beam):
+        """
+        Method to propagate beam through PhasePlate
+        :param beam: Beam
+            Beam object to propagate through PhasePlate. Beam is modified by this method.
+        :return: None
+        """
+        
+        # get shape of phase plate thickness
+        self.plate_shape = np.shape(self.plateThickness)
+        Ms = self.plate_shape[0]; Ns = self.plate_shape[1]
+        
+        
+        beamx = beam.x
+        beamy = beam.y
+        central_line_x = self.plateThickness[np.int(Ms/2)]
+        central_line_y = self.plateThickness[:, np.int(Ns/2)]
+        
+        Ms = central_line_x.size; Ns = central_line_y.size
+        xs = np.linspace(-Ms/2, Ms/2 -1, Ms) * self.x_plate/Ms    # phase plate x coordinate
+        ys = np.linspace(-Ns/2, Ns/2 -1, Ns) * self.y_plate/Ns    # phase plate y coordinate
+        
+        # interpolation onto beam coordinates
+        thickness_x = np.interp(beamx - self.dx, xs, central_line_x, left=0, right=0)
+        thickness_y = np.interp(beamy - self.dy, ys, central_line_y, left=0, right=0)
+
+        # interpolate to find index of refraction at beam's energy
+        delta = np.interp(beam.photonEnergy, self.energy, self.delta)
+        beta = np.interp(beam.photonEnergy, self.energy, self.beta)
+        phase_x = -beam.k0 * delta * thickness_x
+        phase_y = -beam.k0 * delta * thickness_y
+        
+        # transmission based on beta and thickness profile
+        mask_x = (((beamx - self.dx) ** 2) < (self.x_plate / 2) ** 2).astype(float)
+        mask_y = (((beamy - self.dy) ** 2) < (self.y_plate / 2) ** 2).astype(float)
+        transmission_x = np.exp(-beam.k0 * beta * thickness_x) * np.exp(1j * phase_x) * mask_x
+        transmission_y = np.exp(-beam.k0 * beta * thickness_y) * np.exp(1j * phase_y) * mask_y
+        
+        beam.wavex *= transmission_x
+        beam.wavey *= transmission_y
+
+    def propagate(self, beam):
+        """
+        Method to propagate beam through PhasePlate. Calls multiply.
+        :param beam: Beam
+            Beam object to propagate through PhasePlate. Beam is modified by this method.
+        :return: None
+        """
+        self.multiply(beam)
+
+
+def define_beamline_phase(E0, z_s=650, m_alpha=2.65e-3, m2_z=300.0,
+                           m1_p=None, m1_q=None, m2_p=None, m2_q=None,
+                           aperture_size=1.0,
+
+                           HHLM_type='2DCM',
+                           HHLM_offset=20e-3,
+                           pair_distance=200e-3,
+                           hkl1 = [1,1,1], alphaAsym1 = 0.0,
+                           hkl2 = [2,2,0], alphaAsym2 = 0.0,
+                           l_crystal=[1e-1 for i in range(6)],
+                           w_crystal = [5e-3 for i in range(6)],
+                           
+                           f1=10.0, f2=10.0, slit_width=3e-6,
+                           hkl3 = [5,5,5], alphaAsym3 = 15.0,
+                           shapeErrors=[None for i in range(6)],
+                           
+                           FOV1 = 5e-3, N1 = 512,
+                           FOV2 = 5e-3, N2 = 8192,
+                           plate_position = 'HHLM',
+                           plate_length=1., plate_width=1.,
+                           plateThickness = None):
+    
+    # partial beamlines    
+    Telescope_devices = define_Telescope(E0, z_s=z_s, m_alpha=m_alpha, m2_z=m2_z,
+                                         m1_p=m1_p, m1_q=m1_q, m2_p=m2_p, m2_q=m2_q,
+                                         aperture_size=aperture_size)
+    
+    if HHLM_type == '2DCM':
+        HHLM_devices = define_HHLM_2DCM(E0, z_s=z_s,
+                                        HHLM_offset=HHLM_offset,
+                                        pair_distance=pair_distance,
+                                        hkl1=hkl1, alphaAsym1=alphaAsym1,
+                                        hkl2=hkl2, alphaAsym2=alphaAsym2,
+                                        shapeErrors=shapeErrors,
+                                        l_crystal=l_crystal,
+                                        w_crystal=w_crystal)
+    elif HHLM_type == 'Zigzag':
+        HHLM_devices = define_HHLM_Zigzag(E0, z_s=z_s,
+                                        HHLM_offset=HHLM_offset,
+                                        pair_distance=pair_distance,
+                                        hkl1=hkl1, alphaAsym1=alphaAsym1,
+                                        hkl2=hkl2, alphaAsym2=alphaAsym2,
+                                        shapeErrors=shapeErrors,
+                                        l_crystal=l_crystal,
+                                        w_crystal=w_crystal)
+
+    HRM_devices = define_HRM(E0, z_s=z_s,
+                             f1=f1, f2=f2, slit_width=slit_width,
+                             hkl=hkl3, alphaAsym=alphaAsym3,
+                             shapeErrors=shapeErrors,
+                             l_crystal=l_crystal,
+                             w_crystal=w_crystal)
+    
+    # viewing points
+    im_input = optics.PPM('im_input', z=184+z_s, FOV=FOV1, N=N1)
+    im_output = optics.PPM('im_output', FOV=FOV1,N=N1,z=HRM_devices[-1].z+1.1e-3)
+    
+    # putting it together
+    if plate_position == 'HHLM':
+        Phase1 = PhasePlate('Phase1', plateThickness=plateThickness,
+                            x_plate=plate_length, y_plate=plate_width,
+                            E0=E0, z=HHLM_devices[-1].z + 1e-3)
+        im_plate = optics.PPM('im_plate', FOV=FOV2, N=N2, z=HHLM_devices[-1].z + 1.1e-3)
+        all_devices = [im_input] + Telescope_devices + HHLM_devices + [Phase1, im_plate] + HRM_devices + [im_output]
+    elif plate_position == 'HRM':
+        Phase1 = PhasePlate('Phase1', plateThickness=plateThickness,
+                            x_plate=plate_length, y_plate=plate_width,
+                            E0=E0, z=HHLM_devices[-1].z + 1e-3)
+        im_plate = optics.PPM('im_plate', FOV=FOV2, N=N1, z=HHLM_devices[-1].z + 1e-3)
+        im_plate2 = optics.PPM('im_plate2', FOV=FOV2, N=N2, z=HRM_devices[-1].z + 1.1e-3)
+        all_devices = [im_input] + Telescope_devices + HHLM_devices + [im_plate] + HRM_devices + [Phase1, im_plate2, im_output]
     
     mono_beamline = beamline.Beamline(all_devices, ordered=True)
     return all_devices, mono_beamline
